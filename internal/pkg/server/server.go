@@ -5,15 +5,20 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
+
+	"github.com/namreg/godown-v2/internal/pkg/command"
+	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
 //Server represents a server
 type Server struct {
+	strg storage.Storage
 }
 
-//New creates a server instance
-func New() *Server {
-	return &Server{}
+//New creates a server with given storage
+func New(strg storage.Storage) *Server {
+	return &Server{strg}
 }
 
 //Run runs the server on the given host and port
@@ -32,21 +37,44 @@ func (s *Server) Run(hostPort string) error {
 			log.Printf("[WARN] server: could not accept connection: %v\n", err)
 			continue
 		}
-		cl := newClient(conn)
-		go s.handleClient(cl)
+
+		go s.handleConn(newConn(conn))
 	}
 }
 
-func (s *Server) handleClient(cl *client) {
-	defer cl.Close()
+func (s *Server) handleConn(conn *conn) {
+	defer conn.Close()
 
-	cl.respondWithCommandWaiting()
+	conn.writeWelcomeMessage()
 
-	scanner := bufio.NewScanner(cl.conn)
+	scanner := bufio.NewScanner(conn.conn)
 	for scanner.Scan() {
-		input := scanner.Text()
-		log.Printf("[INFO] server: recieve command string: %s", input)
-		cl.respondWithCommandWaiting()
+		input := strings.TrimSpace(scanner.Text())
+		if input == "" {
+			conn.writeNewLine()
+			continue
+		}
+
+		cmd, args, err := command.Parse(input)
+
+		if err != nil {
+			log.Printf("[INFO] server: could not parse command %q: %v", input, err)
+			switch err {
+			case command.ErrCommandNotFound:
+				conn.writeError(fmt.Errorf("command %q not found", input))
+			case command.ErrWrongArgsNumber:
+				conn.writeError(fmt.Errorf("wrong number of arguments"))
+			default:
+				conn.writeError(err)
+			}
+			continue
+		}
+
+		res := cmd.Execute(s.strg, args...)
+
+		conn.writeCommandResult(res)
+
+		log.Printf("[INFO] server: recieved command: %s", cmd.Name())
 	}
 
 	if err := scanner.Err(); err != nil {

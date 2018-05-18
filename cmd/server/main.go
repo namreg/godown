@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/namreg/godown-v2/internal/pkg/server"
+	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 )
 
 var host = flag.String("host", "127.0.0.1", "Server host")
@@ -21,6 +22,8 @@ func main() {
 		log.Fatalf("port can not be empty")
 	}
 
-	srv := server.New()
+	strg := memory.New()
+	srv := server.New(strg)
+
 	log.Fatal(srv.Run(net.JoinHostPort(*host, *port)))
 }
