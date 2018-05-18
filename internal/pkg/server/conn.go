@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/namreg/godown-v2/internal/pkg/command"
+	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
 const (
@@ -31,6 +32,11 @@ func (c *conn) writeWelcomeMessage() {
 
 func (c *conn) writeMessage(msg string) {
 	fmt.Fprint(c.conn, msg)
+	c.writeNewLine()
+}
+
+func (c *conn) writeType(str string) {
+	fmt.Fprintf(c.conn, "(%s)", str)
 	c.writeNewLine()
 }
 
@@ -62,6 +68,8 @@ func (c *conn) writeCommandResult(res command.Resulter) {
 		switch res.Value().(type) {
 		case string:
 			c.writeString(res.Value().(string))
+		case storage.Key:
+			c.writeType(res.Value().(storage.Key).DataType())
 		}
 	}
 }

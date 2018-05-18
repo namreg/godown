@@ -1,5 +1,12 @@
 package storage
 
+import "errors"
+
+var (
+	//ErrKeyNotExists means that key does not exist. Returns by Key method
+	ErrKeyNotExists = errors.New("storage: key does not exist")
+)
+
 //DataType represents type of data
 type DataType string
 
@@ -24,6 +31,16 @@ type Key struct {
 	dataType DataType
 }
 
+//Val returns value of the key
+func (k Key) Val() string {
+	return k.value
+}
+
+//DataType returns a data type of the key
+func (k Key) DataType() string {
+	return string(k.dataType)
+}
+
 //NewStringKey creates a new key with StringDataType
 func NewStringKey(key string) Key {
 	return Key{
@@ -43,6 +60,8 @@ type Storage interface {
 	Get(Key) (Value, error)
 	//Del deletes a value by the given key
 	Del(Key) error
+	//GetKey returns Key by the given name
+	GetKey(string) (Key, error)
 	//Keys returns all stored keys
 	Keys() ([]Key, error)
 }
