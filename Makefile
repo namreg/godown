@@ -15,4 +15,4 @@ build-server: vendor
 build-server-linux: vendor
 	mkdir -p $(BIN_PATH)
 	rm -f $(SERVER_BINARY)
-	env GOOS=linux GOARCH=amd64 go build -o $(SERVER_BINARY) ./cmd/server
+	env GOOS=linux GOARCH=amd64 go build -o $(SERVER_BINARY)-linux ./cmd/server
