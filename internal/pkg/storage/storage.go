@@ -37,8 +37,8 @@ func (k Key) Val() string {
 }
 
 //DataType returns a data type of the key
-func (k Key) DataType() string {
-	return string(k.dataType)
+func (k Key) DataType() DataType {
+	return k.dataType
 }
 
 //NewStringKey creates a new key with StringDataType

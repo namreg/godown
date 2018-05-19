@@ -28,13 +28,13 @@ func (c *Type) ArgsNumber() int {
 }
 
 //Execute implements Execute of Command interface
-func (c *Type) Execute(strg storage.Storage, args ...string) Resulter {
+func (c *Type) Execute(strg storage.Storage, args ...string) Result {
 	key, err := strg.GetKey(args[0])
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return EmptyResult{}
+			return NilResult{}
 		}
-		return Result{err: err}
+		return ErrResult{err}
 	}
-	return Result{value: key}
+	return StringResult{string(key.DataType())}
 }

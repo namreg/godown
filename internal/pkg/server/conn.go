@@ -1,15 +1,15 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"net"
 
 	"github.com/namreg/godown-v2/internal/pkg/command"
-	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
 const (
-	nilString     = "(nil)"
+	nilString     = "nil"
 	okString      = "OK"
 	newLineString = "\n> "
 )
@@ -50,28 +50,38 @@ func (c *conn) writeError(err error) {
 	c.writeNewLine()
 }
 
-func (c *conn) writeCommandResult(res command.Resulter) {
-	if _, ok := res.(command.EmptyResult); ok {
-		c.writeMessage(nilString)
-		return
-	}
-	if res, ok := res.(command.UsageResult); ok {
-		c.writeMessage(res.Value().(string))
-		return
-	}
-	switch {
-	case res.Err() == nil && res.Value() == nil:
-		c.writeMessage(okString)
-	case res.Err() != nil:
-		c.writeError(res.Err())
-	default:
-		switch res.Value().(type) {
-		case string:
-			c.writeString(res.Value().(string))
-		case storage.Key:
-			c.writeType(res.Value().(storage.Key).DataType())
+func (c *conn) writeCommandResult(res command.Result) {
+	switch res.(type) {
+	case command.OkResult:
+		c.writeString(okString)
+	case command.ErrResult:
+		c.writeError(res.Val().(error))
+	case command.NilResult:
+		c.writeType(nilString)
+	case command.StringResult:
+		c.writeString(res.Val().(string))
+	case command.HelpResult:
+		c.writeMessage(res.Val().(string))
+	case command.SliceResult:
+		s := res.Val().([]string)
+		if len(s) == 0 {
+			c.writeType(nilString)
+		} else {
+			for i, v := range s {
+				c.write(fmt.Sprintf("%d) %q", i+1, v))
+				if i != len(s)-1 {
+					c.write("\n")
+				}
+			}
+			c.writeNewLine()
 		}
+	default:
+		c.writeError(errors.New("could not recognize result"))
 	}
+}
+
+func (c *conn) write(str string) {
+	fmt.Fprintf(c.conn, str)
 }
 
 func (c *conn) writeNewLine() {

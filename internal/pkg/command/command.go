@@ -28,55 +28,7 @@ type Command interface {
 	//ArgsNumber returns the number of arguments that command cat accept
 	ArgsNumber() int
 	//Execute executes the command in the context of Storage with the given arguments
-	Execute(strg storage.Storage, args ...string) Resulter
-}
-
-//Resulter contains the result of execution of a command
-type Resulter interface {
-	Value() interface{}
-	Err() error
-}
-
-//Result represents a none empty result of command execution
-type Result struct {
-	value interface{}
-	err   error
-}
-
-//Value returns a value of the result
-func (r Result) Value() interface{} {
-	return r.value
-}
-
-//Err returns an error of the result
-func (r Result) Err() error {
-	return r.err
-}
-
-//EmptyResult represents an empty result of command execution
-type EmptyResult struct{}
-
-//Value returns a nil for empty result
-func (r EmptyResult) Value() interface{} {
-	return nil
-}
-
-//Err returns a nil for empty result
-func (r EmptyResult) Err() error {
-	return nil
-}
-
-//UsageResult represents a command usage result
-type UsageResult struct{ cmd Command }
-
-//Value returns commands help message
-func (r UsageResult) Value() interface{} {
-	return r.cmd.Help()
-}
-
-//Err returns a nil for usage result
-func (r UsageResult) Err() error {
-	return nil
+	Execute(strg storage.Storage, args ...string) Result
 }
 
 //Parse parses string to Command with args

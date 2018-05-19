@@ -29,15 +29,14 @@ func (c *Get) ArgsNumber() int {
 }
 
 //Execute implements Execute of Command interface
-func (c *Get) Execute(strg storage.Storage, args ...string) Resulter {
+func (c *Get) Execute(strg storage.Storage, args ...string) Result {
 	key := storage.NewStringKey(args[0])
 	val, err := strg.Get(key)
 	if err != nil {
-		return Result{err: err}
+		return ErrResult{err}
 	}
-
 	if val == nil {
-		return EmptyResult{}
+		return NilResult{}
 	}
-	return Result{value: val}
+	return StringResult{val.(string)}
 }

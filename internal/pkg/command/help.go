@@ -32,10 +32,10 @@ func (c *Help) ArgsNumber() int {
 }
 
 //Execute implements Execute of Command interface
-func (c *Help) Execute(strg storage.Storage, args ...string) Resulter {
+func (c *Help) Execute(strg storage.Storage, args ...string) Result {
 	cmdName := args[0]
 	if cmd, ok := commands[strings.ToUpper(cmdName)]; ok {
-		return UsageResult{cmd}
+		return HelpResult{cmd}
 	}
-	return Result{err: fmt.Errorf("command %q not found", cmdName)}
+	return ErrResult{fmt.Errorf("command %q not found", cmdName)}
 }
