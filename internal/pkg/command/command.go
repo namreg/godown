@@ -14,6 +14,8 @@ var (
 	ErrCommandNotFound = errors.New("command: not found")
 	//ErrWrongArgsNumber means that given arguments not acceptable by Command. Returns by Parse
 	ErrWrongArgsNumber = errors.New("command: wrong args number")
+	//ErrWrongTypeOp means that operation is not acceptable for the given key
+	ErrWrongTypeOp = errors.New("command: wrong type operation")
 )
 
 //commands is the all available commands

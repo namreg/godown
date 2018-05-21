@@ -3,7 +3,7 @@ package storage
 import "errors"
 
 var (
-	//ErrKeyNotExists means that key does not exist. Returns by Key method
+	//ErrKeyNotExists means that key does not exist. Returns by GetKey method
 	ErrKeyNotExists = errors.New("storage: key does not exist")
 )
 
@@ -13,6 +13,8 @@ type DataType string
 const (
 	//StringDataType is the string data type
 	StringDataType DataType = "string"
+	//BitMapDataType is the bitmap data type. Stored as int64 integer
+	BitMapDataType DataType = "bitmap"
 )
 
 //DataType returns string representation of the DataType
@@ -25,43 +27,53 @@ func (dt DataType) IsEqual(other DataType) bool {
 	return string(dt) == string(other)
 }
 
-//Key is the key of value in the storage
-type Key struct {
-	value    string
+//Key is the key of a value in the storage
+type Key string
+
+//Value represents a single value of a storage
+type Value struct {
+	data     interface{}
 	dataType DataType
 }
 
-//Val returns value of the key
-func (k Key) Val() string {
-	return k.value
+//Data returns data of the value
+func (v *Value) Data() interface{} {
+	return v.data
 }
 
-//DataType returns a data type of the key
-func (k Key) DataType() DataType {
-	return k.dataType
+//Type returns a DataType of the value
+func (v *Value) Type() DataType {
+	return v.dataType
 }
 
-//NewStringKey creates a new key with StringDataType
-func NewStringKey(key string) Key {
-	return Key{
-		value:    key,
+//NewStringValue creates a new value with StringDataType
+func NewStringValue(str string) *Value {
+	return &Value{
+		data:     str,
 		dataType: StringDataType,
 	}
 }
 
-//Value represents a value of storage
-type Value interface{}
+//NewBitMapValue creates a new value of the BitMapDataType. Stored as int64 integer
+func NewBitMapValue(value int64) *Value {
+	return &Value{
+		data:     value,
+		dataType: BitMapDataType,
+	}
+}
 
 //Storage represents a storage
 type Storage interface {
-	//Put puts a value to the storage by the given key
-	Put(Key, Value) error
-	//Get gets a value of storage by the given key
-	Get(Key) (Value, error)
-	//Del deletes a value by the given key
-	Del(Key) error
-	//GetKey returns Key by the given name
-	GetKey(string) (Key, error)
+	//Put puts a new value that will be returned by ValueSetter at the given Key
+	Put(key Key, setter ValueSetter) error
+	//Get gets a Value of a storage by the given Key.
+	Get(key Key) (*Value, error)
+	//Del deletes a value by the given Key
+	Del(key Key) error
 	//Keys returns all stored keys
 	Keys() ([]Key, error)
 }
+
+//ValueSetter is a callback that calls by Storage during Puts a new Value
+//Returns a new Value
+type ValueSetter func(old *Value) (new *Value, err error)

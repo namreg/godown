@@ -51,6 +51,16 @@ func (sr StringResult) Val() interface{} {
 	return sr.str
 }
 
+//IntResult containt an int64 integer
+type IntResult struct {
+	val int64
+}
+
+//Val returns an int64 integer
+func (ir IntResult) Val() interface{} {
+	return ir.val
+}
+
 //SliceResult contains a slice of strings
 type SliceResult struct {
 	val []string

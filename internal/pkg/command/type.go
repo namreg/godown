@@ -29,12 +29,12 @@ func (c *Type) ArgsNumber() int {
 
 //Execute implements Execute of Command interface
 func (c *Type) Execute(strg storage.Storage, args ...string) Result {
-	key, err := strg.GetKey(args[0])
+	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
 		return ErrResult{err}
 	}
-	return StringResult{string(key.DataType())}
+	return StringResult{string(value.Type())}
 }

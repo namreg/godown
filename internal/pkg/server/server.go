@@ -51,7 +51,7 @@ func (s *Server) handleConn(conn *conn) {
 	for scanner.Scan() {
 		input := strings.TrimSpace(scanner.Text())
 		if input == "" {
-			conn.writeNewLine()
+			conn.writePrompt()
 			continue
 		}
 

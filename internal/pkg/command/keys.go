@@ -45,8 +45,9 @@ func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
 
 	keyNames := make([]string, 0, len(keys))
 	for _, k := range keys {
-		if re.MatchString(k.Val()) {
-			keyNames = append(keyNames, k.Val())
+		sk := string(k)
+		if re.MatchString(sk) {
+			keyNames = append(keyNames, sk)
 		}
 	}
 	return SliceResult{keyNames}

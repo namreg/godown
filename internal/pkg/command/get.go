@@ -30,13 +30,15 @@ func (c *Get) ArgsNumber() int {
 
 //Execute implements Execute of Command interface
 func (c *Get) Execute(strg storage.Storage, args ...string) Result {
-	key := storage.NewStringKey(args[0])
-	val, err := strg.Get(key)
+	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
+		if err == storage.ErrKeyNotExists {
+			return NilResult{}
+		}
 		return ErrResult{err}
 	}
-	if val == nil {
-		return NilResult{}
+	if value.Type() != storage.StringDataType {
+		return ErrResult{ErrWrongTypeOp}
 	}
-	return StringResult{val.(string)}
+	return StringResult{value.Data().(string)}
 }

@@ -9,61 +9,59 @@ import (
 //Storage represents a storage that store its all data in memory. Implements Storage interaface
 type Storage struct {
 	mu    sync.RWMutex
-	keys  map[string]storage.Key
-	items map[storage.Key]storage.Value
+	items map[storage.Key]*storage.Value
 }
 
 //New creates a new memory storage
 func New() *Storage {
 	return &Storage{
-		keys:  make(map[string]storage.Key),
-		items: make(map[storage.Key]storage.Value),
+		items: make(map[storage.Key]*storage.Value),
 	}
 }
 
-//Put puts a value to the storage by the given key
-func (strg *Storage) Put(key storage.Key, value storage.Value) error {
+//Put puts a new value that will be returned by ValueSetter
+func (strg *Storage) Put(key storage.Key, setter storage.ValueSetter) error {
 	strg.mu.Lock()
-	strg.keys[key.Val()] = key
-	strg.items[key] = value
+
+	value := strg.items[key]
+
+	var err error
+
+	if value, err = setter(value); err == nil {
+		strg.items[key] = value
+	}
+
 	strg.mu.Unlock()
-	return nil
+
+	return err
 }
 
-//Get gets a value of storage by the given key
-func (strg *Storage) Get(key storage.Key) (storage.Value, error) {
+//Get gets a value of the storage by the given Key
+func (strg *Storage) Get(key storage.Key) (*storage.Value, error) {
 	strg.mu.RLock()
-	val := strg.items[key]
+
+	if value, exists := strg.items[key]; exists {
+		return value, nil
+	}
+
 	strg.mu.RUnlock()
-	return val, nil
+	return nil, storage.ErrKeyNotExists
 }
 
 //Del deletes a value by the given key
 func (strg *Storage) Del(key storage.Key) error {
 	strg.mu.Lock()
-	delete(strg.keys, key.Val())
 	delete(strg.items, key)
 	strg.mu.Unlock()
 	return nil
-}
-
-//GetKey returns a key by the given name
-func (strg *Storage) GetKey(keyName string) (storage.Key, error) {
-	strg.mu.RLock()
-	key, ok := strg.keys[keyName]
-	strg.mu.RUnlock()
-	if !ok {
-		return storage.Key{}, storage.ErrKeyNotExists
-	}
-	return key, nil
 }
 
 //Keys returns all stored keys
 func (strg *Storage) Keys() ([]storage.Key, error) {
 	strg.mu.RLock()
 
-	keys := make([]storage.Key, 0, len(strg.keys))
-	for _, key := range strg.keys {
+	keys := make([]storage.Key, 0, len(strg.items))
+	for key := range strg.items {
 		keys = append(keys, key)
 	}
 

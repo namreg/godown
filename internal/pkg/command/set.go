@@ -32,9 +32,13 @@ func (c *Set) ArgsNumber() int {
 
 //Execute implements Execute of Command interface
 func (c *Set) Execute(strg storage.Storage, args ...string) Result {
-	key := storage.NewStringKey(args[0])
-	err := strg.Put(key, storage.Value(strings.Join(args[1:], " ")))
-	if err != nil {
+	value := strings.Join(args[1:], " ")
+
+	setter := func(old *storage.Value) (*storage.Value, error) {
+		return storage.NewStringValue(value), nil
+	}
+
+	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
 		return ErrResult{err}
 	}
 	return OkResult{}
