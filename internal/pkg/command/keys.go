@@ -1,7 +1,11 @@
 package command
 
 import (
+	"regexp"
+	"strings"
+
 	"github.com/namreg/godown-v2/internal/pkg/storage"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -34,9 +38,25 @@ func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{err}
 	}
 
+	re, err := c.compilePattern(args[0])
+	if err != nil {
+		return ErrResult{err}
+	}
+
 	keyNames := make([]string, 0, len(keys))
 	for _, k := range keys {
-		keyNames = append(keyNames, k.Val())
+		if re.MatchString(k.Val()) {
+			keyNames = append(keyNames, k.Val())
+		}
 	}
 	return SliceResult{keyNames}
+}
+
+func (c *Keys) compilePattern(input string) (*regexp.Regexp, error) {
+	pattern := strings.Replace(input, "*", ".+?", -1)
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return nil, errors.New("invalid pattern syntax")
+	}
+	return re, nil
 }
