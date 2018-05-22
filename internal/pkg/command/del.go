@@ -24,7 +24,7 @@ Del the given key.`
 
 //ValidateArgs implements ValidateArgs of Command interface
 func (c *Del) ValidateArgs(args ...string) error {
-	if len(args) != 0 {
+	if len(args) != 1 {
 		return ErrWrongArgsNumber
 	}
 	return nil
