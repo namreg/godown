@@ -39,12 +39,12 @@ func (strg *Storage) Put(key storage.Key, setter storage.ValueSetter) error {
 //Get gets a value of the storage by the given Key
 func (strg *Storage) Get(key storage.Key) (*storage.Value, error) {
 	strg.mu.RLock()
+	defer strg.mu.RUnlock()
 
 	if value, exists := strg.items[key]; exists {
 		return value, nil
 	}
 
-	strg.mu.RUnlock()
 	return nil, storage.ErrKeyNotExists
 }
 
