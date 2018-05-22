@@ -23,9 +23,12 @@ Get the value by key.
 If provided key does not exist NIL will be returned.`
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *Get) ArgsNumber() int {
-	return 1
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *Get) ValidateArgs(args ...string) error {
+	if len(args) != 1 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface

@@ -25,9 +25,12 @@ Set key to hold the string value.
 If key already holds a value, it is overwritten.`
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *Set) ArgsNumber() int {
-	return 2
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *Set) ValidateArgs(args ...string) error {
+	if len(args) != 2 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface

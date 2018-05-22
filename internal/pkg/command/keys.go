@@ -26,9 +26,12 @@ func (c *Keys) Help() string {
 Find all keys matching the given pattern.`
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *Keys) ArgsNumber() int {
-	return 1
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *Keys) ValidateArgs(args ...string) error {
+	if len(args) != 1 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface

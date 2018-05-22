@@ -26,9 +26,12 @@ Show the usage of the given command
 `
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *Help) ArgsNumber() int {
-	return 1
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *Help) ValidateArgs(args ...string) error {
+	if len(args) != 1 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface

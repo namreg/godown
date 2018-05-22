@@ -22,9 +22,12 @@ func (c *Type) Help() string {
 Returns the type stored at key.`
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *Type) ArgsNumber() int {
-	return 1
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *Type) ValidateArgs(args ...string) error {
+	if len(args) != 1 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface

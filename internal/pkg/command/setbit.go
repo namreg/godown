@@ -25,9 +25,12 @@ func (c *SetBit) Help() string {
 Sets or clears the bit at offset in the string value stored at key.`
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *SetBit) ArgsNumber() int {
-	return 3
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *SetBit) ValidateArgs(args ...string) error {
+	if len(args) != 3 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface

@@ -27,8 +27,8 @@ type Command interface {
 	Name() string
 	//Help returns information about the command. Description, usage and etc.
 	Help() string
-	//ArgsNumber returns the number of arguments that command cat accept
-	ArgsNumber() int
+	//ValidateArgs validates args
+	ValidateArgs(args ...string) error
 	//Execute executes the command in the context of Storage with the given arguments
 	Execute(strg storage.Storage, args ...string) Result
 }
@@ -44,8 +44,8 @@ func Parse(value string) (Command, []string, error) {
 
 	args = args[1:]
 
-	if len(args) != cmd.ArgsNumber() {
-		return nil, nil, ErrWrongArgsNumber
+	if err := cmd.ValidateArgs(args...); err != nil {
+		return nil, nil, err
 	}
 
 	return cmd, args, nil

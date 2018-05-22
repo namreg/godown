@@ -25,9 +25,12 @@ Returns length of the given key.
 If key does not exists, 0 will be returned.`
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *Strlen) ArgsNumber() int {
-	return 1
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *Strlen) ValidateArgs(args ...string) error {
+	if len(args) != 1 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface

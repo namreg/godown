@@ -25,9 +25,12 @@ func (c *GetBit) Help() string {
 Returns the bit value at offset in the string value stored at key.`
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *GetBit) ArgsNumber() int {
-	return 2
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *GetBit) ValidateArgs(args ...string) error {
+	if len(args) != 2 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface

@@ -22,9 +22,12 @@ func (c *Del) Help() string {
 Del the given key.`
 }
 
-//ArgsNumber implements ArgsNumber of Command interface
-func (c *Del) ArgsNumber() int {
-	return 1
+//ValidateArgs implements ValidateArgs of Command interface
+func (c *Del) ValidateArgs(args ...string) error {
+	if len(args) != 0 {
+		return ErrWrongArgsNumber
+	}
+	return nil
 }
 
 //Execute implements Execute of Command interface
