@@ -15,6 +15,8 @@ const (
 	StringDataType DataType = "string"
 	//BitMapDataType is the bitmap data type. Stored as int64 integer
 	BitMapDataType DataType = "bitmap"
+	//ListDataType is the list data type. Stored as slice of string
+	ListDataType DataType = "list"
 )
 
 //DataType returns string representation of the DataType
@@ -59,6 +61,16 @@ func NewBitMapValue(value int64) *Value {
 	return &Value{
 		data:     value,
 		dataType: BitMapDataType,
+	}
+}
+
+//NewListValue creates a new value of the ListDataType. Stored as slice of strings
+func NewListValue(vals ...string) *Value {
+	data := make([]string, 0, len(vals))
+	data = append(data, vals...)
+	return &Value{
+		data:     data,
+		dataType: ListDataType,
 	}
 }
 
