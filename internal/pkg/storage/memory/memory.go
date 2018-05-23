@@ -28,7 +28,11 @@ func (strg *Storage) Put(key storage.Key, setter storage.ValueSetter) error {
 	var err error
 
 	if value, err = setter(value); err == nil {
-		strg.items[key] = value
+		if value == nil {
+			delete(strg.items, key)
+		} else {
+			strg.items[key] = value
+		}
 	}
 
 	strg.mu.Unlock()

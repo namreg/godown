@@ -42,6 +42,10 @@ func (c *Lpush) Execute(strg storage.Storage, args ...string) Result {
 			return storage.NewListValue(vals...), nil
 		}
 
+		if old.Type() != storage.ListDataType {
+			return nil, ErrWrongTypeOp
+		}
+
 		oldList := old.Data().([]string)
 
 		newList := make([]string, 0, len(oldList)+len(vals))
