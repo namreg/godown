@@ -42,7 +42,7 @@ func (c *Hset) Execute(strg storage.Storage, args ...string) Result {
 		}
 		m := old.Data().(map[string]string)
 		m[mfield] = mvalue
-		return storage.NewMapValue(map[string]string{mfield: mvalue}), nil
+		return storage.NewMapValue(m), nil
 	}
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
 		return ErrResult{err}
