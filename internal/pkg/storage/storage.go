@@ -17,6 +17,8 @@ const (
 	BitMapDataType DataType = "bitmap"
 	//ListDataType is the list data type. Stored as slice of string
 	ListDataType DataType = "list"
+	//MapDataType is the hash map type. Stored as map[string][string]
+	MapDataType DataType = "map"
 )
 
 //DataType returns string representation of the DataType
@@ -71,6 +73,14 @@ func NewListValue(vals ...string) *Value {
 	return &Value{
 		data:     data,
 		dataType: ListDataType,
+	}
+}
+
+//NewMapValue creates a new value of the MapDataType.
+func NewMapValue(val map[string]string) *Value {
+	return &Value{
+		data:     val,
+		dataType: MapDataType,
 	}
 }
 
