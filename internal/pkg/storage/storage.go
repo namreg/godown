@@ -1,6 +1,9 @@
 package storage
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 var (
 	//ErrKeyNotExists means that key does not exist. Returns by GetKey method
@@ -26,18 +29,14 @@ func (dt DataType) String() string {
 	return string(dt)
 }
 
-//IsEqual compares DataType with other
-func (dt DataType) IsEqual(other DataType) bool {
-	return string(dt) == string(other)
-}
-
 //Key is the key of a value in the storage
 type Key string
 
 //Value represents a single value of a storage
 type Value struct {
-	data     interface{}
-	dataType DataType
+	expiredAt int64 //unix time
+	data      interface{}
+	dataType  DataType
 }
 
 //Data returns data of the value
@@ -48,6 +47,11 @@ func (v *Value) Data() interface{} {
 //Type returns a DataType of the value
 func (v *Value) Type() DataType {
 	return v.dataType
+}
+
+//IsExpired indicates wheter the value is expired
+func (v *Value) IsExpired() bool {
+	return v.expiredAt > 0 && v.expiredAt < time.Now().Unix()
 }
 
 //NewStringValue creates a new value with StringDataType
@@ -94,6 +98,8 @@ type Storage interface {
 	Del(key Key) error
 	//Keys returns all stored keys
 	Keys() ([]Key, error)
+	//All returns all stored values
+	All() (map[Key]*Value, error)
 }
 
 //ValueSetter is a callback that calls by Storage during Puts a new Value

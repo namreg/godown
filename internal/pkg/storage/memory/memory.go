@@ -72,3 +72,11 @@ func (strg *Storage) Keys() ([]storage.Key, error) {
 	strg.mu.RUnlock()
 	return keys, nil
 }
+
+//All returns all stored keys
+func (strg *Storage) All() (map[storage.Key]*storage.Value, error) {
+	strg.mu.RLock()
+	vals := strg.items
+	strg.mu.RUnlock()
+	return vals, nil
+}

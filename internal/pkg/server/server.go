@@ -6,24 +6,38 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/namreg/godown-v2/internal/pkg/command"
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
+//Opts stores the server options
+type Opts struct {
+	GCInterval time.Duration // the interval through which a garbage collector will be running
+}
+
 //Server represents a server
 type Server struct {
 	strg storage.Storage
+	opts Opts
 }
 
 //New creates a server with given storage
-func New(strg storage.Storage) *Server {
-	return &Server{strg}
+func New(strg storage.Storage, opts Opts) *Server {
+	return &Server{strg, opts}
 }
 
 //Run runs the server on the given host and port
 func (s *Server) Run(hostPort string) error {
 	log.Printf("[INFO] server: runing on %s\n", hostPort)
+
+	// starting a garbage collector
+	go func() {
+		gc := newGc(s.strg, s.opts.GCInterval)
+		gc.start()
+	}()
+
 	l, err := net.Listen("tcp", hostPort)
 	if err != nil {
 		return fmt.Errorf("server: could not listen %s: %v", hostPort, err)
