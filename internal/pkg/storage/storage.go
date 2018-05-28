@@ -34,9 +34,9 @@ type Key string
 
 //Value represents a single value of a storage
 type Value struct {
-	expiredAt int64 //unix time
-	data      interface{}
-	dataType  DataType
+	ttl      int64 //unix time
+	data     interface{}
+	dataType DataType
 }
 
 //Data returns data of the value
@@ -51,7 +51,20 @@ func (v *Value) Type() DataType {
 
 //IsExpired indicates wheter the value is expired
 func (v *Value) IsExpired() bool {
-	return v.expiredAt > 0 && v.expiredAt < time.Now().Unix()
+	if v.ttl < 0 {
+		return false
+	}
+	return v.ttl < time.Now().Unix()
+}
+
+//SetTTL sets expiration time of the value
+func (v *Value) SetTTL(at time.Time) {
+	v.ttl = at.Unix()
+}
+
+//TTL returns expired time of the value
+func (v *Value) TTL() int64 {
+	return v.ttl
 }
 
 //NewStringValue creates a new value with StringDataType
@@ -59,6 +72,7 @@ func NewStringValue(str string) *Value {
 	return &Value{
 		data:     str,
 		dataType: StringDataType,
+		ttl:      -1,
 	}
 }
 
@@ -67,6 +81,7 @@ func NewBitMapValue(value int64) *Value {
 	return &Value{
 		data:     value,
 		dataType: BitMapDataType,
+		ttl:      -1,
 	}
 }
 
@@ -77,6 +92,7 @@ func NewListValue(vals ...string) *Value {
 	return &Value{
 		data:     data,
 		dataType: ListDataType,
+		ttl:      -1,
 	}
 }
 
@@ -85,6 +101,7 @@ func NewMapValue(val map[string]string) *Value {
 	return &Value{
 		data:     val,
 		dataType: MapDataType,
+		ttl:      -1,
 	}
 }
 
