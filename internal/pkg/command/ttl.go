@@ -1,6 +1,8 @@
 package command
 
 import (
+	"time"
+
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
@@ -39,5 +41,5 @@ func (c *TTL) Execute(strg storage.Storage, args ...string) Result {
 		}
 		return ErrResult{err}
 	}
-	return IntResult{value.TTL()}
+	return IntResult{int64(time.Until(time.Unix(value.TTL(), 0)).Seconds())}
 }

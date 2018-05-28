@@ -25,7 +25,7 @@ func (g *gc) start() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		items, err := g.strg.All()
+		items, err := g.strg.AllWithTTL()
 		if err != nil {
 			log.Printf("[WARN] gc: could not retrieve values: %v", err)
 		}

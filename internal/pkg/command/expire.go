@@ -47,7 +47,7 @@ func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
 		if old == nil {
 			return nil, nil
 		}
-		old.SetTTL(time.Now().Add(time.Duration(secs)))
+		old.SetTTL(time.Now().Add(time.Duration(secs) * time.Second))
 		return old, nil
 	}
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {

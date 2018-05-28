@@ -117,6 +117,8 @@ type Storage interface {
 	Keys() ([]Key, error)
 	//All returns all stored values
 	All() (map[Key]*Value, error)
+	//AllWithTTL returns all stored values thats have TTL
+	AllWithTTL() (map[Key]*Value, error)
 }
 
 //ValueSetter is a callback that calls by Storage during Puts a new Value

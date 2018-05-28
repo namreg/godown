@@ -8,14 +8,16 @@ import (
 
 //Storage represents a storage that store its all data in memory. Implements Storage interaface
 type Storage struct {
-	mu    sync.RWMutex
-	items map[storage.Key]*storage.Value
+	mu           sync.RWMutex
+	items        map[storage.Key]*storage.Value
+	itemsWithTTL map[storage.Key]*storage.Value // items thats have ttl and will be processed by GC
 }
 
 //New creates a new memory storage
 func New() *Storage {
 	return &Storage{
-		items: make(map[storage.Key]*storage.Value),
+		items:        make(map[storage.Key]*storage.Value),
+		itemsWithTTL: make(map[storage.Key]*storage.Value),
 	}
 }
 
@@ -30,8 +32,12 @@ func (strg *Storage) Put(key storage.Key, setter storage.ValueSetter) error {
 	if value, err = setter(value); err == nil {
 		if value == nil {
 			delete(strg.items, key)
+			delete(strg.itemsWithTTL, key)
 		} else {
 			strg.items[key] = value
+			if value.TTL() != -1 {
+				strg.itemsWithTTL[key] = value
+			}
 		}
 	}
 
@@ -56,6 +62,7 @@ func (strg *Storage) Get(key storage.Key) (*storage.Value, error) {
 func (strg *Storage) Del(key storage.Key) error {
 	strg.mu.Lock()
 	delete(strg.items, key)
+	delete(strg.itemsWithTTL, key)
 	strg.mu.Unlock()
 	return nil
 }
@@ -73,10 +80,18 @@ func (strg *Storage) Keys() ([]storage.Key, error) {
 	return keys, nil
 }
 
-//All returns all stored keys
+//All returns all stored values
 func (strg *Storage) All() (map[storage.Key]*storage.Value, error) {
 	strg.mu.RLock()
 	vals := strg.items
+	strg.mu.RUnlock()
+	return vals, nil
+}
+
+//AllWithTTL returns all stored values thats have TTL
+func (strg *Storage) AllWithTTL() (map[storage.Key]*storage.Value, error) {
+	strg.mu.RLock()
+	vals := strg.itemsWithTTL
 	strg.mu.RUnlock()
 	return vals, nil
 }
