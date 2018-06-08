@@ -3,6 +3,7 @@ package memory
 import (
 	"errors"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -14,6 +15,7 @@ func TestNew(t *testing.T) {
 	strg := New()
 	assert.Equal(t, map[storage.Key]*storage.Value{}, strg.items)
 	assert.Equal(t, map[storage.Key]*storage.Value{}, strg.itemsWithTTL)
+	assert.Implements(t, new(storage.Storage), strg)
 }
 
 func TestStorage_Put(t *testing.T) {
@@ -178,7 +180,7 @@ func TestStorage_Keys(t *testing.T) {
 	actual, err := strg.Keys()
 
 	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	assertKeysEquals(t, expected, actual)
 }
 
 func TestStorage_All(t *testing.T) {
@@ -215,4 +217,16 @@ func TestStorage_AllWithTTL(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, expected, actual)
+}
+
+func assertKeysEquals(t *testing.T, a, b []storage.Key) bool {
+	sort.Slice(a, func(i, j int) bool {
+		return a[i] < a[j]
+	})
+
+	sort.Slice(b, func(i, j int) bool {
+		return b[i] < b[j]
+	})
+
+	return assert.Equal(t, a, b)
 }
