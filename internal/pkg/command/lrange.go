@@ -10,7 +10,8 @@ import (
 var errListOutOfRange = errors.New("lrange: out of range")
 
 func init() {
-	commands["LRANGE"] = new(Lrange)
+	cmd := new(Lrange)
+	commands[cmd.Name()] = cmd
 }
 
 //Lrange is the LRANGE command
@@ -39,6 +40,10 @@ func (c *Lrange) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["HGET"] = new(Hget)
+	cmd := new(Hget)
+	commands[cmd.Name()] = cmd
 }
 
 //Hget is the HGET command
@@ -32,6 +33,10 @@ func (c *Hget) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Hget) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

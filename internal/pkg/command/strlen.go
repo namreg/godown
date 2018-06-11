@@ -7,7 +7,8 @@ import (
 )
 
 func init() {
-	commands["STRLEN"] = new(Strlen)
+	cmd := new(Strlen)
+	commands[cmd.Name()] = cmd
 }
 
 //Strlen is the Strlen command
@@ -35,6 +36,10 @@ func (c *Strlen) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Strlen) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

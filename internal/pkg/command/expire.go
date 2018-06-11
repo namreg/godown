@@ -9,7 +9,8 @@ import (
 )
 
 func init() {
-	commands["EXPIRE"] = new(Expire)
+	cmd := new(Expire)
+	commands[cmd.Name()] = cmd
 }
 
 //Expire is the Expire command
@@ -36,6 +37,9 @@ func (c *Expire) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
 	secs, err := strconv.Atoi(args[1])
 	if err != nil {
 		return ErrResult{errors.New("seconds should be integer")}

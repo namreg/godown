@@ -8,7 +8,8 @@ import (
 )
 
 func init() {
-	commands["HELP"] = new(Help)
+	cmd := new(Help)
+	commands[cmd.Name()] = cmd
 }
 
 //Help is the Help command
@@ -36,6 +37,10 @@ func (c *Help) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Help) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	cmdName := args[0]
 	if cmd, ok := commands[strings.ToUpper(cmdName)]; ok {
 		return HelpResult{cmd}

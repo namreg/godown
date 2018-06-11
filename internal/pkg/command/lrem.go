@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["LREM"] = new(Lrem)
+	cmd := new(Lrem)
+	commands[cmd.Name()] = cmd
 }
 
 //Lrem is the LREM command
@@ -32,6 +33,10 @@ func (c *Lrem) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Lrem) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	setter := func(old *storage.Value) (*storage.Value, error) {
 		if old == nil {
 			return nil, nil

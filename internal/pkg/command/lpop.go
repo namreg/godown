@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["LPOP"] = new(Lpop)
+	cmd := new(Lpop)
+	commands[cmd.Name()] = cmd
 }
 
 //Lpop is the LPOP command
@@ -32,6 +33,10 @@ func (c *Lpop) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Lpop) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	var popped string
 	setter := func(old *storage.Value) (*storage.Value, error) {
 		if old == nil {

@@ -8,7 +8,8 @@ import (
 )
 
 func init() {
-	commands["LINDEX"] = new(Lindex)
+	cmd := new(Lindex)
+	commands[cmd.Name()] = cmd
 }
 
 //Lindex is the LINDEX command
@@ -37,6 +38,10 @@ func (c *Lindex) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Lindex) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["TYPE"] = new(Type)
+	cmd := new(Type)
+	commands[cmd.Name()] = cmd
 }
 
 //Type is the Type command
@@ -32,6 +33,10 @@ func (c *Type) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Type) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

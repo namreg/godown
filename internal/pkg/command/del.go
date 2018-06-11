@@ -5,13 +5,14 @@ import (
 )
 
 func init() {
-	commands["DEL"] = new(Del)
+	cmd := new(Del)
+	commands[cmd.Name()] = cmd
 }
 
 //Del is the DEL command
 type Del struct{}
 
-//Name implements Name of Command interface
+//Name implements Name of Command i`nterface
 func (c *Del) Name() string {
 	return "DEL"
 }
@@ -32,6 +33,9 @@ func (c *Del) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Del) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
 	err := strg.Del(storage.Key(args[0]))
 	if err != nil {
 		return ErrResult{err}

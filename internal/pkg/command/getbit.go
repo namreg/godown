@@ -8,7 +8,8 @@ import (
 )
 
 func init() {
-	commands["GETBIT"] = new(GetBit)
+	cmd := new(GetBit)
+	commands[cmd.Name()] = cmd
 }
 
 //GetBit is the GetBit command
@@ -35,6 +36,10 @@ func (c *GetBit) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	offset, err := c.parseOffset(args)
 	if err != nil {
 		return ErrResult{err}

@@ -9,7 +9,8 @@ import (
 )
 
 func init() {
-	commands["KEYS"] = new(Keys)
+	cmd := new(Keys)
+	commands[cmd.Name()] = cmd
 }
 
 //Keys is the Keys command
@@ -36,6 +37,10 @@ func (c *Keys) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	keys, err := strg.Keys()
 	if err != nil {
 		return ErrResult{err}

@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["LLEN"] = new(Llen)
+	cmd := new(Llen)
+	commands[cmd.Name()] = cmd
 }
 
 //Llen is the LLEN command
@@ -33,6 +34,10 @@ func (c *Llen) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Llen) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

@@ -8,7 +8,8 @@ import (
 )
 
 func init() {
-	commands["SETBIT"] = new(SetBit)
+	cmd := new(SetBit)
+	commands[cmd.Name()] = cmd
 }
 
 //SetBit is the SetBit command
@@ -35,6 +36,10 @@ func (c *SetBit) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	offset, err := c.parseOffset(args)
 	if err != nil {
 		return ErrResult{err}

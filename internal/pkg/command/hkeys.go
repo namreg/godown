@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["HKEYS"] = new(Hkeys)
+	cmd := new(Hkeys)
+	commands[cmd.Name()] = cmd
 }
 
 //Hkeys is the HKEYS command
@@ -32,6 +33,10 @@ func (c *Hkeys) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Hkeys) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

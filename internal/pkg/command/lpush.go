@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["LPUSH"] = new(Lpush)
+	cmd := new(Lpush)
+	commands[cmd.Name()] = cmd
 }
 
 //Lpush is the LPUSH command
@@ -32,6 +33,10 @@ func (c *Lpush) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Lpush) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	setter := func(old *storage.Value) (*storage.Value, error) {
 		vals := args[1:]
 		// reverse vals

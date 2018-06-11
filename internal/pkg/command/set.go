@@ -7,7 +7,8 @@ import (
 )
 
 func init() {
-	commands["SET"] = new(Set)
+	cmd := new(Set)
+	commands[cmd.Name()] = cmd
 }
 
 //Set is the SET command
@@ -35,6 +36,10 @@ func (c *Set) ValidateArgs(args ...string) error {
 
 //Execute implements Execute of Command interface
 func (c *Set) Execute(strg storage.Storage, args ...string) Result {
+	if err := c.ValidateArgs(args...); err != nil {
+		return ErrResult{err}
+	}
+
 	value := strings.Join(args[1:], " ")
 
 	setter := func(old *storage.Value) (*storage.Value, error) {

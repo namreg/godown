@@ -44,7 +44,7 @@ func TestSet_ValidateArgs(t *testing.T) {
 	}
 }
 
-func TestSet_Execute_Ok(t *testing.T) {
+func TestSet_Execute(t *testing.T) {
 	strg := memory.NewTestStorage(
 		make(map[storage.Key]*storage.Value),
 		make(map[storage.Key]*storage.Value),
@@ -62,7 +62,7 @@ func TestSet_Execute_Ok(t *testing.T) {
 	assert.Equal(t, expectedItemsWithTTL, strg.ItemsWithTTL())
 }
 
-func TestSet_Execute_Err(t *testing.T) {
+func TestSet_Execute_StorageErr(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
