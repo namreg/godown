@@ -12,7 +12,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	strg := New()
+	strg := New(nil)
 	assert.Equal(t, map[storage.Key]*storage.Value{}, strg.items)
 	assert.Equal(t, map[storage.Key]*storage.Value{}, strg.itemsWithTTL)
 	assert.Implements(t, new(storage.Storage), strg)

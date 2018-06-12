@@ -45,17 +45,12 @@ func TestGet_ValidateArgs(t *testing.T) {
 }
 
 func TestGet_Execute(t *testing.T) {
-	strg := memory.NewTestStorage(
+	strg := memory.New(
 		map[storage.Key]*storage.Value{
 			"key_string": storage.NewStringValue("string_value"),
 			"key_list":   storage.NewListValue("list_value_1", "list_value_2"),
 		},
-		nil,
 	)
-	type args struct {
-		strg storage.Storage
-		args []string
-	}
 	tests := []struct {
 		name string
 		args []string

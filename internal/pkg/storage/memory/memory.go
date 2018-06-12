@@ -13,11 +13,21 @@ type Storage struct {
 	itemsWithTTL map[storage.Key]*storage.Value // items thats have ttl and will be processed by GC
 }
 
-//New creates a new memory storage
-func New() *Storage {
+//New creates a new memory storage with the given items
+func New(items map[storage.Key]*storage.Value) *Storage {
+	if items == nil {
+		items = make(map[storage.Key]*storage.Value)
+	}
+
+	itemsWithTTL := make(map[storage.Key]*storage.Value)
+	for k, v := range items {
+		if v.TTL() > 0 {
+			itemsWithTTL[k] = v
+		}
+	}
 	return &Storage{
-		items:        make(map[storage.Key]*storage.Value),
-		itemsWithTTL: make(map[storage.Key]*storage.Value),
+		items:        items,
+		itemsWithTTL: itemsWithTTL,
 	}
 }
 

@@ -26,7 +26,7 @@ func main() {
 	opts := server.Opts{
 		GCInterval: 1 * time.Second,
 	}
-	strg := memory.New()
+	strg := memory.New(nil)
 	srv := server.New(strg, opts)
 
 	log.Fatal(srv.Run(net.JoinHostPort(*host, *port)))

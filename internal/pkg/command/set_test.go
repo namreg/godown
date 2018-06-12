@@ -45,21 +45,21 @@ func TestSet_ValidateArgs(t *testing.T) {
 }
 
 func TestSet_Execute(t *testing.T) {
-	strg := memory.NewTestStorage(
-		make(map[storage.Key]*storage.Value),
-		make(map[storage.Key]*storage.Value),
-	)
-	cmd := new(Set)
-	res := cmd.Execute(strg, "key", "value")
-
-	assert.Equal(t, res, OkResult{})
-	expectedItems := map[storage.Key]*storage.Value{
-		storage.Key("key"): storage.NewStringValue("value"),
+	strg := memory.New(nil)
+	tests := []struct {
+		name   string
+		args   []string
+		result Result
+	}{
+		{"ok", []string{"key", "value"}, OkResult{}},
+		{"wrong_args_number", []string{}, ErrResult{ErrWrongArgsNumber}},
 	}
-	assert.Equal(t, expectedItems, strg.Items())
-
-	expectedItemsWithTTL := map[storage.Key]*storage.Value{}
-	assert.Equal(t, expectedItemsWithTTL, strg.ItemsWithTTL())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := new(Set)
+			assert.Equal(t, tt.result, cmd.Execute(strg, tt.args...))
+		})
+	}
 }
 
 func TestSet_Execute_StorageErr(t *testing.T) {
@@ -73,8 +73,6 @@ func TestSet_Execute_StorageErr(t *testing.T) {
 	})
 
 	cmd := new(Set)
-	res := cmd.Execute(strg, "key", "value")
 
-	assert.Equal(t, ErrResult{err}, res)
-
+	assert.Equal(t, ErrResult{err}, cmd.Execute(strg, "key", "value"))
 }
