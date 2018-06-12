@@ -25,18 +25,10 @@ func (c *TTL) Help() string {
 Ttl the given key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *TTL) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *TTL) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))

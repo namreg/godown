@@ -23,18 +23,10 @@ func (c *Lpop) Help() string {
 Removes and returns the first element of the list stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Lpop) ValidateArgs(args ...string) error {
-	if len(args) < 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Lpop) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) < 1 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	var popped string

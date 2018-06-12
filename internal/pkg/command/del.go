@@ -23,18 +23,10 @@ func (c *Del) Help() string {
 Del the given key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Del) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Del) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 	err := strg.Del(storage.Key(args[0]))
 	if err != nil {

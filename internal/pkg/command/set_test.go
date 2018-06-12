@@ -25,25 +25,6 @@ If key already holds a value, it is overwritten.`
 	assert.Equal(t, expected, cmd.Help())
 }
 
-func TestSet_ValidateArgs(t *testing.T) {
-	tests := []struct {
-		name string
-		args []string
-		err  error
-	}{
-		{"valid_number_of_agrs", []string{"1", "2"}, nil},
-		{"not_valid_number_of_agrs/1", []string{}, ErrWrongArgsNumber},
-		{"not_valid_number_of_agrs/2", []string{"1"}, ErrWrongArgsNumber},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Set)
-			err := cmd.ValidateArgs(tt.args...)
-			assert.Equal(t, tt.err, err)
-		})
-	}
-}
-
 func TestSet_Execute(t *testing.T) {
 	strg := memory.New(nil)
 	tests := []struct {

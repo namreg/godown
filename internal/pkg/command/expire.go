@@ -27,18 +27,10 @@ func (c *Expire) Help() string {
 Set a timeout on key. After the timeout has expired, the key will automatically be deleted.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Expire) ValidateArgs(args ...string) error {
-	if len(args) != 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 	secs, err := strconv.Atoi(args[1])
 	if err != nil {

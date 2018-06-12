@@ -30,18 +30,10 @@ The offsets start and stop are zero-based indexes,
 with 0 being the first element of the list (the head of the list), 1 being the next element and so on.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Lrange) ValidateArgs(args ...string) error {
-	if len(args) != 3 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 3 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))

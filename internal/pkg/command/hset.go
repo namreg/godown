@@ -23,18 +23,10 @@ func (c *Hset) Help() string {
 Sets field in the hash stored at key to value.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Hset) ValidateArgs(args ...string) error {
-	if len(args) != 3 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Hset) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 3 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	setter := func(old *storage.Value) (*storage.Value, error) {

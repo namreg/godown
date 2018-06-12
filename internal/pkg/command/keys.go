@@ -27,18 +27,10 @@ func (c *Keys) Help() string {
 Find all keys matching the given pattern.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Keys) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	keys, err := strg.Keys()

@@ -26,18 +26,10 @@ Set key to hold the string value.
 If key already holds a value, it is overwritten.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Set) ValidateArgs(args ...string) error {
-	if len(args) != 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Set) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	value := strings.Join(args[1:], " ")

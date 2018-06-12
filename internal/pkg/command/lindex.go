@@ -28,18 +28,10 @@ The index is zero-based, so 0 means the first element, 1 the second element and 
 Negative indices can be used to designate elements starting at the tail of the list.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Lindex) ValidateArgs(args ...string) error {
-	if len(args) != 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Lindex) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))

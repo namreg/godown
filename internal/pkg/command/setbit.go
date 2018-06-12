@@ -26,18 +26,10 @@ func (c *SetBit) Help() string {
 Sets or clears the bit at offset in the string value stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *SetBit) ValidateArgs(args ...string) error {
-	if len(args) != 3 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 3 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	offset, err := c.parseOffset(args)

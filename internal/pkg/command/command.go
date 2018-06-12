@@ -27,8 +27,6 @@ type Command interface {
 	Name() string
 	//Help returns information about the command. Description, usage and etc.
 	Help() string
-	//ValidateArgs validates args
-	ValidateArgs(args ...string) error
 	//Execute executes the command in the context of Storage with the given arguments
 	Execute(strg storage.Storage, args ...string) Result
 }
@@ -42,13 +40,7 @@ func Parse(value string) (Command, []string, error) {
 		return nil, nil, ErrCommandNotFound
 	}
 
-	args = args[1:]
-
-	if err := cmd.ValidateArgs(args...); err != nil {
-		return nil, nil, err
-	}
-
-	return cmd, args, nil
+	return cmd, args[1:], nil
 }
 
 func extractArgs(val string) []string {

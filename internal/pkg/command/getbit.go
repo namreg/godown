@@ -26,18 +26,10 @@ func (c *GetBit) Help() string {
 Returns the bit value at offset in the string value stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *GetBit) ValidateArgs(args ...string) error {
-	if len(args) != 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	offset, err := c.parseOffset(args)

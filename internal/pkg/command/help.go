@@ -27,18 +27,10 @@ Show the usage of the given command
 `
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Help) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Help) Execute(strg storage.Storage, args ...string) Result {
-	if err := c.ValidateArgs(args...); err != nil {
-		return ErrResult{err}
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
 	}
 
 	cmdName := args[0]

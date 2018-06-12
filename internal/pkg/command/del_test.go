@@ -24,25 +24,6 @@ Del the given key.`
 	assert.Equal(t, expexted, cmd.Help())
 }
 
-func TestDel_ValidateArgs(t *testing.T) {
-	tests := []struct {
-		name string
-		args []string
-		err  error
-	}{
-		{"valid_number_of_agrs", []string{"1"}, nil},
-		{"not_valid_number_of_agrs/1", []string{}, ErrWrongArgsNumber},
-		{"not_valid_number_of_agrs/2", []string{"1", "2"}, ErrWrongArgsNumber},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Del)
-			err := cmd.ValidateArgs(tt.args...)
-			assert.Equal(t, tt.err, err)
-		})
-	}
-}
-
 func TestDel_Execute(t *testing.T) {
 	strg := memory.New(
 		map[storage.Key]*storage.Value{
