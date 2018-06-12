@@ -2,11 +2,11 @@ package command
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"unicode"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 var (

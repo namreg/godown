@@ -20,7 +20,6 @@ func TestParse(t *testing.T) {
 		{"uppercase", "GET key", new(Get), []string{"key"}, nil},
 		{"lowercase", "get key", new(Get), []string{"key"}, nil},
 		{"not_existing_command", "command_not_exists arg", nil, nil, ErrCommandNotFound},
-		{"with_wrong_args_number", "GET key1 key2", nil, nil, ErrWrongArgsNumber},
 		{"args_with_space", `SET key "value with space"`, new(Set), []string{"key", "value with space"}, nil},
 	}
 	for _, tt := range tests {

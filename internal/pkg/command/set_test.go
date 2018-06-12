@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/namreg/godown-v2/internal/pkg/storage"
+	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 	"github.com/namreg/godown-v2/test"
 )
 
@@ -33,7 +33,8 @@ func TestSet_Execute(t *testing.T) {
 		result Result
 	}{
 		{"ok", []string{"key", "value"}, OkResult{}},
-		{"wrong_args_number", []string{}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_args_number/1", []string{}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "value1", "value2"}, ErrResult{ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -54,6 +55,7 @@ func TestSet_Execute_StorageErr(t *testing.T) {
 	})
 
 	cmd := new(Set)
+	res := cmd.Execute(strg, "key", "value")
 
-	assert.Equal(t, ErrResult{err}, cmd.Execute(strg, "key", "value"))
+	assert.Equal(t, ErrResult{err}, res)
 }

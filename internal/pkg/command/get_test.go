@@ -38,9 +38,10 @@ func TestGet_Execute(t *testing.T) {
 		want Result
 	}{
 		{"ok", []string{"key_string"}, StringResult{"string_value"}},
-		{"get_not_existing_key", []string{"not_existing_key"}, NilResult{}},
+		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
 		{"wrong_type_op", []string{"key_list"}, ErrResult{ErrWrongTypeOp}},
-		{"wrong_number_of_args", []string{"key_1", "key_2"}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_number_of_args/1", []string{"key1", "key2"}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{}, ErrResult{ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

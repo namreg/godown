@@ -36,8 +36,9 @@ func TestDel_Execute(t *testing.T) {
 		result Result
 	}{
 		{"ok", []string{"key"}, OkResult{}},
-		{"del_not_existing_key", []string{"not_existing_key"}, OkResult{}},
-		{"wrong_number_of_args", []string{}, ErrResult{ErrWrongArgsNumber}},
+		{"not_existing_key", []string{"not_existing_key"}, OkResult{}},
+		{"wrong_number_of_args/1", []string{}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key1", "key2"}, ErrResult{ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

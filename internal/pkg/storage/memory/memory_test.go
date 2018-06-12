@@ -12,10 +12,42 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	strg := New(nil)
-	assert.Equal(t, map[storage.Key]*storage.Value{}, strg.items)
-	assert.Equal(t, map[storage.Key]*storage.Value{}, strg.itemsWithTTL)
-	assert.Implements(t, new(storage.Storage), strg)
+	val := storage.NewStringValue("value1")
+
+	valWithTTL := storage.NewStringValue("value2")
+	valWithTTL.SetTTL(time.Now().Add(1 * time.Second))
+
+	tests := []struct {
+		name                 string
+		items                map[storage.Key]*storage.Value
+		expectedItems        map[storage.Key]*storage.Value
+		expectedItemsWithTTL map[storage.Key]*storage.Value
+	}{
+		{
+			name:                 "empty",
+			items:                nil,
+			expectedItems:        map[storage.Key]*storage.Value{},
+			expectedItemsWithTTL: map[storage.Key]*storage.Value{},
+		},
+		{
+			name:                 "without_ttl",
+			items:                map[storage.Key]*storage.Value{"key": val},
+			expectedItems:        map[storage.Key]*storage.Value{"key": val},
+			expectedItemsWithTTL: map[storage.Key]*storage.Value{},
+		},
+		{
+			name:                 "with_ttl",
+			items:                map[storage.Key]*storage.Value{"key": val, "key_with_ttl": valWithTTL},
+			expectedItems:        map[storage.Key]*storage.Value{"key": val, "key_with_ttl": valWithTTL},
+			expectedItemsWithTTL: map[storage.Key]*storage.Value{"key_with_ttl": valWithTTL},
+		},
+	}
+	for _, tt := range tests {
+		strg := New(tt.items)
+		assert.Implements(t, new(storage.Storage), strg)
+		assert.Equal(t, tt.expectedItems, strg.items)
+		assert.Equal(t, tt.expectedItemsWithTTL, strg.itemsWithTTL)
+	}
 }
 
 func TestStorage_Put(t *testing.T) {

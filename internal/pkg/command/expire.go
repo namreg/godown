@@ -4,8 +4,9 @@ import (
 	"strconv"
 	"time"
 
+	"errors"
+
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 func init() {
