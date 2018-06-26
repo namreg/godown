@@ -2,13 +2,12 @@ package command
 
 import (
 	"testing"
+	"time"
 
-	"github.com/golang/mock/gomock"
-	"github.com/pkg/errors"
-
+	"github.com/gojuno/minimock"
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
-	"github.com/namreg/godown-v2/test"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,10 +25,14 @@ If provided key does not exist NIL will be returned.`
 }
 
 func TestGet_Execute(t *testing.T) {
+	expired := storage.NewStringValue("expired_value")
+	expired.SetTTL(time.Now().Add(-1 * time.Second))
+
 	strg := memory.New(
 		map[storage.Key]*storage.Value{
 			"key_string": storage.NewStringValue("string_value"),
 			"key_list":   storage.NewListValue("list_value_1", "list_value_2"),
+			"expired":    expired,
 		},
 	)
 	tests := []struct {
@@ -39,6 +42,7 @@ func TestGet_Execute(t *testing.T) {
 	}{
 		{"ok", []string{"key_string"}, StringResult{"string_value"}},
 		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
+		{"expired_key", []string{"expired"}, NilResult{}},
 		{"wrong_type_op", []string{"key_list"}, ErrResult{ErrWrongTypeOp}},
 		{"wrong_number_of_args/1", []string{"key1", "key2"}, ErrResult{ErrWrongArgsNumber}},
 		{"wrong_number_of_args/2", []string{}, ErrResult{ErrWrongArgsNumber}},
@@ -53,14 +57,14 @@ func TestGet_Execute(t *testing.T) {
 }
 
 func TestGet_Execute_StorageErr(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	mc := minimock.NewController(t)
+	defer mc.Finish()
+
+	strg := NewStorageMock(t)
 
 	err := errors.New("error")
-	strg := test.NewMockStorage(ctrl)
-	strg.EXPECT().Get(storage.Key("key")).DoAndReturn(func(k storage.Key) (*storage.Value, error) {
-		return nil, err
-	})
+
+	strg.GetMock.Return(nil, err)
 
 	cmd := new(Get)
 	res := cmd.Execute(strg, "key")

@@ -3,11 +3,11 @@ package command
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/gojuno/minimock"
+	"github.com/pkg/errors"
+
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
-	"github.com/namreg/godown-v2/test"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,14 +50,14 @@ func TestDel_Execute(t *testing.T) {
 }
 
 func TestDel_Execute_StorageErr(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	mc := minimock.NewController(t)
+	defer mc.Finish()
+
+	strg := NewStorageMock(t)
 
 	err := errors.New("error")
-	strg := test.NewMockStorage(ctrl)
-	strg.EXPECT().Del(storage.Key("key")).DoAndReturn(func(_ storage.Key) error {
-		return err
-	})
+
+	strg.DelMock.Return(err)
 
 	cmd := new(Del)
 	res := cmd.Execute(strg, "key")

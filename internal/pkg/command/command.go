@@ -47,7 +47,7 @@ func extractArgs(val string) []string {
 	args := make([]string, 0)
 	var inQuote bool
 	var buf bytes.Buffer
-	for _, r := range []rune(val) {
+	for _, r := range val {
 		switch {
 		case r == '"':
 			inQuote = !inQuote

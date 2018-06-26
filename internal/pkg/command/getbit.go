@@ -56,10 +56,7 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 func (c *GetBit) parseOffset(args []string) (uint64, error) {
 	offset, err := strconv.ParseUint(args[1], 10, 64)
 	if err != nil {
-		return 0, err
-	}
-	if offset < 0 {
-		return 0, errors.New("offset should not be negative")
+		return 0, errors.New("offset should be positive integer")
 	}
 	return offset, nil
 }

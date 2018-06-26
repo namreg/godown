@@ -39,5 +39,8 @@ func (c *Get) Execute(strg storage.Storage, args ...string) Result {
 	if value.Type() != storage.StringDataType {
 		return ErrResult{ErrWrongTypeOp}
 	}
+	if value.IsExpired() {
+		return NilResult{}
+	}
 	return StringResult{value.Data().(string)}
 }

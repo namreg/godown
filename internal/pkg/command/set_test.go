@@ -3,13 +3,10 @@ package command
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/gojuno/minimock"
+	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
-	"github.com/namreg/godown-v2/test"
 )
 
 func TestSet_Name(t *testing.T) {
@@ -45,14 +42,14 @@ func TestSet_Execute(t *testing.T) {
 }
 
 func TestSet_Execute_StorageErr(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	mc := minimock.NewController(t)
+	defer mc.Finish()
 
-	strg := test.NewMockStorage(ctrl)
+	strg := NewStorageMock(t)
+
 	err := errors.New("error")
-	strg.EXPECT().Put(storage.Key("key"), gomock.Any()).DoAndReturn(func(_ storage.Key, _ storage.ValueSetter) error {
-		return err
-	})
+
+	strg.PutMock.Return(err)
 
 	cmd := new(Set)
 	res := cmd.Execute(strg, "key", "value")
