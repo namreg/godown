@@ -23,8 +23,7 @@ func (c *Help) Name() string {
 //Help implements Help of Command interface
 func (c *Help) Help() string {
 	return `Usage: HELP command
-Show the usage of the given command
-`
+Show the usage of the given command`
 }
 
 //Execute implements Execute of Command interface
