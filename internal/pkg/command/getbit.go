@@ -1,10 +1,10 @@
 package command
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 func init() {
@@ -43,6 +43,14 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 			return IntResult{0}
 		}
 		return ErrResult{err}
+	}
+
+	if value.Type() != storage.BitMapDataType {
+		return ErrResult{ErrWrongTypeOp}
+	}
+
+	if value.IsExpired() {
+		return IntResult{0}
 	}
 
 	intValue := value.Data().(int64)
