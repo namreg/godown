@@ -7,9 +7,6 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	type args struct {
-		value string
-	}
 	tests := []struct {
 		name     string
 		input    string

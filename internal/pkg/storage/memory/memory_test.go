@@ -137,9 +137,13 @@ func TestStorage_Put_WhenValueShouldBeAdded(t *testing.T) {
 }
 
 func TestStorage_Get(t *testing.T) {
-	strg := Storage{
-		items: map[storage.Key]*storage.Value{storage.Key("key"): storage.NewStringValue("value")},
-	}
+	expired := storage.NewStringValue("expired_value")
+	expired.SetTTL(time.Now().Add(-1 * time.Second))
+
+	strg := New(map[storage.Key]*storage.Value{
+		"key":         storage.NewStringValue("value"),
+		"expired_key": expired,
+	})
 	tests := []struct {
 		name string
 		key  storage.Key
@@ -151,10 +155,15 @@ func TestStorage_Get(t *testing.T) {
 			key:  storage.Key("key"),
 			want: storage.NewStringValue("value"),
 		},
-
 		{
 			name: "not_existing_key",
 			key:  storage.Key("not_existing_key"),
+			want: nil,
+			err:  storage.ErrKeyNotExists,
+		},
+		{
+			name: "expired_key",
+			key:  storage.Key("expired_key"),
 			want: nil,
 			err:  storage.ErrKeyNotExists,
 		},

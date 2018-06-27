@@ -49,10 +49,6 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{ErrWrongTypeOp}
 	}
 
-	if value.IsExpired() {
-		return IntResult{0}
-	}
-
 	intValue := value.Data().(int64)
 
 	if intValue&(1<<offset) != 0 {

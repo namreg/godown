@@ -61,7 +61,7 @@ func (strg *Storage) Get(key storage.Key) (*storage.Value, error) {
 	strg.mu.RLock()
 	defer strg.mu.RUnlock()
 
-	if value, exists := strg.items[key]; exists {
+	if value, exists := strg.items[key]; exists && !value.IsExpired() {
 		return value, nil
 	}
 
