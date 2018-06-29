@@ -20,7 +20,7 @@ func (c *Hkeys) Name() string {
 //Help implements Help of Command interface
 func (c *Hkeys) Help() string {
 	return `Usage: HKEYS key
-Returns all field names in the hash stored at key`
+Returns all field names in the hash stored at key. Order of fields is not guaranteed`
 }
 
 //Execute implements Execute of Command interface
