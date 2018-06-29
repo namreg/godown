@@ -82,8 +82,10 @@ func (strg *Storage) Keys() ([]storage.Key, error) {
 	strg.mu.RLock()
 
 	keys := make([]storage.Key, 0, len(strg.items))
-	for key := range strg.items {
-		keys = append(keys, key)
+	for k, v := range strg.items {
+		if !v.IsExpired() {
+			keys = append(keys, k)
+		}
 	}
 
 	strg.mu.RUnlock()

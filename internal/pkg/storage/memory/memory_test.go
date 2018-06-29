@@ -210,10 +210,14 @@ func TestStorage_Del(t *testing.T) {
 }
 
 func TestStorage_Keys(t *testing.T) {
+	expired := storage.NewStringValue("expired_value")
+	expired.SetTTL(time.Now().Add(-1 * time.Second))
+
 	strg := Storage{
 		items: map[storage.Key]*storage.Value{
-			storage.Key("key"):  storage.NewStringValue("value"),
-			storage.Key("key2"): storage.NewStringValue("value2"),
+			storage.Key("key"):     storage.NewStringValue("value"),
+			storage.Key("key2"):    storage.NewStringValue("value2"),
+			storage.Key("expired"): expired,
 		},
 	}
 	expected := []storage.Key{storage.Key("key"), storage.Key("key2")}
