@@ -1,11 +1,11 @@
 package command
 
 import (
+	"errors"
 	"regexp"
 	"strings"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 func init() {
