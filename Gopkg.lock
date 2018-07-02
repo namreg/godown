@@ -8,6 +8,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/gojuno/minimock"
+  packages = ["."]
+  revision = "b9abc15077091c4f94d03b0007d7109e304c58ee"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -28,6 +34,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "848d1f80ac0b70e858ca4c9a2276a317d6cdf77eca4b7f63fd4ba93a4cfd04c2"
+  inputs-digest = "33077cc1c94e317e1ad96f60f41d3488f991c0a2251806d80f6061534ce572ca"
   solver-name = "gps-cdcl"
   solver-version = 1
