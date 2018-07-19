@@ -25,7 +25,7 @@ Removes all occurrences of elements equal to value from the list stored at key.`
 
 //Execute implements Execute of Command interface
 func (c *Lrem) Execute(strg storage.Storage, args ...string) Result {
-	if len(args) < 2 {
+	if len(args) != 2 {
 		return ErrResult{ErrWrongArgsNumber}
 	}
 
