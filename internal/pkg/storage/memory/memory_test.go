@@ -136,6 +136,21 @@ func TestStorage_Put_WhenValueShouldBeAdded(t *testing.T) {
 	assert.True(t, ok)
 }
 
+func TestStorage_Put_ExpiredKey(t *testing.T) {
+	expired := storage.NewStringValue("value")
+	expired.SetTTL(time.Now().Add(-1 * time.Second))
+
+	strg := &Storage{
+		items:        map[storage.Key]*storage.Value{"expired": expired},
+		itemsWithTTL: map[storage.Key]*storage.Value{"expired": expired},
+	}
+
+	strg.Put(storage.Key("expired"), func(old *storage.Value) (*storage.Value, error) {
+		assert.Nil(t, old)
+		return nil, nil
+	})
+}
+
 func TestStorage_Get(t *testing.T) {
 	expired := storage.NewStringValue("expired_value")
 	expired.SetTTL(time.Now().Add(-1 * time.Second))

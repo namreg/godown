@@ -35,9 +35,13 @@ func New(items map[storage.Key]*storage.Value) *Storage {
 func (strg *Storage) Put(key storage.Key, setter storage.ValueSetter) error {
 	strg.mu.Lock()
 
-	value := strg.items[key]
-
+	var value *storage.Value
+	var exists bool
 	var err error
+
+	if value, exists = strg.items[key]; exists && value.IsExpired() {
+		value = nil
+	}
 
 	if value, err = setter(value); err == nil {
 		if value == nil {

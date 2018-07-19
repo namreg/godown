@@ -25,7 +25,7 @@ Removes and returns the first element of the list stored at key.`
 
 //Execute implements Execute of Command interface
 func (c *Lpop) Execute(strg storage.Storage, args ...string) Result {
-	if len(args) < 1 {
+	if len(args) != 1 {
 		return ErrResult{ErrWrongArgsNumber}
 	}
 
