@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/namreg/godown-v2/pkg/clock"
+
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/stretchr/testify/assert"
 )
@@ -100,6 +102,7 @@ func TestStorage_Put(t *testing.T) {
 
 func TestStorage_Put_WhenValueShouldBeDeleted(t *testing.T) {
 	strg := &Storage{
+		clock:        clock.TimeClock{},
 		items:        make(map[storage.Key]*storage.Value),
 		itemsWithTTL: make(map[storage.Key]*storage.Value),
 	}
@@ -119,6 +122,7 @@ func TestStorage_Put_WhenValueShouldBeDeleted(t *testing.T) {
 
 func TestStorage_Put_WhenValueShouldBeAdded(t *testing.T) {
 	strg := &Storage{
+		clock:        clock.TimeClock{},
 		items:        make(map[storage.Key]*storage.Value),
 		itemsWithTTL: make(map[storage.Key]*storage.Value),
 	}
@@ -141,6 +145,7 @@ func TestStorage_Put_ExpiredKey(t *testing.T) {
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := &Storage{
+		clock:        clock.TimeClock{},
 		items:        map[storage.Key]*storage.Value{"expired": expired},
 		itemsWithTTL: map[storage.Key]*storage.Value{"expired": expired},
 	}
@@ -155,10 +160,16 @@ func TestStorage_Get(t *testing.T) {
 	expired := storage.NewStringValue("expired_value")
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
-	strg := New(map[storage.Key]*storage.Value{
-		"key":         storage.NewStringValue("value"),
-		"expired_key": expired,
-	})
+	strg := &Storage{
+		clock: clock.TimeClock{},
+		items: map[storage.Key]*storage.Value{
+			"key":         storage.NewStringValue("value"),
+			"expired_key": expired,
+		},
+		itemsWithTTL: map[storage.Key]*storage.Value{
+			"expired_key": expired,
+		},
+	}
 	tests := []struct {
 		name string
 		key  storage.Key
@@ -198,6 +209,7 @@ func TestStorage_Get(t *testing.T) {
 
 func TestStorage_Del(t *testing.T) {
 	strg := Storage{
+		clock: clock.TimeClock{},
 		items: map[storage.Key]*storage.Value{
 			storage.Key("key"):  storage.NewStringValue("value"),
 			storage.Key("key2"): storage.NewStringValue("value2"),
@@ -229,6 +241,7 @@ func TestStorage_Keys(t *testing.T) {
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := Storage{
+		clock: clock.TimeClock{},
 		items: map[storage.Key]*storage.Value{
 			storage.Key("key"):     storage.NewStringValue("value"),
 			storage.Key("key2"):    storage.NewStringValue("value2"),
@@ -245,6 +258,7 @@ func TestStorage_Keys(t *testing.T) {
 
 func TestStorage_All(t *testing.T) {
 	strg := Storage{
+		clock: clock.TimeClock{},
 		items: map[storage.Key]*storage.Value{
 			storage.Key("key"):  storage.NewStringValue("value"),
 			storage.Key("key2"): storage.NewStringValue("value2"),
@@ -262,6 +276,7 @@ func TestStorage_All(t *testing.T) {
 
 func TestStorage_AllWithTTL(t *testing.T) {
 	strg := Storage{
+		clock: clock.TimeClock{},
 		items: map[storage.Key]*storage.Value{
 			storage.Key("key"):  storage.NewStringValue("value"),
 			storage.Key("key2"): storage.NewStringValue("value2"),

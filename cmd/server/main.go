@@ -6,6 +6,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/namreg/godown-v2/pkg/clock"
+
 	"github.com/namreg/godown-v2/internal/pkg/server"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 )
@@ -23,11 +25,10 @@ func main() {
 		log.Fatalf("port can not be empty")
 	}
 
-	opts := server.Opts{
-		GCInterval: 1 * time.Second,
-	}
-	strg := memory.New(nil)
-	srv := server.New(strg, opts)
+	clck := clock.TimeClock{}
+
+	strg := memory.New(nil, memory.WithClock(clck))
+	srv := server.New(strg, server.WithClock(clck), server.WithGCInterval(1*time.Second))
 
 	log.Fatal(srv.Run(net.JoinHostPort(*host, *port)))
 }

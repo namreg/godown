@@ -5,21 +5,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gojuno/minimock"
-
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
+	"github.com/namreg/godown-v2/pkg/clock"
 
+	"github.com/gojuno/minimock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestExpire_Name(t *testing.T) {
-	cmd := new(Expire)
+	cmd := Expire{clock.TimeClock{}}
 	assert.Equal(t, "EXPIRE", cmd.Name())
 }
 
 func TestExpire_Help(t *testing.T) {
-	cmd := new(Expire)
+	cmd := Expire{clock.TimeClock{}}
 	expexted := `Usage: EXPIRE key seconds
 Set a timeout on key. After the timeout has expired, the key will automatically be deleted.`
 
@@ -44,7 +44,7 @@ func TestExpire_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Expire)
+			cmd := Expire{clock.TimeClock{}}
 			res := cmd.Execute(strg, tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
@@ -68,20 +68,27 @@ func TestExpire_Execute_StorageErr(t *testing.T) {
 }
 
 func TestExpire_Execute_Setter(t *testing.T) {
+	mc := minimock.NewController(t)
+	defer mc.Finish()
+
+	now, _ := time.Parse("2006-01-02 15:04:05", "2018-01-01 11:11:11")
+
+	clck := NewClockMock(t)
+	clck.NowMock.Return(now)
+
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"key": storage.NewStringValue("value"),
 	})
 
-	cmd := new(Expire)
+	cmd := Expire{clck}
 
-	expectedRes := OkResult{}
-	actualRes := cmd.Execute(strg, []string{"key", "10"}...)
-	assert.Equal(t, expectedRes, actualRes)
+	res := cmd.Execute(strg, []string{"key", "10"}...)
+	assert.Equal(t, OkResult{}, res)
 
 	items, err := strg.All()
 	assert.NoError(t, err)
 
 	value, ok := items["key"]
 	assert.True(t, ok)
-	assert.True(t, time.Unix(value.TTL(), 0).After(time.Now()))
+	assert.Equal(t, now.Add(10*time.Second).Unix(), value.TTL())
 }

@@ -1,21 +1,23 @@
 package command
 
 import (
+	"errors"
 	"strconv"
 	"time"
 
-	"errors"
-
 	"github.com/namreg/godown-v2/internal/pkg/storage"
+	"github.com/namreg/godown-v2/pkg/clock"
 )
 
 func init() {
-	cmd := new(Expire)
+	cmd := &Expire{clock.TimeClock{}}
 	commands[cmd.Name()] = cmd
 }
 
 //Expire is the Expire command
-type Expire struct{}
+type Expire struct {
+	clck clock.Clock
+}
 
 //Name implements Name of Command interface
 func (c *Expire) Name() string {
@@ -44,7 +46,8 @@ func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
 		if old == nil {
 			return nil, nil
 		}
-		old.SetTTL(time.Now().Add(time.Duration(secs) * time.Second))
+		now := c.clck.Now()
+		old.SetTTL(now.Add(time.Duration(secs) * time.Second))
 		return old, nil
 	}
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {

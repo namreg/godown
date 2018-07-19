@@ -8,24 +8,52 @@ import (
 	"strings"
 	"time"
 
+	"github.com/namreg/godown-v2/pkg/clock"
+
 	"github.com/namreg/godown-v2/internal/pkg/command"
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-//Opts stores the server options
-type Opts struct {
-	GCInterval time.Duration // the interval through which a garbage collector will be running
-}
+const defaultGCInterval = 500 * time.Millisecond
 
 //Server represents a server
 type Server struct {
-	strg storage.Storage
-	opts Opts
+	strg       storage.Storage
+	gcInterval time.Duration
+	clock      clock.Clock
 }
 
-//New creates a server with given storage
-func New(strg storage.Storage, opts Opts) *Server {
-	return &Server{strg, opts}
+//WithGCInterval sets GC interval for garbage collector
+func WithGCInterval(interval time.Duration) func(*Server) {
+	return func(srv *Server) {
+		srv.gcInterval = interval
+	}
+}
+
+//WithClock sets clock
+func WithClock(clck clock.Clock) func(*Server) {
+	return func(srv *Server) {
+		srv.clock = clck
+	}
+}
+
+//New creates a server with given storage and options
+func New(strg storage.Storage, opts ...func(*Server)) *Server {
+	srv := &Server{strg: strg}
+
+	for _, f := range opts {
+		f(srv)
+	}
+
+	if srv.gcInterval == 0 {
+		srv.gcInterval = defaultGCInterval
+	}
+
+	if srv.clock == nil {
+		srv.clock = clock.TimeClock{}
+	}
+
+	return srv
 }
 
 //Run runs the server on the given host and port
@@ -34,7 +62,7 @@ func (s *Server) Run(hostPort string) error {
 
 	// starting a garbage collector
 	go func() {
-		gc := newGc(s.strg, s.opts.GCInterval)
+		gc := newGc(s.strg, s.clock, s.gcInterval)
 		gc.start()
 	}()
 
