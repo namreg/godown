@@ -1,10 +1,10 @@
 package command
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 var errListOutOfRange = errors.New("lrange: out of range")
@@ -50,7 +50,7 @@ func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
 
 	list := value.Data().([]string)
 
-	start, stop, err := c.extractStartStopIndexes(list, args)
+	start, stop, err := c.extractStartStopIndexes(len(list), args)
 	if err != nil {
 		if err == errListOutOfRange {
 			return NilResult{}
@@ -66,7 +66,7 @@ func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
 	return SliceResult{rng}
 }
 
-func (c *Lrange) extractStartStopIndexes(list, args []string) (int, int, error) {
+func (c *Lrange) extractStartStopIndexes(len int, args []string) (int, int, error) {
 	start, err := strconv.Atoi(args[1])
 	if err != nil {
 		return 0, 0, errors.New("start should be an integer")
@@ -77,18 +77,24 @@ func (c *Lrange) extractStartStopIndexes(list, args []string) (int, int, error) 
 		return 0, 0, errors.New("stop should be an integer")
 	}
 
-	if start < 0 {
-		if start = len(list) + start; start < 0 {
-			start = 0
-		}
-	} else if start > len(list)-1 {
+	if start > len-1 {
 		return 0, 0, errListOutOfRange
 	}
 
+	if stop > len {
+		return start, len, nil
+	}
+
+	if start < 0 {
+		if start = len - 1 + start; start < 0 {
+			start = 0
+		}
+	}
+
 	if stop < 0 {
-		stop = len(list) + stop
-	} else if stop > len(list) {
-		stop = len(list)
+		if stop = len + stop; stop < 0 {
+			stop = len - 1
+		}
 	}
 
 	return start, stop + 1, nil // +1 due to the range operator of slice
