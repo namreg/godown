@@ -10,13 +10,15 @@ import (
 
 //gc is the garbage collector that collects expired values
 type gc struct {
+	logger   *log.Logger
 	clck     clock.Clock
 	strg     storage.Storage
 	interval time.Duration
 }
 
-func newGc(strg storage.Storage, clck clock.Clock, interval time.Duration) *gc {
+func newGc(strg storage.Storage, logger *log.Logger, clck clock.Clock, interval time.Duration) *gc {
 	return &gc{
+		logger:   logger,
 		clck:     clck,
 		strg:     strg,
 		interval: interval,
@@ -30,7 +32,7 @@ func (g *gc) start() {
 	for range ticker.C {
 		items, err := g.strg.AllWithTTL()
 		if err != nil {
-			log.Printf("[WARN] gc: could not retrieve values: %v", err)
+			g.logger.Printf("[WARN] gc: could not retrieve values: %v", err)
 		}
 		for k, v := range items {
 			if v.IsExpired(g.clck.Now()) {

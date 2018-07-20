@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"strings"
 	"time"
 
@@ -18,9 +19,17 @@ const defaultGCInterval = 500 * time.Millisecond
 
 //Server represents a server
 type Server struct {
+	logger     *log.Logger
 	strg       storage.Storage
 	gcInterval time.Duration
 	clock      clock.Clock
+}
+
+//WithLogger sets the logger
+func WithLogger(logger *log.Logger) func(*Server) {
+	return func(srv *Server) {
+		srv.logger = logger
+	}
 }
 
 //WithGCInterval sets GC interval for garbage collector
@@ -45,6 +54,10 @@ func New(strg storage.Storage, opts ...func(*Server)) *Server {
 		f(srv)
 	}
 
+	if srv.logger == nil {
+		srv.logger = log.New(os.Stdout, "[godown-server]: ", log.LstdFlags)
+	}
+
 	if srv.gcInterval == 0 {
 		srv.gcInterval = defaultGCInterval
 	}
@@ -58,11 +71,11 @@ func New(strg storage.Storage, opts ...func(*Server)) *Server {
 
 //Run runs the server on the given host and port
 func (s *Server) Run(hostPort string) error {
-	log.Printf("[INFO] server: runing on %s\n", hostPort)
+	s.logger.Printf("[INFO] running on %s\n", hostPort)
 
 	// starting a garbage collector
 	go func() {
-		gc := newGc(s.strg, s.clock, s.gcInterval)
+		gc := newGc(s.strg, s.logger, s.clock, s.gcInterval)
 		gc.start()
 	}()
 
@@ -76,7 +89,7 @@ func (s *Server) Run(hostPort string) error {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			log.Printf("[WARN] server: could not accept connection: %v\n", err)
+			s.logger.Printf("[WARN] could not accept connection: %v\n", err)
 			continue
 		}
 
@@ -100,7 +113,6 @@ func (s *Server) handleConn(conn *conn) {
 		cmd, args, err := command.Parse(input)
 
 		if err != nil {
-			log.Printf("[INFO] server: could not parse command %q: %v", input, err)
 			switch err {
 			case command.ErrCommandNotFound:
 				conn.writeError(fmt.Errorf("command %q not found", input))
@@ -115,11 +127,9 @@ func (s *Server) handleConn(conn *conn) {
 		res := cmd.Execute(s.strg, args...)
 
 		conn.writeCommandResult(res)
-
-		log.Printf("[INFO] server: recieved command: %s", cmd.Name())
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Printf("[WARN] server: scanner error: %v", err)
+		s.logger.Printf("[WARN] scanner error: %v", err)
 	}
 }
