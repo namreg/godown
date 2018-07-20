@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/namreg/godown-v2/pkg/clock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -69,9 +70,10 @@ func TestValue_IsExpired(t *testing.T) {
 		{"not_expired", &Value{ttl: time.Now().Add(1 * time.Second).Unix()}, false},
 		{"expired", &Value{ttl: time.Now().Add(-1 * time.Second).Unix()}, true},
 	}
+	clock := clock.TimeClock{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.value.IsExpired(); got != tt.want {
+			if got := tt.value.IsExpired(clock.Now()); got != tt.want {
 				t.Errorf("Value.IsExpired() = %v, want %v", got, tt.want)
 			}
 		})

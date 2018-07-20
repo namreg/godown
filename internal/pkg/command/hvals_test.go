@@ -51,10 +51,10 @@ func TestHvals_Execute(t *testing.T) {
 			cmd := new(Hvals)
 			res := cmd.Execute(strg, tt.args...)
 			if sr, ok := res.(SliceResult); ok {
-				expected := tt.want.(SliceResult).val
+				expected := tt.want.(SliceResult).Value
 				sort.Strings(expected)
 
-				actual := sr.val
+				actual := sr.Value
 				sort.Strings(actual)
 
 				assert.Equal(t, tt.want, res)

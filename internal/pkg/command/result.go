@@ -15,12 +15,12 @@ func (or OkResult) Val() interface{} {
 
 //ErrResult contains an error
 type ErrResult struct {
-	err error
+	Err error
 }
 
 //Val returns an error
 func (er ErrResult) Val() interface{} {
-	return er.err
+	return er.Err
 }
 
 //NilResult is the nil result that does not contain any payload
@@ -33,40 +33,40 @@ func (nr NilResult) Val() interface{} {
 
 //HelpResult contains underlying command help message
 type HelpResult struct {
-	cmd Command
+	Cmd Command
 }
 
 //Val returns underlying command help message
 func (ur HelpResult) Val() interface{} {
-	return ur.cmd.Help()
+	return ur.Cmd.Help()
 }
 
 //StringResult contains a string
 type StringResult struct {
-	str string
+	Str string
 }
 
 //Val returns string
 func (sr StringResult) Val() interface{} {
-	return sr.str
+	return sr.Str
 }
 
 //IntResult containt an int64 integer
 type IntResult struct {
-	val int64
+	Value int64
 }
 
 //Val returns an int64 integer
 func (ir IntResult) Val() interface{} {
-	return ir.val
+	return ir.Value
 }
 
 //SliceResult contains a slice of strings
 type SliceResult struct {
-	val []string
+	Value []string
 }
 
 //Val returns slice of strings
 func (sr SliceResult) Val() interface{} {
-	return sr.val
+	return sr.Value
 }

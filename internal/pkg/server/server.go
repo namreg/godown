@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/namreg/godown-v2/pkg/clock"
-
 	"github.com/namreg/godown-v2/internal/pkg/command"
 	"github.com/namreg/godown-v2/internal/pkg/storage"
+	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
+	"github.com/namreg/godown-v2/pkg/clock"
 )
 
 const defaultGCInterval = 500 * time.Millisecond
@@ -25,6 +25,13 @@ type Server struct {
 	clock      clock.Clock
 }
 
+//WithStorage sets the storage
+func WithStorage(strg storage.Storage) func(*Server) {
+	return func(srv *Server) {
+		srv.strg = strg
+	}
+}
+
 //WithLogger sets the logger
 func WithLogger(logger *log.Logger) func(*Server) {
 	return func(srv *Server) {
@@ -32,14 +39,14 @@ func WithLogger(logger *log.Logger) func(*Server) {
 	}
 }
 
-//WithGCInterval sets GC interval for garbage collector
+//WithGCInterval sets the GC interval for garbage collector
 func WithGCInterval(interval time.Duration) func(*Server) {
 	return func(srv *Server) {
 		srv.gcInterval = interval
 	}
 }
 
-//WithClock sets clock
+//WithClock sets the clock
 func WithClock(clck clock.Clock) func(*Server) {
 	return func(srv *Server) {
 		srv.clock = clck
@@ -47,8 +54,8 @@ func WithClock(clck clock.Clock) func(*Server) {
 }
 
 //New creates a server with given storage and options
-func New(strg storage.Storage, opts ...func(*Server)) *Server {
-	srv := &Server{strg: strg}
+func New(opts ...func(*Server)) *Server {
+	srv := new(Server)
 
 	for _, f := range opts {
 		f(srv)
@@ -64,6 +71,10 @@ func New(strg storage.Storage, opts ...func(*Server)) *Server {
 
 	if srv.clock == nil {
 		srv.clock = clock.TimeClock{}
+	}
+
+	if srv.strg == nil {
+		srv.strg = memory.New(nil, memory.WithClock(srv.clock))
 	}
 
 	return srv
