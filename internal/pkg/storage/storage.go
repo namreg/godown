@@ -50,11 +50,11 @@ func (v *Value) Type() DataType {
 }
 
 //IsExpired indicates wheter the value is expired
-func (v *Value) IsExpired() bool {
+func (v *Value) IsExpired(till time.Time) bool {
 	if v.ttl < 0 {
 		return false
 	}
-	return v.ttl < time.Now().Unix()
+	return v.ttl < till.Unix()
 }
 
 //SetTTL sets expiration time of the value

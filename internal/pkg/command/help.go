@@ -8,7 +8,8 @@ import (
 )
 
 func init() {
-	commands["HELP"] = new(Help)
+	cmd := new(Help)
+	commands[cmd.Name()] = cmd
 }
 
 //Help is the Help command
@@ -22,20 +23,15 @@ func (c *Help) Name() string {
 //Help implements Help of Command interface
 func (c *Help) Help() string {
 	return `Usage: HELP command
-Show the usage of the given command
-`
-}
-
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Help) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
+Show the usage of the given command`
 }
 
 //Execute implements Execute of Command interface
 func (c *Help) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	cmdName := args[0]
 	if cmd, ok := commands[strings.ToUpper(cmdName)]; ok {
 		return HelpResult{cmd}

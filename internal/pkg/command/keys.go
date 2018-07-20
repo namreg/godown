@@ -1,15 +1,16 @@
 package command
 
 import (
+	"errors"
 	"regexp"
 	"strings"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 func init() {
-	commands["KEYS"] = new(Keys)
+	cmd := new(Keys)
+	commands[cmd.Name()] = cmd
 }
 
 //Keys is the Keys command
@@ -26,16 +27,12 @@ func (c *Keys) Help() string {
 Find all keys matching the given pattern.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Keys) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	keys, err := strg.Keys()
 	if err != nil {
 		return ErrResult{err}

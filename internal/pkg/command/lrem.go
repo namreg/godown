@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["LREM"] = new(Lrem)
+	cmd := new(Lrem)
+	commands[cmd.Name()] = cmd
 }
 
 //Lrem is the LREM command
@@ -22,16 +23,12 @@ func (c *Lrem) Help() string {
 Removes all occurrences of elements equal to value from the list stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Lrem) ValidateArgs(args ...string) error {
-	if len(args) < 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Lrem) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	setter := func(old *storage.Value) (*storage.Value, error) {
 		if old == nil {
 			return nil, nil

@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["LPUSH"] = new(Lpush)
+	cmd := new(Lpush)
+	commands[cmd.Name()] = cmd
 }
 
 //Lpush is the LPUSH command
@@ -22,16 +23,12 @@ func (c *Lpush) Help() string {
 Prepend one or multiple values to a list.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Lpush) ValidateArgs(args ...string) error {
-	if len(args) < 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Lpush) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) < 2 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	setter := func(old *storage.Value) (*storage.Value, error) {
 		vals := args[1:]
 		// reverse vals

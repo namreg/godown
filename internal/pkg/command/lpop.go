@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["LPOP"] = new(Lpop)
+	cmd := new(Lpop)
+	commands[cmd.Name()] = cmd
 }
 
 //Lpop is the LPOP command
@@ -22,16 +23,12 @@ func (c *Lpop) Help() string {
 Removes and returns the first element of the list stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Lpop) ValidateArgs(args ...string) error {
-	if len(args) < 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Lpop) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	var popped string
 	setter := func(old *storage.Value) (*storage.Value, error) {
 		if old == nil {

@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["TYPE"] = new(Type)
+	cmd := new(Type)
+	commands[cmd.Name()] = cmd
 }
 
 //Type is the Type command
@@ -22,16 +23,12 @@ func (c *Type) Help() string {
 Returns the type stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Type) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Type) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

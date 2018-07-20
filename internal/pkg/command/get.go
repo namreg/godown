@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["GET"] = new(Get)
+	cmd := new(Get)
+	commands[cmd.Name()] = cmd
 }
 
 //Get is the GET command
@@ -19,20 +20,15 @@ func (c *Get) Name() string {
 //Help implements Help of Command interface
 func (c *Get) Help() string {
 	return `Usage: GET key
-Get the value by key. 
+Get the value by key.
 If provided key does not exist NIL will be returned.`
-}
-
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Get) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
 }
 
 //Execute implements Execute of Command interface
 func (c *Get) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

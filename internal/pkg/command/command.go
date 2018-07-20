@@ -2,11 +2,11 @@ package command
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"unicode"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -27,8 +27,6 @@ type Command interface {
 	Name() string
 	//Help returns information about the command. Description, usage and etc.
 	Help() string
-	//ValidateArgs validates args
-	ValidateArgs(args ...string) error
 	//Execute executes the command in the context of Storage with the given arguments
 	Execute(strg storage.Storage, args ...string) Result
 }
@@ -42,20 +40,14 @@ func Parse(value string) (Command, []string, error) {
 		return nil, nil, ErrCommandNotFound
 	}
 
-	args = args[1:]
-
-	if err := cmd.ValidateArgs(args...); err != nil {
-		return nil, nil, err
-	}
-
-	return cmd, args, nil
+	return cmd, args[1:], nil
 }
 
 func extractArgs(val string) []string {
 	args := make([]string, 0)
 	var inQuote bool
 	var buf bytes.Buffer
-	for _, r := range []rune(val) {
+	for _, r := range val {
 		switch {
 		case r == '"':
 			inQuote = !inQuote

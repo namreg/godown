@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["HGET"] = new(Hget)
+	cmd := new(Hget)
+	commands[cmd.Name()] = cmd
 }
 
 //Hget is the HGET command
@@ -22,16 +23,12 @@ func (c *Hget) Help() string {
 Returns the value associated with field in the hash stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Hget) ValidateArgs(args ...string) error {
-	if len(args) != 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Hget) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

@@ -7,7 +7,8 @@ import (
 )
 
 func init() {
-	commands["SET"] = new(Set)
+	cmd := new(Set)
+	commands[cmd.Name()] = cmd
 }
 
 //Set is the SET command
@@ -25,16 +26,12 @@ Set key to hold the string value.
 If key already holds a value, it is overwritten.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Set) ValidateArgs(args ...string) error {
-	if len(args) != 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Set) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	value := strings.Join(args[1:], " ")
 
 	setter := func(old *storage.Value) (*storage.Value, error) {

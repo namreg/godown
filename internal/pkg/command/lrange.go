@@ -1,16 +1,17 @@
 package command
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 var errListOutOfRange = errors.New("lrange: out of range")
 
 func init() {
-	commands["LRANGE"] = new(Lrange)
+	cmd := new(Lrange)
+	commands[cmd.Name()] = cmd
 }
 
 //Lrange is the LRANGE command
@@ -29,16 +30,12 @@ The offsets start and stop are zero-based indexes,
 with 0 being the first element of the list (the head of the list), 1 being the next element and so on.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Lrange) ValidateArgs(args ...string) error {
-	if len(args) != 3 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 3 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
@@ -53,7 +50,7 @@ func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
 
 	list := value.Data().([]string)
 
-	start, stop, err := c.extractStartStopIndexes(list, args)
+	start, stop, err := c.extractStartStopIndexes(len(list), args)
 	if err != nil {
 		if err == errListOutOfRange {
 			return NilResult{}
@@ -69,7 +66,7 @@ func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
 	return SliceResult{rng}
 }
 
-func (c *Lrange) extractStartStopIndexes(list, args []string) (int, int, error) {
+func (c *Lrange) extractStartStopIndexes(len int, args []string) (int, int, error) {
 	start, err := strconv.Atoi(args[1])
 	if err != nil {
 		return 0, 0, errors.New("start should be an integer")
@@ -80,18 +77,24 @@ func (c *Lrange) extractStartStopIndexes(list, args []string) (int, int, error) 
 		return 0, 0, errors.New("stop should be an integer")
 	}
 
-	if start < 0 {
-		if start = len(list) + start; start < 0 {
-			start = 0
-		}
-	} else if start > len(list)-1 {
+	if start > len-1 {
 		return 0, 0, errListOutOfRange
 	}
 
+	if stop > len {
+		return start, len, nil
+	}
+
+	if start < 0 {
+		if start = len - 1 + start; start < 0 {
+			start = 0
+		}
+	}
+
 	if stop < 0 {
-		stop = len(list) + stop
-	} else if stop > len(list) {
-		stop = len(list)
+		if stop = len + stop; stop < 0 {
+			stop = len - 1
+		}
 	}
 
 	return start, stop + 1, nil // +1 due to the range operator of slice

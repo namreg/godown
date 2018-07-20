@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	commands["HVALS"] = new(Hvals)
+	cmd := new(Hvals)
+	commands[cmd.Name()] = cmd
 }
 
 //Hvals is the HVALS command
@@ -22,16 +23,12 @@ func (c *Hvals) Help() string {
 Returns all values in the hash stored at key`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Hvals) ValidateArgs(args ...string) error {
-	if len(args) != 1 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Hvals) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 1 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {

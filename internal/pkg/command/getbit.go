@@ -1,14 +1,15 @@
 package command
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 func init() {
-	commands["GETBIT"] = new(GetBit)
+	cmd := new(GetBit)
+	commands[cmd.Name()] = cmd
 }
 
 //GetBit is the GetBit command
@@ -25,16 +26,12 @@ func (c *GetBit) Help() string {
 Returns the bit value at offset in the string value stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *GetBit) ValidateArgs(args ...string) error {
-	if len(args) != 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	offset, err := c.parseOffset(args)
 	if err != nil {
 		return ErrResult{err}
@@ -48,6 +45,10 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{err}
 	}
 
+	if value.Type() != storage.BitMapDataType {
+		return ErrResult{ErrWrongTypeOp}
+	}
+
 	intValue := value.Data().(int64)
 
 	if intValue&(1<<offset) != 0 {
@@ -59,10 +60,7 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 func (c *GetBit) parseOffset(args []string) (uint64, error) {
 	offset, err := strconv.ParseUint(args[1], 10, 64)
 	if err != nil {
-		return 0, err
-	}
-	if offset < 0 {
-		return 0, errors.New("offset should not be negative")
+		return 0, errors.New("offset should be positive integer")
 	}
 	return offset, nil
 }

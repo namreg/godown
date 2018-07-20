@@ -1,14 +1,15 @@
 package command
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 func init() {
-	commands["SETBIT"] = new(SetBit)
+	cmd := new(SetBit)
+	commands[cmd.Name()] = cmd
 }
 
 //SetBit is the SetBit command
@@ -25,16 +26,12 @@ func (c *SetBit) Help() string {
 Sets or clears the bit at offset in the string value stored at key.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *SetBit) ValidateArgs(args ...string) error {
-	if len(args) != 3 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 3 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
+
 	offset, err := c.parseOffset(args)
 	if err != nil {
 		return ErrResult{err}
@@ -59,6 +56,9 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 		} else {
 			value = value & ^(1 << offset)
 		}
+		if value == 0 {
+			return nil, nil
+		}
 		return storage.NewBitMapValue(value), nil
 	}
 
@@ -71,10 +71,7 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 func (c *SetBit) parseOffset(args []string) (uint64, error) {
 	offset, err := strconv.ParseUint(args[1], 10, 64)
 	if err != nil {
-		return 0, err
-	}
-	if offset < 0 {
-		return 0, errors.New("offset should not be negative")
+		return 0, errors.New("invalid offset")
 	}
 	return offset, nil
 }
@@ -82,9 +79,6 @@ func (c *SetBit) parseOffset(args []string) (uint64, error) {
 func (c *SetBit) parseValue(args []string) (uint64, error) {
 	bitValue, err := strconv.ParseUint(args[2], 10, 1)
 	if err != nil {
-		return 0, errors.New("could not parse value")
-	}
-	if bitValue != 0 && bitValue != 1 {
 		return 0, errors.New("value should be 0 or 1")
 	}
 	return bitValue, nil

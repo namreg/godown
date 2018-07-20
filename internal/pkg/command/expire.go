@@ -1,19 +1,23 @@
 package command
 
 import (
+	"errors"
 	"strconv"
 	"time"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/pkg/errors"
+	"github.com/namreg/godown-v2/pkg/clock"
 )
 
 func init() {
-	commands["EXPIRE"] = new(Expire)
+	cmd := &Expire{clock.TimeClock{}}
+	commands[cmd.Name()] = cmd
 }
 
 //Expire is the Expire command
-type Expire struct{}
+type Expire struct {
+	clck clock.Clock
+}
 
 //Name implements Name of Command interface
 func (c *Expire) Name() string {
@@ -26,16 +30,11 @@ func (c *Expire) Help() string {
 Set a timeout on key. After the timeout has expired, the key will automatically be deleted.`
 }
 
-//ValidateArgs implements ValidateArgs of Command interface
-func (c *Expire) ValidateArgs(args ...string) error {
-	if len(args) != 2 {
-		return ErrWrongArgsNumber
-	}
-	return nil
-}
-
 //Execute implements Execute of Command interface
 func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
+	if len(args) != 2 {
+		return ErrResult{ErrWrongArgsNumber}
+	}
 	secs, err := strconv.Atoi(args[1])
 	if err != nil {
 		return ErrResult{errors.New("seconds should be integer")}
@@ -47,7 +46,8 @@ func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
 		if old == nil {
 			return nil, nil
 		}
-		old.SetTTL(time.Now().Add(time.Duration(secs) * time.Second))
+		now := c.clck.Now()
+		old.SetTTL(now.Add(time.Duration(secs) * time.Second))
 		return old, nil
 	}
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {

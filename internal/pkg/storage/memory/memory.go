@@ -3,31 +3,65 @@ package memory
 import (
 	"sync"
 
+	"github.com/namreg/godown-v2/pkg/clock"
+
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
 //Storage represents a storage that store its all data in memory. Implements Storage interaface
 type Storage struct {
+	clock        clock.Clock
 	mu           sync.RWMutex
 	items        map[storage.Key]*storage.Value
 	itemsWithTTL map[storage.Key]*storage.Value // items thats have ttl and will be processed by GC
 }
 
-//New creates a new memory storage
-func New() *Storage {
-	return &Storage{
-		items:        make(map[storage.Key]*storage.Value),
-		itemsWithTTL: make(map[storage.Key]*storage.Value),
+//WithClock sets Clock implementation
+func WithClock(clck clock.Clock) func(*Storage) {
+	return func(strg *Storage) {
+		strg.clock = clck
 	}
+}
+
+//New creates a new memory storage with the given items
+func New(items map[storage.Key]*storage.Value, opts ...func(*Storage)) *Storage {
+	if items == nil {
+		items = make(map[storage.Key]*storage.Value)
+	}
+
+	itemsWithTTL := make(map[storage.Key]*storage.Value)
+	for k, v := range items {
+		if v.TTL() > 0 {
+			itemsWithTTL[k] = v
+		}
+	}
+	strg := &Storage{
+		items:        items,
+		itemsWithTTL: itemsWithTTL,
+	}
+
+	for _, f := range opts {
+		f(strg)
+	}
+
+	if strg.clock == nil {
+		strg.clock = clock.TimeClock{}
+	}
+
+	return strg
 }
 
 //Put puts a new value that will be returned by ValueSetter
 func (strg *Storage) Put(key storage.Key, setter storage.ValueSetter) error {
 	strg.mu.Lock()
 
-	value := strg.items[key]
-
+	var value *storage.Value
+	var exists bool
 	var err error
+
+	if value, exists = strg.items[key]; exists && value.IsExpired(strg.clock.Now()) {
+		value = nil
+	}
 
 	if value, err = setter(value); err == nil {
 		if value == nil {
@@ -51,7 +85,7 @@ func (strg *Storage) Get(key storage.Key) (*storage.Value, error) {
 	strg.mu.RLock()
 	defer strg.mu.RUnlock()
 
-	if value, exists := strg.items[key]; exists {
+	if value, exists := strg.items[key]; exists && !value.IsExpired(strg.clock.Now()) {
 		return value, nil
 	}
 
@@ -72,8 +106,10 @@ func (strg *Storage) Keys() ([]storage.Key, error) {
 	strg.mu.RLock()
 
 	keys := make([]storage.Key, 0, len(strg.items))
-	for key := range strg.items {
-		keys = append(keys, key)
+	for k, v := range strg.items {
+		if !v.IsExpired(strg.clock.Now()) {
+			keys = append(keys, k)
+		}
 	}
 
 	strg.mu.RUnlock()
