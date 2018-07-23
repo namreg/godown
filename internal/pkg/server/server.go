@@ -127,8 +127,6 @@ func (s *Server) handleConn(conn *conn) {
 			switch err {
 			case command.ErrCommandNotFound:
 				conn.writeError(fmt.Errorf("command %q not found", input))
-			case command.ErrWrongArgsNumber:
-				conn.writeError(fmt.Errorf("wrong number of arguments"))
 			default:
 				conn.writeError(err)
 			}
