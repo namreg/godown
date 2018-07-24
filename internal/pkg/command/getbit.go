@@ -49,7 +49,7 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{ErrWrongTypeOp}
 	}
 
-	intValue := value.Data().(int64)
+	intValue := value.Data().(uint64)
 
 	if intValue&(1<<offset) != 0 {
 		return IntResult{1}
@@ -60,7 +60,10 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 func (c *GetBit) parseOffset(args []string) (uint64, error) {
 	offset, err := strconv.ParseUint(args[1], 10, 64)
 	if err != nil {
-		return 0, errors.New("offset should be positive integer")
+		return 0, errors.New("invalid offset")
+	}
+	if offset > 63 {
+		return 0, errors.New("invalid offset")
 	}
 	return offset, nil
 }

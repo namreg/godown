@@ -35,6 +35,7 @@ func TestSetBit_Execute(t *testing.T) {
 	}{
 		{"ok/1", []string{"key", "1", "1"}, OkResult{}},
 		{"ok/2", []string{"key", "0", "0"}, OkResult{}},
+		{"big_offset", []string{"key", "100", "1"}, ErrResult{errors.New("invalid offset")}},
 		{"negative_offset", []string{"key", "-1", "1"}, ErrResult{errors.New("invalid offset")}},
 		{"invalid_value/1", []string{"key", "1", "-1"}, ErrResult{errors.New("value should be 0 or 1")}},
 		{"invalid_value/2", []string{"key", "1", "2"}, ErrResult{errors.New("value should be 0 or 1")}},

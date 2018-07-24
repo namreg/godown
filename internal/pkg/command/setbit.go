@@ -43,12 +43,12 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 	}
 
 	setter := func(old *storage.Value) (*storage.Value, error) {
-		var value int64
+		var value uint64
 		if old != nil {
 			if old.Type() != storage.BitMapDataType {
 				return nil, ErrWrongTypeOp
 			}
-			value = old.Data().(int64)
+			value = old.Data().(uint64)
 		}
 
 		if bitValue == 1 {
@@ -71,6 +71,9 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 func (c *SetBit) parseOffset(args []string) (uint64, error) {
 	offset, err := strconv.ParseUint(args[1], 10, 64)
 	if err != nil {
+		return 0, errors.New("invalid offset")
+	}
+	if offset > 63 {
 		return 0, errors.New("invalid offset")
 	}
 	return offset, nil
