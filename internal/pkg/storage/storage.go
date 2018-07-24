@@ -77,7 +77,7 @@ func NewStringValue(str string) *Value {
 }
 
 //NewBitMapValue creates a new value of the BitMapDataType. Stored as uint64 integer
-func NewBitMapValue(value uint64) *Value {
+func NewBitMapValue(value []uint64) *Value {
 	return &Value{
 		data:     value,
 		dataType: BitMapDataType,

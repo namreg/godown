@@ -49,9 +49,14 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{ErrWrongTypeOp}
 	}
 
-	intValue := value.Data().(uint64)
+	vals := value.Data().([]uint64)
+	idx := c.resolveIndex(offset)
 
-	if intValue&(1<<offset) != 0 {
+	if idx > uint64(len(vals)-1) {
+		return IntResult{0}
+	}
+
+	if vals[idx]&(1<<(offset%64)) != 0 {
 		return IntResult{1}
 	}
 	return IntResult{0}
@@ -62,8 +67,17 @@ func (c *GetBit) parseOffset(args []string) (uint64, error) {
 	if err != nil {
 		return 0, errors.New("invalid offset")
 	}
-	if offset > 63 {
-		return 0, errors.New("invalid offset")
-	}
 	return offset, nil
+}
+
+func (c *GetBit) resolveIndex(offset uint64) uint64 {
+	var idx uint64
+	if offset > 63 {
+		if offset == 64 {
+			idx = 1
+		} else {
+			idx = offset % 64
+		}
+	}
+	return idx
 }
