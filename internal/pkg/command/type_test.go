@@ -28,7 +28,7 @@ func TestType_Execute(t *testing.T) {
 		"string": storage.NewStringValue("value"),
 		"list":   storage.NewListValue("val1"),
 		"map":    storage.NewMapValue(map[string]string{"field": "values"}),
-		"bitmap": storage.NewBitMapValue(1),
+		"bitmap": storage.NewBitMapValue([]uint64{1}),
 	})
 
 	tests := []struct {

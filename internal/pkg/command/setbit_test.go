@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/gojuno/minimock"
-
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 	"github.com/stretchr/testify/assert"
@@ -35,6 +34,7 @@ func TestSetBit_Execute(t *testing.T) {
 	}{
 		{"ok/1", []string{"key", "1", "1"}, OkResult{}},
 		{"ok/2", []string{"key", "0", "0"}, OkResult{}},
+		{"big_offset", []string{"key", "100", "1"}, OkResult{}},
 		{"negative_offset", []string{"key", "-1", "1"}, ErrResult{errors.New("invalid offset")}},
 		{"invalid_value/1", []string{"key", "1", "-1"}, ErrResult{errors.New("value should be 0 or 1")}},
 		{"invalid_value/2", []string{"key", "1", "2"}, ErrResult{errors.New("value should be 0 or 1")}},
@@ -52,8 +52,9 @@ func TestSetBit_Execute(t *testing.T) {
 
 func TestSetBit_Execute_Setter(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"bitmap2": storage.NewBitMapValue(2),
-		"bitmap3": storage.NewBitMapValue(2),
+		"bitmap2":                storage.NewBitMapValue([]uint64{2}),
+		"bitmap3":                storage.NewBitMapValue([]uint64{2}),
+		"bitmap_with_big_offset": storage.NewBitMapValue([]uint64{0, 1}),
 	})
 
 	tests := []struct {
@@ -68,9 +69,9 @@ func TestSetBit_Execute_Setter(t *testing.T) {
 				val, ok := items["bitmap"]
 				assert.True(t, ok)
 
-				v, ok := val.Data().(int64)
+				v, ok := val.Data().([]uint64)
 				assert.True(t, ok)
-				assert.Equal(t, int64(2), v)
+				assert.Equal(t, uint64(2), v[0])
 			},
 		},
 		{
@@ -80,9 +81,9 @@ func TestSetBit_Execute_Setter(t *testing.T) {
 				val, ok := items["bitmap2"]
 				assert.True(t, ok)
 
-				v, ok := val.Data().(int64)
+				v, ok := val.Data().([]uint64)
 				assert.True(t, ok)
-				assert.Equal(t, int64(6), v)
+				assert.Equal(t, uint64(6), v[0])
 			},
 		},
 		{
@@ -90,6 +91,14 @@ func TestSetBit_Execute_Setter(t *testing.T) {
 			[]string{"bitmap3", "1", "0"},
 			func(t *testing.T, items map[storage.Key]*storage.Value) {
 				_, ok := items["bitmap3"]
+				assert.False(t, ok)
+			},
+		},
+		{
+			"delete_key_when_all_bits_not_set/big_offset",
+			[]string{"bitmap_with_big_offset", "64", "0"},
+			func(t *testing.T, items map[storage.Key]*storage.Value) {
+				_, ok := items["bitmap_with_big_offset"]
 				assert.False(t, ok)
 			},
 		},
@@ -104,6 +113,30 @@ func TestSetBit_Execute_Setter(t *testing.T) {
 			assert.NoError(t, err)
 
 			tt.verify(t, items)
+		})
+	}
+}
+
+func TestSetBit_growSlice(t *testing.T) {
+	type args struct {
+		sl     []uint64
+		offset uint64
+	}
+	tests := []struct {
+		name string
+		args args
+		want []uint64
+	}{
+		{"offset < 64", args{[]uint64{1}, 60}, []uint64{1}},
+		{"offset > 63", args{[]uint64{1}, 65}, []uint64{1, 0}},
+		{"offset == 63", args{[]uint64{1}, 63}, []uint64{1}},
+		{"offset == 64", args{[]uint64{1}, 64}, []uint64{1, 0}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &SetBit{}
+			got := c.growSlice(tt.args.sl, tt.args.offset)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

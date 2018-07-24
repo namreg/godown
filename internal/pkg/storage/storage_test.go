@@ -111,8 +111,8 @@ func TestNewStringValue(t *testing.T) {
 }
 
 func TestNewBitMapValue(t *testing.T) {
-	value := NewBitMapValue(35)
-	assert.Equal(t, int64(35), value.data)
+	value := NewBitMapValue([]uint64{35})
+	assert.Equal(t, uint64(35), value.data.([]uint64)[0])
 	assert.Equal(t, BitMapDataType, value.dataType)
 	assert.Equal(t, int64(-1), value.ttl)
 }

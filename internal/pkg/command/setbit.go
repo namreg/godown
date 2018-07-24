@@ -43,20 +43,23 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 	}
 
 	setter := func(old *storage.Value) (*storage.Value, error) {
-		var value int64
+		var value []uint64
 		if old != nil {
 			if old.Type() != storage.BitMapDataType {
 				return nil, ErrWrongTypeOp
 			}
-			value = old.Data().(int64)
+			value = old.Data().([]uint64)
 		}
 
+		value = c.growSlice(value, offset)
+		idx := c.resolveIndex(offset)
+
 		if bitValue == 1 {
-			value = value | 1<<offset
+			value[idx] = value[idx] | 1<<(offset%64)
 		} else {
-			value = value & ^(1 << offset)
+			value[idx] = value[idx] & ^(1 << (offset % 64))
 		}
-		if value == 0 {
+		if c.isZeroSlice(value) {
 			return nil, nil
 		}
 		return storage.NewBitMapValue(value), nil
@@ -66,6 +69,44 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{err}
 	}
 	return OkResult{}
+}
+
+func (c *SetBit) resolveIndex(offset uint64) uint64 {
+	var idx uint64
+	if offset > 63 {
+		if offset == 64 {
+			idx = 1
+		} else {
+			idx = offset % 64
+		}
+	}
+	return idx
+}
+
+func (c *SetBit) growSlice(sl []uint64, offset uint64) []uint64 {
+	if sl == nil {
+		sl = make([]uint64, 1)
+	}
+
+	maxIdx := uint64(len(sl) - 1)
+	idx := c.resolveIndex(offset)
+
+	if maxIdx >= idx {
+		return sl
+	}
+
+	gsl := make([]uint64, idx+1)
+	copy(gsl, sl)
+
+	return gsl
+}
+
+func (c *SetBit) isZeroSlice(sl []uint64) bool {
+	var sum uint64
+	for _, v := range sl {
+		sum += v
+	}
+	return sum == 0
 }
 
 func (c *SetBit) parseOffset(args []string) (uint64, error) {
