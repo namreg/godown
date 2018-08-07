@@ -21,6 +21,8 @@ var (
 //commands is the all available commands
 var commands = make(map[string]Command)
 
+//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/command.Command -o ./ -s "_mock.go" -b test
+
 //Command represents a command thats server can execute
 type Command interface {
 	//Name returns the command name

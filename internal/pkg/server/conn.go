@@ -14,6 +14,8 @@ const (
 	newLineString = "\ngodown > "
 )
 
+//go:generate minimock -i net.Conn -o ./
+
 type conn struct {
 	conn net.Conn
 }

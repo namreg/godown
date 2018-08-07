@@ -105,6 +105,8 @@ func NewMapValue(val map[string]string) *Value {
 	}
 }
 
+//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/storage.Storage -o ./ -s "_mock.go" -b test
+
 //Storage represents a storage
 type Storage interface {
 	//Put puts a new value that will be returned by ValueSetter at the given Key
