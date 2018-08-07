@@ -1,22 +1,18 @@
-BIN_PATH=./build
-SERVER_BINARY=$(BIN_PATH)/server
+PACKAGE=github.com/namreg/godown-v2
+SRC_PKGS=$(shell go list ./... | grep -v vendor)
 
+.PHONY: vendor
 vendor:
 	$(GOPATH)/bin/dep ensure
 
-run-server: build-server
-	./$(SERVER_BINARY)
-
-build-server: vendor
-	mkdir -p $(BIN_PATH)
-	rm -f $(SERVER_BINARY)
-	go build -o $(SERVER_BINARY) ./cmd/server
-
-build-server-linux: vendor
-	mkdir -p $(BIN_PATH)
-	rm -f $(SERVER_BINARY)
-	env GOOS=linux GOARCH=amd64 go build -o $(SERVER_BINARY)-linux ./cmd/server
-
 .PHONY: generate
 generate:
-	@go generate $(shell go list ./... | grep -v vendor)
+	@go generate $(SRC_PKGS)
+
+.PHONY: lint
+lint:
+	@docker run --rm -t -v $(GOPATH)/src/$(PACKAGE):/go/src/$(PACKAGE) -w /go/src/$(PACKAGE) roistat/golangci-lint -c .golang.ci.yaml
+
+.PHONY: test
+test: vendor generate
+	@go test -tags test $(SRC_PKGS) -cover

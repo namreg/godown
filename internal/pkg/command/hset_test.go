@@ -34,9 +34,9 @@ func TestHset_Execute(t *testing.T) {
 		want Result
 	}{
 		{"ok", []string{"key", "field", "value"}, OkResult{}},
-		{"wrong_type_op", []string{"string", "field", "value"}, ErrResult{ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key", "field"}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_type_op", []string{"string", "field", "value"}, ErrResult{Err: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "field"}, ErrResult{Err: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -130,5 +130,5 @@ func TestHset_Execute_StorageErr(t *testing.T) {
 	cmd := new(Hset)
 	res := cmd.Execute(strg, "key", "field", "value")
 
-	assert.Equal(t, ErrResult{err}, res)
+	assert.Equal(t, ErrResult{Err: err}, res)
 }

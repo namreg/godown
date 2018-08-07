@@ -39,10 +39,10 @@ func TestValue_Data_And_Value_Type(t *testing.T) {
 		fields fields
 		want   interface{}
 	}{
-		{"string", fields{"string", StringDataType}, "string"},
-		{"bitmap", fields{1024, BitMapDataType}, 1024},
-		{"list", fields{[]string{"1", "2"}, ListDataType}, []string{"1", "2"}},
-		{"map", fields{map[string]string{"key": "value"}, MapDataType}, map[string]string{"key": "value"}},
+		{"string", fields{data: "string", dataType: StringDataType}, "string"},
+		{"bitmap", fields{data: 1024, dataType: BitMapDataType}, 1024},
+		{"list", fields{data: []string{"1", "2"}, dataType: ListDataType}, []string{"1", "2"}},
+		{"map", fields{data: map[string]string{"key": "value"}, dataType: MapDataType}, map[string]string{"key": "value"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

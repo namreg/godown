@@ -29,7 +29,7 @@ If key already holds a value, it is overwritten.`
 //Execute implements Execute of Command interface
 func (c *Set) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 2 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	value := strings.Join(args[1:], " ")
@@ -39,7 +39,7 @@ func (c *Set) Execute(strg storage.Storage, args ...string) Result {
 	}
 
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 	return OkResult{}
 }

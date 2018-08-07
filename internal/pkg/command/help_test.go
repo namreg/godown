@@ -37,10 +37,10 @@ func TestHelp_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"existing_command", []string{"mock"}, HelpResult{mock}},
-		{"not_existing_command", []string{"not_existing_command"}, ErrResult{errors.New(`command "not_existing_command" not found`)}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"mock", "mock"}, ErrResult{ErrWrongArgsNumber}},
+		{"existing_command", []string{"mock"}, HelpResult{Cmd: mock}},
+		{"not_existing_command", []string{"not_existing_command"}, ErrResult{Err: errors.New(`command "not_existing_command" not found`)}},
+		{"wrong_number_of_args/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"mock", "mock"}, ErrResult{Err: ErrWrongArgsNumber}},
 	}
 
 	for _, tt := range tests {

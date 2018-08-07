@@ -41,21 +41,21 @@ func TestLrange_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"0:0", []string{"list", "0", "0"}, SliceResult{[]string{"val1"}}},
-		{"0:1", []string{"list", "0", "1"}, SliceResult{[]string{"val1", "val2"}}},
-		{"-1:-100", []string{"list", "-1", "-100"}, SliceResult{[]string{"val1", "val2"}}},
-		{"-2:0", []string{"list", "-2", "0"}, SliceResult{[]string{"val1"}}},
-		{"0:-1", []string{"list", "0", "-1"}, SliceResult{[]string{"val1", "val2"}}},
+		{"0:0", []string{"list", "0", "0"}, SliceResult{Value: []string{"val1"}}},
+		{"0:1", []string{"list", "0", "1"}, SliceResult{Value: []string{"val1", "val2"}}},
+		{"-1:-100", []string{"list", "-1", "-100"}, SliceResult{Value: []string{"val1", "val2"}}},
+		{"-2:0", []string{"list", "-2", "0"}, SliceResult{Value: []string{"val1"}}},
+		{"0:-1", []string{"list", "0", "-1"}, SliceResult{Value: []string{"val1", "val2"}}},
 		{"1:0", []string{"list", "1", "0"}, NilResult{}},
-		{"0:100500", []string{"list", "0", "100500"}, SliceResult{[]string{"val1", "val2"}}},
+		{"0:100500", []string{"list", "0", "100500"}, SliceResult{Value: []string{"val1", "val2"}}},
 		{"100500:100501", []string{"list", "100500", "100501"}, NilResult{}},
 		{"expired_key", []string{"expired", "0", "1"}, NilResult{}},
 		{"not_existing_key", []string{"not_existing_key", "0", "1"}, NilResult{}},
-		{"wrong_type_op", []string{"string", "0", "1"}, ErrResult{ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key", "0"}, ErrResult{ErrWrongArgsNumber}},
-		{"start_is_not_integer", []string{"list", "start", "1"}, ErrResult{errors.New("start should be an integer")}},
-		{"stop_is_not_integer", []string{"list", "0", "stop"}, ErrResult{errors.New("stop should be an integer")}},
+		{"wrong_type_op", []string{"string", "0", "1"}, ErrResult{Err: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "0"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"start_is_not_integer", []string{"list", "start", "1"}, ErrResult{Err: errors.New("start should be an integer")}},
+		{"stop_is_not_integer", []string{"list", "0", "stop"}, ErrResult{Err: errors.New("stop should be an integer")}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -78,5 +78,5 @@ func TestLrange_Execute_StorageErr(t *testing.T) {
 	cmd := new(Lrange)
 	res := cmd.Execute(strg, "key", "0", "1")
 
-	assert.Equal(t, ErrResult{err}, res)
+	assert.Equal(t, ErrResult{Err: err}, res)
 }

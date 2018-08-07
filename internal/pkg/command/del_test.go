@@ -37,8 +37,8 @@ func TestDel_Execute(t *testing.T) {
 	}{
 		{"ok", []string{"key"}, OkResult{}},
 		{"not_existing_key", []string{"not_existing_key"}, OkResult{}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"key1", "key2"}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_number_of_args/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key1", "key2"}, ErrResult{Err: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -62,5 +62,5 @@ func TestDel_Execute_StorageErr(t *testing.T) {
 	cmd := new(Del)
 	res := cmd.Execute(strg, "key")
 
-	assert.Equal(t, ErrResult{err}, res)
+	assert.Equal(t, ErrResult{Err: err}, res)
 }

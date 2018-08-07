@@ -16,7 +16,7 @@ func TestOkResult_Val(t *testing.T) {
 
 func TestErrResult_Val(t *testing.T) {
 	err := errors.New("error")
-	res := ErrResult{err}
+	res := ErrResult{Err: err}
 
 	assert.Equal(t, err, res.Val())
 }
@@ -33,21 +33,21 @@ func TestHelpResult_Val(t *testing.T) {
 	cmd := NewCommandMock(t)
 	cmd.HelpMock.Return("help message")
 
-	res := HelpResult{cmd}
+	res := HelpResult{Cmd: cmd}
 	assert.Equal(t, "help message", res.Val())
 }
 
 func TestStringResult_Val(t *testing.T) {
-	res := StringResult{"string"}
+	res := StringResult{Str: "string"}
 	assert.Equal(t, "string", res.Val())
 }
 
 func TestIntResult_Val(t *testing.T) {
-	res := IntResult{100}
+	res := IntResult{Value: 100}
 	assert.Equal(t, int64(100), res.Val())
 }
 
 func TestSliceResult_Val(t *testing.T) {
-	res := SliceResult{[]string{"val1", "val2"}}
+	res := SliceResult{Value: []string{"val1", "val2"}}
 	assert.Equal(t, []string{"val1", "val2"}, res.Val())
 }

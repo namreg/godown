@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	cmd := &TTL{clock.TimeClock{}}
+	cmd := &TTL{clck: clock.TimeClock{}}
 	commands[cmd.Name()] = cmd
 }
 
@@ -32,7 +32,7 @@ Returns the remaining time to live of a key. -1 returns if key does not have tim
 //Execute implements Execute of Command interface
 func (c *TTL) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -40,11 +40,11 @@ func (c *TTL) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 	if value.TTL() < 0 {
-		return IntResult{-1}
+		return IntResult{Value: -1}
 	}
 	secs := time.Unix(value.TTL(), 0).Sub(c.clck.Now()).Seconds()
-	return IntResult{int64(secs)}
+	return IntResult{Value: int64(secs)}
 }

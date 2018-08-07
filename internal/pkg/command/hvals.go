@@ -26,7 +26,7 @@ Returns all values in the hash stored at key`
 //Execute implements Execute of Command interface
 func (c *Hvals) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -34,15 +34,15 @@ func (c *Hvals) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 	if value.Type() != storage.MapDataType {
-		return ErrResult{ErrWrongTypeOp}
+		return ErrResult{Err: ErrWrongTypeOp}
 	}
 	m := value.Data().(map[string]string)
 	vals := make([]string, 0, len(m))
 	for _, v := range m {
 		vals = append(vals, v)
 	}
-	return SliceResult{vals}
+	return SliceResult{Value: vals}
 }

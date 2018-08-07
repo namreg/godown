@@ -39,12 +39,12 @@ func TestLlen_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"ok", []string{"list"}, IntResult{2}},
-		{"expired_key", []string{"expired"}, IntResult{0}},
-		{"not_existing_key", []string{"not_existing_key"}, IntResult{0}},
-		{"wrong_type_op", []string{"string"}, ErrResult{ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"list", "0", "1"}, ErrResult{ErrWrongArgsNumber}},
+		{"ok", []string{"list"}, IntResult{Value: 2}},
+		{"expired_key", []string{"expired"}, IntResult{Value: 0}},
+		{"not_existing_key", []string{"not_existing_key"}, IntResult{Value: 0}},
+		{"wrong_type_op", []string{"string"}, ErrResult{Err: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"list", "0", "1"}, ErrResult{Err: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,5 +67,5 @@ func TestLlen_Execute_StorageErr(t *testing.T) {
 	cmd := new(Llen)
 	res := cmd.Execute(strg, "key")
 
-	assert.Equal(t, ErrResult{err}, res)
+	assert.Equal(t, ErrResult{Err: err}, res)
 }

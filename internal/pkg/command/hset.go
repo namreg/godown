@@ -26,7 +26,7 @@ Sets field in the hash stored at key to value.`
 //Execute implements Execute of Command interface
 func (c *Hset) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 3 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	setter := func(old *storage.Value) (*storage.Value, error) {
@@ -42,7 +42,7 @@ func (c *Hset) Execute(strg storage.Storage, args ...string) Result {
 		return storage.NewMapValue(m), nil
 	}
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 	return OkResult{}
 }

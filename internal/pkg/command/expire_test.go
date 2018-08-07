@@ -14,12 +14,12 @@ import (
 )
 
 func TestExpire_Name(t *testing.T) {
-	cmd := Expire{clock.TimeClock{}}
+	cmd := Expire{clck: clock.TimeClock{}}
 	assert.Equal(t, "EXPIRE", cmd.Name())
 }
 
 func TestExpire_Help(t *testing.T) {
-	cmd := Expire{clock.TimeClock{}}
+	cmd := Expire{clck: clock.TimeClock{}}
 	expexted := `Usage: EXPIRE key seconds
 Set a timeout on key. After the timeout has expired, the key will automatically be deleted.`
 
@@ -35,16 +35,16 @@ func TestExpire_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"wrong_arg_number/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_arg_number/2", []string{"key", "10", "20"}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_arg_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_arg_number/2", []string{"key", "10", "20"}, ErrResult{Err: ErrWrongArgsNumber}},
 		{"existing_key", []string{"key", "10"}, OkResult{}},
 		{"not_existing_key", []string{"not_existing_key", "10"}, OkResult{}},
-		{"secs_as_string", []string{"not_existing_key", "seconds"}, ErrResult{errors.New("seconds should be integer")}},
-		{"secs_negative", []string{"not_existing_key", "-10"}, ErrResult{errors.New("seconds should be positive")}},
+		{"secs_as_string", []string{"not_existing_key", "seconds"}, ErrResult{Err: errors.New("seconds should be integer")}},
+		{"secs_negative", []string{"not_existing_key", "-10"}, ErrResult{Err: errors.New("seconds should be positive")}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := Expire{clock.TimeClock{}}
+			cmd := Expire{clck: clock.TimeClock{}}
 			res := cmd.Execute(strg, tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
@@ -61,7 +61,7 @@ func TestExpire_Execute_StorageErr(t *testing.T) {
 
 	cmd := new(Expire)
 
-	expectedRes := ErrResult{err}
+	expectedRes := ErrResult{Err: err}
 	actualRes := cmd.Execute(strg, []string{"key", "10"}...)
 
 	assert.Equal(t, expectedRes, actualRes)
@@ -80,7 +80,7 @@ func TestExpire_Execute_Setter(t *testing.T) {
 		"key": storage.NewStringValue("value"),
 	})
 
-	cmd := Expire{clck}
+	cmd := Expire{clck: clck}
 
 	res := cmd.Execute(strg, []string{"key", "10"}...)
 	assert.Equal(t, OkResult{}, res)

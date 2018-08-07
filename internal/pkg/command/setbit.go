@@ -29,17 +29,17 @@ Sets or clears the bit at offset in the string value stored at key.`
 //Execute implements Execute of Command interface
 func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 3 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	offset, err := c.parseOffset(args)
 	if err != nil {
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 
 	bitValue, err := c.parseValue(args)
 	if err != nil {
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 
 	setter := func(old *storage.Value) (*storage.Value, error) {
@@ -66,7 +66,7 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 	}
 
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 	return OkResult{}
 }

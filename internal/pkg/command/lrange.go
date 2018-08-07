@@ -33,7 +33,7 @@ with 0 being the first element of the list (the head of the list), 1 being the n
 //Execute implements Execute of Command interface
 func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 3 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -41,11 +41,11 @@ func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 
 	if value.Type() != storage.ListDataType {
-		return ErrResult{ErrWrongTypeOp}
+		return ErrResult{Err: ErrWrongTypeOp}
 	}
 
 	list := value.Data().([]string)
@@ -55,7 +55,7 @@ func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
 		if err == errListOutOfRange {
 			return NilResult{}
 		}
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 
 	rng := list[start:stop]
@@ -63,7 +63,7 @@ func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
 		return NilResult{}
 	}
 
-	return SliceResult{rng}
+	return SliceResult{Value: rng}
 }
 
 func (c *Lrange) extractStartStopIndexes(len int, args []string) (int, int, error) {

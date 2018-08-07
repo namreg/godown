@@ -47,7 +47,9 @@ func (g *gc) deleteExpired() {
 	}
 	for k, v := range items {
 		if v.IsExpired(g.clck.Now()) {
-			g.strg.Del(k)
+			if err := g.strg.Del(k); err != nil {
+				g.logger.Printf("[WANR] gc: could not delete item: %v", err)
+			}
 		}
 	}
 }

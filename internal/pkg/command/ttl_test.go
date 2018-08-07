@@ -55,17 +55,17 @@ func TestTTL_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"no_timeout", []string{"no_timeout"}, IntResult{-1}},
+		{"no_timeout", []string{"no_timeout"}, IntResult{Value: -1}},
 		{"expired", []string{"expired"}, NilResult{}},
-		{"will_expire", []string{"will_expire"}, IntResult{now.Add(10*time.Second).Unix() - now.Unix()}},
+		{"will_expire", []string{"will_expire"}, IntResult{Value: now.Add(10*time.Second).Unix() - now.Unix()}},
 		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_number_of_args/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{Err: ErrWrongArgsNumber}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := TTL{clck}
+			cmd := TTL{clck: clck}
 			res := cmd.Execute(strg, tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
@@ -84,5 +84,5 @@ func TestTTL_Execute_StorageErr(t *testing.T) {
 	cmd := new(TTL)
 	res := cmd.Execute(strg, "key")
 
-	assert.Equal(t, ErrResult{err}, res)
+	assert.Equal(t, ErrResult{Err: err}, res)
 }

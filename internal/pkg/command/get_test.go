@@ -40,12 +40,12 @@ func TestGet_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"ok", []string{"key_string"}, StringResult{"string_value"}},
+		{"ok", []string{"key_string"}, StringResult{Str: "string_value"}},
 		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
 		{"expired_key", []string{"expired"}, NilResult{}},
-		{"wrong_type_op", []string{"key_list"}, ErrResult{ErrWrongTypeOp}},
-		{"wrong_number_of_args/1", []string{"key1", "key2"}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_type_op", []string{"key_list"}, ErrResult{Err: ErrWrongTypeOp}},
+		{"wrong_number_of_args/1", []string{"key1", "key2"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -69,5 +69,5 @@ func TestGet_Execute_StorageErr(t *testing.T) {
 	cmd := new(Get)
 	res := cmd.Execute(strg, "key")
 
-	assert.Equal(t, ErrResult{err}, res)
+	assert.Equal(t, ErrResult{Err: err}, res)
 }

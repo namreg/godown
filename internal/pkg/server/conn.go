@@ -21,7 +21,7 @@ type conn struct {
 }
 
 func newConn(c net.Conn) *conn {
-	return &conn{c}
+	return &conn{conn: c}
 }
 
 func (c *conn) Close() {

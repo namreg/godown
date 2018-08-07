@@ -150,10 +150,11 @@ func TestStorage_Put_ExpiredKey(t *testing.T) {
 		itemsWithTTL: map[storage.Key]*storage.Value{"expired": expired},
 	}
 
-	strg.Put(storage.Key("expired"), func(old *storage.Value) (*storage.Value, error) {
+	err := strg.Put(storage.Key("expired"), func(old *storage.Value) (*storage.Value, error) {
 		assert.Nil(t, old)
 		return nil, nil
 	})
+	assert.NoError(t, err)
 }
 
 func TestStorage_Get(t *testing.T) {

@@ -26,7 +26,7 @@ Returns the value associated with field in the hash stored at key.`
 //Execute implements Execute of Command interface
 func (c *Hget) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 2 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -34,14 +34,14 @@ func (c *Hget) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 	if value.Type() != storage.MapDataType {
-		return ErrResult{ErrWrongTypeOp}
+		return ErrResult{Err: ErrWrongTypeOp}
 	}
 	m := value.Data().(map[string]string)
 	if v, ok := m[args[1]]; ok {
-		return StringResult{v}
+		return StringResult{Str: v}
 	}
 	return NilResult{}
 }

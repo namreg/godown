@@ -36,12 +36,12 @@ func TestLpop_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"ok", []string{"list"}, StringResult{"val1"}},
+		{"ok", []string{"list"}, StringResult{Str: "val1"}},
 		{"expired_key", []string{"expired"}, NilResult{}},
 		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
-		{"wrong_type_op", []string{"string"}, ErrResult{ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"list", "0"}, ErrResult{ErrWrongArgsNumber}},
+		{"wrong_type_op", []string{"string"}, ErrResult{Err: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"list", "0"}, ErrResult{Err: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

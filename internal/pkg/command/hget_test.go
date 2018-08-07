@@ -39,13 +39,13 @@ func TestHget_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"ok", []string{"key", "field"}, StringResult{"value"}},
+		{"ok", []string{"key", "field"}, StringResult{Str: "value"}},
 		{"not_existing_key", []string{"not_existing_key", "field"}, NilResult{}},
 		{"not_existing_field", []string{"key", "not_existing_field"}, NilResult{}},
 		{"expired_key", []string{"expired_key", "field"}, NilResult{}},
-		{"wront_type_op", []string{"string_key", "field"}, ErrResult{ErrWrongTypeOp}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"key", "arg1", "arg2"}, ErrResult{ErrWrongArgsNumber}},
+		{"wront_type_op", []string{"string_key", "field"}, ErrResult{Err: ErrWrongTypeOp}},
+		{"wrong_number_of_args/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key", "arg1", "arg2"}, ErrResult{Err: ErrWrongArgsNumber}},
 	}
 
 	for _, tt := range tests {
@@ -69,5 +69,5 @@ func TestHget_Execute_StorageErr(t *testing.T) {
 	cmd := new(Hget)
 	res := cmd.Execute(strg, "key", "field")
 
-	assert.Equal(t, ErrResult{err}, res)
+	assert.Equal(t, ErrResult{Err: err}, res)
 }

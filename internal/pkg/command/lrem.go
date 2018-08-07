@@ -26,7 +26,7 @@ Removes all occurrences of elements equal to value from the list stored at key.`
 //Execute implements Execute of Command interface
 func (c *Lrem) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 2 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	setter := func(old *storage.Value) (*storage.Value, error) {
@@ -52,7 +52,7 @@ func (c *Lrem) Execute(strg storage.Storage, args ...string) Result {
 		return storage.NewListValue(newList...), nil
 	}
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 	return OkResult{}
 }

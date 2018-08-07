@@ -30,17 +30,17 @@ Find all keys matching the given pattern.`
 //Execute implements Execute of Command interface
 func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{ErrWrongArgsNumber}
+		return ErrResult{Err: ErrWrongArgsNumber}
 	}
 
 	keys, err := strg.Keys()
 	if err != nil {
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 
 	re, err := c.compilePattern(args[0])
 	if err != nil {
-		return ErrResult{err}
+		return ErrResult{Err: err}
 	}
 
 	keyNames := make([]string, 0, len(keys))
@@ -50,7 +50,7 @@ func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
 			keyNames = append(keyNames, sk)
 		}
 	}
-	return SliceResult{keyNames}
+	return SliceResult{Value: keyNames}
 }
 
 func (c *Keys) compilePattern(input string) (*regexp.Regexp, error) {
