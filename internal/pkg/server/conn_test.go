@@ -74,7 +74,7 @@ func (ts *connTestSuite) Test_writeError() {
 }
 
 func (ts *connTestSuite) Test_writeCommandResult() {
-	cmdMock := NewCommandMock(ts.T())
+	cmdMock := command.NewCommandMock(ts.T())
 	cmdMock.HelpMock.Return("help message")
 
 	testCases := []struct {

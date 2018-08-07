@@ -1,8 +1,10 @@
-package command
+// +build test
+
+package clock
 
 /*
 DO NOT EDIT!
-This code was generated automatically using github.com/gojuno/minimock v1.9
+This code was generated automatically using github.com/gojuno/minimock v1.10
 The original interface "Clock" can be found in github.com/namreg/godown-v2/pkg/clock
 */
 import (

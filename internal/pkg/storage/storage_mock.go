@@ -1,8 +1,10 @@
-package server
+// +build test
+
+package storage
 
 /*
 DO NOT EDIT!
-This code was generated automatically using github.com/gojuno/minimock v1.9
+This code was generated automatically using github.com/gojuno/minimock v1.10
 The original interface "Storage" can be found in github.com/namreg/godown-v2/internal/pkg/storage
 */
 import (
@@ -10,8 +12,6 @@ import (
 	"time"
 
 	"github.com/gojuno/minimock"
-	storage "github.com/namreg/godown-v2/internal/pkg/storage"
-
 	testify_assert "github.com/stretchr/testify/assert"
 )
 
@@ -19,32 +19,32 @@ import (
 type StorageMock struct {
 	t minimock.Tester
 
-	AllFunc       func() (r map[storage.Key]*storage.Value, r1 error)
+	AllFunc       func() (r map[Key]*Value, r1 error)
 	AllCounter    uint64
 	AllPreCounter uint64
 	AllMock       mStorageMockAll
 
-	AllWithTTLFunc       func() (r map[storage.Key]*storage.Value, r1 error)
+	AllWithTTLFunc       func() (r map[Key]*Value, r1 error)
 	AllWithTTLCounter    uint64
 	AllWithTTLPreCounter uint64
 	AllWithTTLMock       mStorageMockAllWithTTL
 
-	DelFunc       func(p storage.Key) (r error)
+	DelFunc       func(p Key) (r error)
 	DelCounter    uint64
 	DelPreCounter uint64
 	DelMock       mStorageMockDel
 
-	GetFunc       func(p storage.Key) (r *storage.Value, r1 error)
+	GetFunc       func(p Key) (r *Value, r1 error)
 	GetCounter    uint64
 	GetPreCounter uint64
 	GetMock       mStorageMockGet
 
-	KeysFunc       func() (r []storage.Key, r1 error)
+	KeysFunc       func() (r []Key, r1 error)
 	KeysCounter    uint64
 	KeysPreCounter uint64
 	KeysMock       mStorageMockKeys
 
-	PutFunc       func(p storage.Key, p1 storage.ValueSetter) (r error)
+	PutFunc       func(p Key, p1 ValueSetter) (r error)
 	PutCounter    uint64
 	PutPreCounter uint64
 	PutMock       mStorageMockPut
@@ -73,21 +73,21 @@ type mStorageMockAll struct {
 }
 
 //Return sets up a mock for Storage.All to return Return's arguments
-func (m *mStorageMockAll) Return(r map[storage.Key]*storage.Value, r1 error) *StorageMock {
-	m.mock.AllFunc = func() (map[storage.Key]*storage.Value, error) {
+func (m *mStorageMockAll) Return(r map[Key]*Value, r1 error) *StorageMock {
+	m.mock.AllFunc = func() (map[Key]*Value, error) {
 		return r, r1
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Storage.All method
-func (m *mStorageMockAll) Set(f func() (r map[storage.Key]*storage.Value, r1 error)) *StorageMock {
+func (m *mStorageMockAll) Set(f func() (r map[Key]*Value, r1 error)) *StorageMock {
 	m.mock.AllFunc = f
 	return m.mock
 }
 
 //All implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
-func (m *StorageMock) All() (r map[storage.Key]*storage.Value, r1 error) {
+func (m *StorageMock) All() (r map[Key]*Value, r1 error) {
 	atomic.AddUint64(&m.AllPreCounter, 1)
 	defer atomic.AddUint64(&m.AllCounter, 1)
 
@@ -114,21 +114,21 @@ type mStorageMockAllWithTTL struct {
 }
 
 //Return sets up a mock for Storage.AllWithTTL to return Return's arguments
-func (m *mStorageMockAllWithTTL) Return(r map[storage.Key]*storage.Value, r1 error) *StorageMock {
-	m.mock.AllWithTTLFunc = func() (map[storage.Key]*storage.Value, error) {
+func (m *mStorageMockAllWithTTL) Return(r map[Key]*Value, r1 error) *StorageMock {
+	m.mock.AllWithTTLFunc = func() (map[Key]*Value, error) {
 		return r, r1
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Storage.AllWithTTL method
-func (m *mStorageMockAllWithTTL) Set(f func() (r map[storage.Key]*storage.Value, r1 error)) *StorageMock {
+func (m *mStorageMockAllWithTTL) Set(f func() (r map[Key]*Value, r1 error)) *StorageMock {
 	m.mock.AllWithTTLFunc = f
 	return m.mock
 }
 
 //AllWithTTL implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
-func (m *StorageMock) AllWithTTL() (r map[storage.Key]*storage.Value, r1 error) {
+func (m *StorageMock) AllWithTTL() (r map[Key]*Value, r1 error) {
 	atomic.AddUint64(&m.AllWithTTLPreCounter, 1)
 	defer atomic.AddUint64(&m.AllWithTTLCounter, 1)
 
@@ -157,31 +157,31 @@ type mStorageMockDel struct {
 
 //StorageMockDelParams represents input parameters of the Storage.Del
 type StorageMockDelParams struct {
-	p storage.Key
+	p Key
 }
 
 //Expect sets up expected params for the Storage.Del
-func (m *mStorageMockDel) Expect(p storage.Key) *mStorageMockDel {
+func (m *mStorageMockDel) Expect(p Key) *mStorageMockDel {
 	m.mockExpectations = &StorageMockDelParams{p}
 	return m
 }
 
 //Return sets up a mock for Storage.Del to return Return's arguments
 func (m *mStorageMockDel) Return(r error) *StorageMock {
-	m.mock.DelFunc = func(p storage.Key) error {
+	m.mock.DelFunc = func(p Key) error {
 		return r
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Storage.Del method
-func (m *mStorageMockDel) Set(f func(p storage.Key) (r error)) *StorageMock {
+func (m *mStorageMockDel) Set(f func(p Key) (r error)) *StorageMock {
 	m.mock.DelFunc = f
 	return m.mock
 }
 
 //Del implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
-func (m *StorageMock) Del(p storage.Key) (r error) {
+func (m *StorageMock) Del(p Key) (r error) {
 	atomic.AddUint64(&m.DelPreCounter, 1)
 	defer atomic.AddUint64(&m.DelCounter, 1)
 
@@ -222,31 +222,31 @@ type mStorageMockGet struct {
 
 //StorageMockGetParams represents input parameters of the Storage.Get
 type StorageMockGetParams struct {
-	p storage.Key
+	p Key
 }
 
 //Expect sets up expected params for the Storage.Get
-func (m *mStorageMockGet) Expect(p storage.Key) *mStorageMockGet {
+func (m *mStorageMockGet) Expect(p Key) *mStorageMockGet {
 	m.mockExpectations = &StorageMockGetParams{p}
 	return m
 }
 
 //Return sets up a mock for Storage.Get to return Return's arguments
-func (m *mStorageMockGet) Return(r *storage.Value, r1 error) *StorageMock {
-	m.mock.GetFunc = func(p storage.Key) (*storage.Value, error) {
+func (m *mStorageMockGet) Return(r *Value, r1 error) *StorageMock {
+	m.mock.GetFunc = func(p Key) (*Value, error) {
 		return r, r1
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Storage.Get method
-func (m *mStorageMockGet) Set(f func(p storage.Key) (r *storage.Value, r1 error)) *StorageMock {
+func (m *mStorageMockGet) Set(f func(p Key) (r *Value, r1 error)) *StorageMock {
 	m.mock.GetFunc = f
 	return m.mock
 }
 
 //Get implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
-func (m *StorageMock) Get(p storage.Key) (r *storage.Value, r1 error) {
+func (m *StorageMock) Get(p Key) (r *Value, r1 error) {
 	atomic.AddUint64(&m.GetPreCounter, 1)
 	defer atomic.AddUint64(&m.GetCounter, 1)
 
@@ -285,21 +285,21 @@ type mStorageMockKeys struct {
 }
 
 //Return sets up a mock for Storage.Keys to return Return's arguments
-func (m *mStorageMockKeys) Return(r []storage.Key, r1 error) *StorageMock {
-	m.mock.KeysFunc = func() ([]storage.Key, error) {
+func (m *mStorageMockKeys) Return(r []Key, r1 error) *StorageMock {
+	m.mock.KeysFunc = func() ([]Key, error) {
 		return r, r1
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Storage.Keys method
-func (m *mStorageMockKeys) Set(f func() (r []storage.Key, r1 error)) *StorageMock {
+func (m *mStorageMockKeys) Set(f func() (r []Key, r1 error)) *StorageMock {
 	m.mock.KeysFunc = f
 	return m.mock
 }
 
 //Keys implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
-func (m *StorageMock) Keys() (r []storage.Key, r1 error) {
+func (m *StorageMock) Keys() (r []Key, r1 error) {
 	atomic.AddUint64(&m.KeysPreCounter, 1)
 	defer atomic.AddUint64(&m.KeysCounter, 1)
 
@@ -328,32 +328,32 @@ type mStorageMockPut struct {
 
 //StorageMockPutParams represents input parameters of the Storage.Put
 type StorageMockPutParams struct {
-	p  storage.Key
-	p1 storage.ValueSetter
+	p  Key
+	p1 ValueSetter
 }
 
 //Expect sets up expected params for the Storage.Put
-func (m *mStorageMockPut) Expect(p storage.Key, p1 storage.ValueSetter) *mStorageMockPut {
+func (m *mStorageMockPut) Expect(p Key, p1 ValueSetter) *mStorageMockPut {
 	m.mockExpectations = &StorageMockPutParams{p, p1}
 	return m
 }
 
 //Return sets up a mock for Storage.Put to return Return's arguments
 func (m *mStorageMockPut) Return(r error) *StorageMock {
-	m.mock.PutFunc = func(p storage.Key, p1 storage.ValueSetter) error {
+	m.mock.PutFunc = func(p Key, p1 ValueSetter) error {
 		return r
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Storage.Put method
-func (m *mStorageMockPut) Set(f func(p storage.Key, p1 storage.ValueSetter) (r error)) *StorageMock {
+func (m *mStorageMockPut) Set(f func(p Key, p1 ValueSetter) (r error)) *StorageMock {
 	m.mock.PutFunc = f
 	return m.mock
 }
 
 //Put implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
-func (m *StorageMock) Put(p storage.Key, p1 storage.ValueSetter) (r error) {
+func (m *StorageMock) Put(p Key, p1 ValueSetter) (r error) {
 	atomic.AddUint64(&m.PutPreCounter, 1)
 	defer atomic.AddUint64(&m.PutCounter, 1)
 

@@ -53,7 +53,7 @@ func TestDel_Execute_StorageErr(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	strg := NewStorageMock(t)
+	strg := storage.NewStorageMock(t)
 
 	err := errors.New("error")
 

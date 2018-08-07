@@ -71,7 +71,7 @@ func TestHvals_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := storage.NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
 
 	cmd := new(Hvals)

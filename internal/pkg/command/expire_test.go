@@ -55,7 +55,7 @@ func TestExpire_Execute_StorageErr(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	strg := NewStorageMock(t)
+	strg := storage.NewStorageMock(t)
 	err := errors.New("error")
 	strg.PutMock.Return(err)
 
@@ -73,7 +73,7 @@ func TestExpire_Execute_Setter(t *testing.T) {
 
 	now, _ := time.Parse("2006-01-02 15:04:05", "2018-01-01 11:11:11")
 
-	clck := NewClockMock(t)
+	clck := clock.NewClockMock(t)
 	clck.NowMock.Return(now)
 
 	strg := memory.New(map[storage.Key]*storage.Value{

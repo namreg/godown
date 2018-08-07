@@ -71,7 +71,7 @@ func TestKeys_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := storage.NewStorageMock(t)
 	strg.KeysMock.Return(nil, err)
 
 	cmd := new(Keys)

@@ -2,7 +2,7 @@ package server
 
 /*
 DO NOT EDIT!
-This code was generated automatically using github.com/gojuno/minimock v1.9
+This code was generated automatically using github.com/gojuno/minimock v1.10
 The original interface "Conn" can be found in net
 */
 import (

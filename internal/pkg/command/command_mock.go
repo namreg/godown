@@ -1,8 +1,10 @@
+// +build test
+
 package command
 
 /*
 DO NOT EDIT!
-This code was generated automatically using github.com/gojuno/minimock v1.9
+This code was generated automatically using github.com/gojuno/minimock v1.10
 The original interface "Command" can be found in github.com/namreg/godown-v2/internal/pkg/command
 */
 import (

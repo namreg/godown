@@ -32,7 +32,7 @@ func TestNew_WithStorage_And_WithClock(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	clck := NewClockMock(mc)
+	clck := clock.NewClockMock(mc)
 	strg := memory.New(map[storage.Key]*storage.Value{"key": storage.NewStringValue("value")}, memory.WithClock(clck))
 
 	srv := New(WithStorage(strg), WithClock(clck))

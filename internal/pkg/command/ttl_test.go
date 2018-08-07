@@ -7,6 +7,7 @@ import (
 	"github.com/gojuno/minimock"
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
+	"github.com/namreg/godown-v2/pkg/clock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,7 +30,7 @@ func TestTTL_Execute(t *testing.T) {
 
 	testTime, _ := time.Parse("2006-01-02 15:04:05", "2018-01-01 11:11:11")
 
-	clck := NewClockMock(t)
+	clck := clock.NewClockMock(t)
 	clck.NowMock.Return(testTime)
 
 	now := clck.Now()
@@ -77,7 +78,7 @@ func TestTTL_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := storage.NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
 
 	cmd := new(TTL)

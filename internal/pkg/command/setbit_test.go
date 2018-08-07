@@ -147,7 +147,7 @@ func TestSetBit_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := storage.NewStorageMock(t)
 	strg.PutMock.Return(err)
 
 	cmd := new(SetBit)
