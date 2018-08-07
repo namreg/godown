@@ -47,11 +47,11 @@ func TestGetBit_Execute(t *testing.T) {
 		{"key_not_exists", []string{"key_not_exists", "0"}, IntResult{Value: 0}},
 		{"key_not_exists", []string{"key_not_exists", "0"}, IntResult{Value: 0}},
 		{"expired_key", []string{"expired_bitmap", "10"}, IntResult{Value: 0}},
-		{"wrong_type_op", []string{"string", "1"}, ErrResult{Err: ErrWrongTypeOp}},
-		{"wrong_number_of_args/1", []string{"key1"}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"negative_offset", []string{"bitmap", "-1"}, ErrResult{Err: errors.New("invalid offset")}},
-		{"offset_not_integer", []string{"bitmap", "string"}, ErrResult{Err: errors.New("invalid offset")}},
+		{"wrong_type_op", []string{"string", "1"}, ErrResult{Value: ErrWrongTypeOp}},
+		{"wrong_number_of_args/1", []string{"key1"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"negative_offset", []string{"bitmap", "-1"}, ErrResult{Value: errors.New("invalid offset")}},
+		{"offset_not_integer", []string{"bitmap", "string"}, ErrResult{Value: errors.New("invalid offset")}},
 	}
 
 	for _, tt := range tests {
@@ -76,5 +76,5 @@ func TestGetBit_Execute_StorageErr(t *testing.T) {
 	cmd := new(GetBit)
 	res := cmd.Execute(strg, "key", "10")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

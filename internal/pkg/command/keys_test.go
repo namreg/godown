@@ -42,9 +42,9 @@ func TestKeys_Execute(t *testing.T) {
 	}{
 		{"all_keys", []string{"*"}, SliceResult{Value: []string{"string", "string2", "map"}}},
 		{"partial_match", []string{"str*"}, SliceResult{Value: []string{"string", "string2"}}},
-		{"invalid_pattern", []string{"str++"}, ErrResult{Err: errors.New("invalid pattern syntax")}},
-		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"*", "*"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"invalid_pattern", []string{"str++"}, ErrResult{Value: errors.New("invalid pattern syntax")}},
+		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"*", "*"}, ErrResult{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -77,5 +77,5 @@ func TestKeys_Execute_StorageErr(t *testing.T) {
 	cmd := new(Keys)
 	res := cmd.Execute(strg, "*")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

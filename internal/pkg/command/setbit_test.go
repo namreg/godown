@@ -35,12 +35,12 @@ func TestSetBit_Execute(t *testing.T) {
 		{"ok/1", []string{"key", "1", "1"}, OkResult{}},
 		{"ok/2", []string{"key", "0", "0"}, OkResult{}},
 		{"big_offset", []string{"key", "100", "1"}, OkResult{}},
-		{"negative_offset", []string{"key", "-1", "1"}, ErrResult{Err: errors.New("invalid offset")}},
-		{"invalid_value/1", []string{"key", "1", "-1"}, ErrResult{Err: errors.New("value should be 0 or 1")}},
-		{"invalid_value/2", []string{"key", "1", "2"}, ErrResult{Err: errors.New("value should be 0 or 1")}},
-		{"wrong_type_op", []string{"string", "1", "1"}, ErrResult{Err: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key", "field"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"negative_offset", []string{"key", "-1", "1"}, ErrResult{Value: errors.New("invalid offset")}},
+		{"invalid_value/1", []string{"key", "1", "-1"}, ErrResult{Value: errors.New("value should be 0 or 1")}},
+		{"invalid_value/2", []string{"key", "1", "2"}, ErrResult{Value: errors.New("value should be 0 or 1")}},
+		{"wrong_type_op", []string{"string", "1", "1"}, ErrResult{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "field"}, ErrResult{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -153,5 +153,5 @@ func TestSetBit_Execute_StorageErr(t *testing.T) {
 	cmd := new(SetBit)
 	res := cmd.Execute(strg, "key", "1", "1")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

@@ -45,9 +45,9 @@ func TestStrlen_Execute(t *testing.T) {
 		{"empty_string", []string{"empty_string"}, IntResult{Value: 0}},
 		{"expired_key", []string{"expired"}, IntResult{Value: 0}},
 		{"not_existing_key", []string{"not_existing_key"}, IntResult{Value: 0}},
-		{"wrong_type_op", []string{"list"}, ErrResult{Err: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"string", "list"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_type_op", []string{"list"}, ErrResult{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"string", "list"}, ErrResult{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -70,5 +70,5 @@ func TestStrlen_Execute_StorageErr(t *testing.T) {
 	cmd := new(Strlen)
 	res := cmd.Execute(strg, "key")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

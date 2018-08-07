@@ -29,12 +29,12 @@ Show the usage of the given command`
 //Execute implements Execute of Command interface
 func (c *Help) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	cmdName := args[0]
 	if cmd, ok := commands[strings.ToUpper(cmdName)]; ok {
-		return HelpResult{Cmd: cmd}
+		return HelpResult{Value: cmd}
 	}
-	return ErrResult{Err: fmt.Errorf("command %q not found", cmdName)}
+	return ErrResult{Value: fmt.Errorf("command %q not found", cmdName)}
 }

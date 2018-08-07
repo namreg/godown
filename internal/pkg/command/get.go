@@ -27,17 +27,17 @@ If provided key does not exist NIL will be returned.`
 //Execute implements Execute of Command interface
 func (c *Get) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 	value, err := strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 	if value.Type() != storage.StringDataType {
-		return ErrResult{Err: ErrWrongTypeOp}
+		return ErrResult{Value: ErrWrongTypeOp}
 	}
-	return StringResult{Str: value.Data().(string)}
+	return StringResult{Value: value.Data().(string)}
 }

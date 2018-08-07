@@ -29,12 +29,12 @@ Returns the bit value at offset in the string value stored at key.`
 //Execute implements Execute of Command interface
 func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 2 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	offset, err := c.parseOffset(args)
 	if err != nil {
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -42,11 +42,11 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return IntResult{Value: 0}
 		}
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 
 	if value.Type() != storage.BitMapDataType {
-		return ErrResult{Err: ErrWrongTypeOp}
+		return ErrResult{Value: ErrWrongTypeOp}
 	}
 
 	vals := value.Data().([]uint64)

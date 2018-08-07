@@ -26,11 +26,11 @@ Del the given key.`
 //Execute implements Execute of Command interface
 func (c *Del) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 	err := strg.Del(storage.Key(args[0]))
 	if err != nil {
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 	return OkResult{}
 }

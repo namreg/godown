@@ -33,14 +33,14 @@ Set a timeout on key. After the timeout has expired, the key will automatically 
 //Execute implements Execute of Command interface
 func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 2 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 	secs, err := strconv.Atoi(args[1])
 	if err != nil {
-		return ErrResult{Err: errors.New("seconds should be integer")}
+		return ErrResult{Value: errors.New("seconds should be integer")}
 	}
 	if secs < 0 {
-		return ErrResult{Err: errors.New("seconds should be positive")}
+		return ErrResult{Value: errors.New("seconds should be positive")}
 	}
 	setter := func(old *storage.Value) (*storage.Value, error) {
 		if old == nil {
@@ -51,7 +51,7 @@ func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
 		return old, nil
 	}
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 	return OkResult{}
 }

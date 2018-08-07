@@ -36,9 +36,9 @@ func TestLpush_Execute(t *testing.T) {
 		want Result
 	}{
 		{"ok", []string{"key", "field", "value"}, OkResult{}},
-		{"wrong_type_op", []string{"string", "value"}, ErrResult{Err: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_type_op", []string{"string", "value"}, ErrResult{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key"}, ErrResult{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -129,5 +129,5 @@ func TestLpush_Execute_StorageErr(t *testing.T) {
 	cmd := new(Lpush)
 	res := cmd.Execute(strg, "key", "val")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

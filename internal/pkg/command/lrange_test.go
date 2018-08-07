@@ -51,11 +51,11 @@ func TestLrange_Execute(t *testing.T) {
 		{"100500:100501", []string{"list", "100500", "100501"}, NilResult{}},
 		{"expired_key", []string{"expired", "0", "1"}, NilResult{}},
 		{"not_existing_key", []string{"not_existing_key", "0", "1"}, NilResult{}},
-		{"wrong_type_op", []string{"string", "0", "1"}, ErrResult{Err: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key", "0"}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"start_is_not_integer", []string{"list", "start", "1"}, ErrResult{Err: errors.New("start should be an integer")}},
-		{"stop_is_not_integer", []string{"list", "0", "stop"}, ErrResult{Err: errors.New("stop should be an integer")}},
+		{"wrong_type_op", []string{"string", "0", "1"}, ErrResult{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "0"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"start_is_not_integer", []string{"list", "start", "1"}, ErrResult{Value: errors.New("start should be an integer")}},
+		{"stop_is_not_integer", []string{"list", "0", "stop"}, ErrResult{Value: errors.New("stop should be an integer")}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -78,5 +78,5 @@ func TestLrange_Execute_StorageErr(t *testing.T) {
 	cmd := new(Lrange)
 	res := cmd.Execute(strg, "key", "0", "1")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

@@ -36,13 +36,13 @@ func TestType_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"string", []string{"string"}, StringResult{Str: "string"}},
-		{"list", []string{"list"}, StringResult{Str: "list"}},
-		{"map", []string{"map"}, StringResult{Str: "map"}},
-		{"bitmap", []string{"bitmap"}, StringResult{Str: "bitmap"}},
+		{"string", []string{"string"}, StringResult{Value: "string"}},
+		{"list", []string{"list"}, StringResult{Value: "list"}},
+		{"map", []string{"map"}, StringResult{Value: "map"}},
+		{"bitmap", []string{"bitmap"}, StringResult{Value: "bitmap"}},
 		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{Value: ErrWrongArgsNumber}},
 	}
 
 	for _, tt := range tests {
@@ -66,5 +66,5 @@ func TestType_Execute_StorageErr(t *testing.T) {
 	cmd := new(Type)
 	res := cmd.Execute(strg, "key")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

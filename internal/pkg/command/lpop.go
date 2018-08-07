@@ -26,7 +26,7 @@ Removes and returns the first element of the list stored at key.`
 //Execute implements Execute of Command interface
 func (c *Lpop) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	var popped string
@@ -49,11 +49,11 @@ func (c *Lpop) Execute(strg storage.Storage, args ...string) Result {
 	}
 
 	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 
 	if popped == "" {
 		return NilResult{}
 	}
-	return StringResult{Str: popped}
+	return StringResult{Value: popped}
 }

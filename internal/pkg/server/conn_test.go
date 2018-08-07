@@ -83,11 +83,11 @@ func (ts *connTestSuite) Test_writeCommandResult() {
 		want []byte
 	}{
 		{"ok", command.OkResult{}, []byte("(string): OK\ngodown > ")},
-		{"error", command.ErrResult{Err: errors.New("test error")}, []byte("(error): test error\ngodown > ")},
+		{"error", command.ErrResult{Value: errors.New("test error")}, []byte("(error): test error\ngodown > ")},
 		{"nil", command.NilResult{}, []byte("(nil)\ngodown > ")},
-		{"string", command.StringResult{Str: "test string"}, []byte("(string): test string\ngodown > ")},
+		{"string", command.StringResult{Value: "test string"}, []byte("(string): test string\ngodown > ")},
 		{"int", command.IntResult{Value: 10}, []byte("(integer): 10\ngodown > ")},
-		{"help", command.HelpResult{Cmd: cmdMock}, []byte("help message\ngodown > ")},
+		{"help", command.HelpResult{Value: cmdMock}, []byte("help message\ngodown > ")},
 		{"slice", command.SliceResult{Value: []string{"value 1", "value 2"}}, []byte("1) \"value 1\"\n2) \"value 2\"\ngodown > ")},
 		{"empty_slice", command.SliceResult{Value: []string{}}, []byte("(nil)\ngodown > ")},
 		{"unknown", nil, []byte("(error): could not recognize result\ngodown > ")},

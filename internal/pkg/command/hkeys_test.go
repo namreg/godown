@@ -43,9 +43,9 @@ func TestHkeys_Execute(t *testing.T) {
 		{"ok", []string{"hash"}, SliceResult{Value: []string{"field", "field2"}}},
 		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
 		{"expired_key", []string{"expired_hash"}, NilResult{}},
-		{"wront_type_op", []string{"string"}, ErrResult{Err: ErrWrongTypeOp}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wront_type_op", []string{"string"}, ErrResult{Value: ErrWrongTypeOp}},
+		{"wrong_number_of_args/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{Value: ErrWrongArgsNumber}},
 	}
 
 	for _, tt := range tests {
@@ -79,5 +79,5 @@ func TestHkeys_Execute_StorageErr(t *testing.T) {
 	cmd := new(Hkeys)
 	res := cmd.Execute(strg, "key")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

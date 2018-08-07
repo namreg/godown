@@ -26,7 +26,7 @@ Returns the type stored at key.`
 //Execute implements Execute of Command interface
 func (c *Type) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -34,7 +34,7 @@ func (c *Type) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
-	return StringResult{Str: string(value.Type())}
+	return StringResult{Value: string(value.Type())}
 }

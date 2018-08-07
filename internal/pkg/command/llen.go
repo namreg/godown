@@ -27,7 +27,7 @@ If key does not exist, it is interpreted as an empty list and 0 is returned.`
 //Execute implements Execute of Command interface
 func (c *Llen) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -35,10 +35,10 @@ func (c *Llen) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return IntResult{Value: 0}
 		}
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 	if value.Type() != storage.ListDataType {
-		return ErrResult{Err: ErrWrongTypeOp}
+		return ErrResult{Value: ErrWrongTypeOp}
 	}
 	l := len(value.Data().([]string))
 	return IntResult{Value: int64(l)}

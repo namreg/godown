@@ -31,7 +31,7 @@ Negative indices can be used to designate elements starting at the tail of the l
 //Execute implements Execute of Command interface
 func (c *Lindex) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 2 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -39,24 +39,24 @@ func (c *Lindex) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 
 	if value.Type() != storage.ListDataType {
-		return ErrResult{Err: ErrWrongTypeOp}
+		return ErrResult{Value: ErrWrongTypeOp}
 	}
 
 	list := value.Data().([]string)
 
 	index, err := c.parseIndex(list, args[1])
 	if err != nil {
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 
 	if index < 0 || index > len(list)-1 {
 		return NilResult{}
 	}
-	return StringResult{Str: list[index]}
+	return StringResult{Value: list[index]}
 }
 
 func (c *Lindex) parseIndex(list []string, index string) (int, error) {

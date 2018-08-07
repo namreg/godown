@@ -41,17 +41,17 @@ func TestLindex_Execute(t *testing.T) {
 		args []string
 		want Result
 	}{
-		{"ok", []string{"list", "0"}, StringResult{Str: "val1"}},
-		{"negative_index/1", []string{"list", "-1"}, StringResult{Str: "val2"}},
-		{"negative_index/2", []string{"list", "-2"}, StringResult{Str: "val1"}},
+		{"ok", []string{"list", "0"}, StringResult{Value: "val1"}},
+		{"negative_index/1", []string{"list", "-1"}, StringResult{Value: "val2"}},
+		{"negative_index/2", []string{"list", "-2"}, StringResult{Value: "val1"}},
 		{"expired_key", []string{"expired", "0"}, NilResult{}},
 		{"not_existing_key", []string{"not_existing_key", "0"}, NilResult{}},
 		{"not_existing_index/1", []string{"list", "2"}, NilResult{}},
 		{"not_existing_index/2", []string{"list", "-3"}, NilResult{}},
-		{"wrong_type_op", []string{"string", "0"}, ErrResult{Err: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"list", "0", "1"}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"index_not_integer", []string{"list", "string"}, ErrResult{Err: errors.New("index should be an integer")}},
+		{"wrong_type_op", []string{"string", "0"}, ErrResult{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"list", "0", "1"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"index_not_integer", []string{"list", "string"}, ErrResult{Value: errors.New("index should be an integer")}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -74,5 +74,5 @@ func TestLindex_Execute_StorageErr(t *testing.T) {
 	cmd := new(Lindex)
 	res := cmd.Execute(strg, "key", "0")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

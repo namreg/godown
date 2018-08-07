@@ -29,7 +29,7 @@ If key does not exists, 0 will be returned.`
 //Execute implements Execute of Command interface
 func (c *Strlen) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -37,10 +37,10 @@ func (c *Strlen) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return IntResult{Value: 0}
 		}
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 	if value.Type() != storage.StringDataType {
-		return ErrResult{Err: ErrWrongTypeOp}
+		return ErrResult{Value: ErrWrongTypeOp}
 	}
 	cnt := utf8.RuneCountInString(value.Data().(string))
 	return IntResult{Value: int64(cnt)}

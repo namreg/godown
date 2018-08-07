@@ -59,8 +59,8 @@ func TestTTL_Execute(t *testing.T) {
 		{"expired", []string{"expired"}, NilResult{}},
 		{"will_expire", []string{"will_expire"}, IntResult{Value: now.Add(10*time.Second).Unix() - now.Unix()}},
 		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{Value: ErrWrongArgsNumber}},
 	}
 
 	for _, tt := range tests {
@@ -84,5 +84,5 @@ func TestTTL_Execute_StorageErr(t *testing.T) {
 	cmd := new(TTL)
 	res := cmd.Execute(strg, "key")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

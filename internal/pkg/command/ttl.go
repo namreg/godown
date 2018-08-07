@@ -32,7 +32,7 @@ Returns the remaining time to live of a key. -1 returns if key does not have tim
 //Execute implements Execute of Command interface
 func (c *TTL) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
-		return ErrResult{Err: ErrWrongArgsNumber}
+		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := strg.Get(storage.Key(args[0]))
@@ -40,7 +40,7 @@ func (c *TTL) Execute(strg storage.Storage, args ...string) Result {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
 		}
-		return ErrResult{Err: err}
+		return ErrResult{Value: err}
 	}
 	if value.TTL() < 0 {
 		return IntResult{Value: -1}

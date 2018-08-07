@@ -41,9 +41,9 @@ func TestLrem_Execute(t *testing.T) {
 	}{
 		{"expired_key", []string{"expired", "val"}, OkResult{}},
 		{"not_existing_key", []string{"not_existing_key", "val"}, OkResult{}},
-		{"wrong_type_op", []string{"string", "val"}, ErrResult{Err: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Err: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key", "val", "val"}, ErrResult{Err: ErrWrongArgsNumber}},
+		{"wrong_type_op", []string{"string", "val"}, ErrResult{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "val", "val"}, ErrResult{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -116,5 +116,5 @@ func TestLrem_Execute_Storage_Err(t *testing.T) {
 	cmd := new(Lrem)
 	res := cmd.Execute(strg, "key", "val")
 
-	assert.Equal(t, ErrResult{Err: err}, res)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }
