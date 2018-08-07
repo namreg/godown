@@ -49,7 +49,7 @@ func (v *Value) Type() DataType {
 	return v.dataType
 }
 
-//IsExpired indicates wheter the value is expired
+//IsExpired indicates whether the value is expired
 func (v *Value) IsExpired(till time.Time) bool {
 	if v.ttl < 0 {
 		return false
