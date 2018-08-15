@@ -1,8 +1,11 @@
 package command
 
 import (
+	"errors"
 	"testing"
 	"time"
+
+	"github.com/gojuno/minimock"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
@@ -22,12 +25,12 @@ Removes and returns the first element of the list stored at key.`
 }
 
 func TestLpop_Execute(t *testing.T) {
-	expired := storage.NewListValue("val1", "val2")
+	expired := storage.NewListValue([]string{"val1", "val2"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"string":  storage.NewStringValue("string"),
-		"list":    storage.NewListValue("val1", "val2"),
+		"list":    storage.NewListValue([]string{"val1", "val2"}),
 		"expired": expired,
 	})
 
@@ -52,9 +55,35 @@ func TestLpop_Execute(t *testing.T) {
 	}
 }
 
+func TestLpop_Execute_StorageErr(t *testing.T) {
+	mc := minimock.NewController(t)
+	defer mc.Finish()
+
+	err := errors.New("error")
+
+	strg1 := storage.NewStorageMock(mc)
+	strg1.GetMock.Return(nil, err)
+	strg1.LockMock.Return()
+	strg1.UnlockMock.Return()
+
+	strg2 := storage.NewStorageMock(mc)
+	strg2.GetMock.Return(storage.NewListValue([]string{"val", "val2"}), nil)
+	strg2.PutMock.Return(err)
+	strg2.LockMock.Return()
+	strg2.UnlockMock.Return()
+
+	cmd := new(Lpop)
+
+	res1 := cmd.Execute(strg1, "list")
+	assert.Equal(t, ErrResult{Value: err}, res1)
+
+	res2 := cmd.Execute(strg2, "list")
+	assert.Equal(t, ErrResult{Value: err}, res2)
+}
+
 func TestLpop_Execute_DelEmptyList(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"list": storage.NewListValue("val1"),
+		"list": storage.NewListValue([]string{"val1"}),
 	})
 
 	cmd := new(Lpop)
@@ -66,4 +95,22 @@ func TestLpop_Execute_DelEmptyList(t *testing.T) {
 	value, ok := items["list"]
 	assert.Nil(t, value)
 	assert.False(t, ok)
+}
+
+func TestLpop_Execute_DelEmptyListStorageErr(t *testing.T) {
+	mc := minimock.NewController(t)
+	defer mc.Finish()
+
+	err := errors.New("error")
+
+	strg := storage.NewStorageMock(mc)
+	strg.LockMock.Return()
+	strg.UnlockMock.Return()
+	strg.GetMock.Return(storage.NewListValue([]string{"val1"}), nil)
+	strg.DelMock.Return(err)
+
+	cmd := new(Lpop)
+	res := cmd.Execute(strg, "list")
+
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

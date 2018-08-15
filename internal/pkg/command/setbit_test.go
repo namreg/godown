@@ -50,7 +50,7 @@ func TestSetBit_Execute(t *testing.T) {
 	}
 }
 
-func TestSetBit_Execute_Setter(t *testing.T) {
+func TestSetBit_Execute_WhiteBox(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"bitmap2":                storage.NewBitMapValue([]uint64{2}),
 		"bitmap3":                storage.NewBitMapValue([]uint64{2}),
@@ -147,11 +147,34 @@ func TestSetBit_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
-	strg.PutMock.Return(err)
-
 	cmd := new(SetBit)
-	res := cmd.Execute(strg, "key", "1", "1")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	//storage.Get error
+	strg1 := storage.NewStorageMock(t)
+	strg1.GetMock.Return(nil, err)
+	strg1.LockMock.Return()
+	strg1.UnlockMock.Return()
+
+	res1 := cmd.Execute(strg1, "key", "1", "1")
+	assert.Equal(t, ErrResult{Value: err}, res1)
+
+	//storage.Put error
+	strg2 := storage.NewStorageMock(t)
+	strg2.GetMock.Return(storage.NewBitMapValue([]uint64{5}), nil)
+	strg2.PutMock.Return(err)
+	strg2.LockMock.Return()
+	strg2.UnlockMock.Return()
+
+	res2 := cmd.Execute(strg2, "key", "1", "1")
+	assert.Equal(t, ErrResult{Value: err}, res2)
+
+	//storage.Del error
+	strg3 := storage.NewStorageMock(t)
+	strg3.GetMock.Return(storage.NewBitMapValue([]uint64{2}), nil)
+	strg3.DelMock.Return(err)
+	strg3.LockMock.Return()
+	strg3.UnlockMock.Return()
+
+	res3 := cmd.Execute(strg3, "key", "1", "0")
+	assert.Equal(t, ErrResult{Value: err}, res3)
 }

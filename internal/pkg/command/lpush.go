@@ -29,29 +29,42 @@ func (c *Lpush) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	setter := func(old *storage.Value) (*storage.Value, error) {
-		vals := args[1:]
-		// reverse vals
-		for i, j := 0, len(vals)-1; i < j; i, j = i+1, j-1 {
-			vals[i], vals[j] = vals[j], vals[i]
-		}
-		if old == nil {
-			return storage.NewListValue(vals...), nil
-		}
+	strg.Lock()
+	defer strg.Unlock()
 
-		if old.Type() != storage.ListDataType {
-			return nil, ErrWrongTypeOp
-		}
+	key := storage.Key(args[0])
 
-		oldList := old.Data().([]string)
-
-		newList := make([]string, 0, len(oldList)+len(vals))
-		newList = append(newList, vals...)
-		newList = append(newList, oldList...)
-
-		return storage.NewListValue(newList...), nil
+	old, err := strg.Get(key)
+	if err != nil && err != storage.ErrKeyNotExists {
+		return ErrResult{Value: err}
 	}
-	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
+
+	vals := args[1:]
+
+	// reverse vals
+	for i, j := 0, len(vals)-1; i < j; i, j = i+1, j-1 {
+		vals[i], vals[j] = vals[j], vals[i]
+	}
+
+	if old == nil {
+		return c.put(strg, key, storage.NewListValue(vals))
+	}
+
+	if old.Type() != storage.ListDataType {
+		return ErrResult{Value: ErrWrongTypeOp}
+	}
+
+	oldList := old.Data().([]string)
+
+	newList := make([]string, 0, len(oldList)+len(vals))
+	newList = append(newList, vals...)
+	newList = append(newList, oldList...)
+
+	return c.put(strg, key, storage.NewListValue(newList))
+}
+
+func (c *Lpush) put(strg storage.Storage, key storage.Key, value *storage.Value) Result {
+	if err := strg.Put(key, value); err != nil {
 		return ErrResult{Value: err}
 	}
 	return OkResult{}

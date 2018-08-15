@@ -44,10 +44,30 @@ type StorageMock struct {
 	KeysPreCounter uint64
 	KeysMock       mStorageMockKeys
 
-	PutFunc       func(p Key, p1 ValueSetter) (r error)
+	LockFunc       func()
+	LockCounter    uint64
+	LockPreCounter uint64
+	LockMock       mStorageMockLock
+
+	PutFunc       func(p Key, p1 *Value) (r error)
 	PutCounter    uint64
 	PutPreCounter uint64
 	PutMock       mStorageMockPut
+
+	RLockFunc       func()
+	RLockCounter    uint64
+	RLockPreCounter uint64
+	RLockMock       mStorageMockRLock
+
+	RUnlockFunc       func()
+	RUnlockCounter    uint64
+	RUnlockPreCounter uint64
+	RUnlockMock       mStorageMockRUnlock
+
+	UnlockFunc       func()
+	UnlockCounter    uint64
+	UnlockPreCounter uint64
+	UnlockMock       mStorageMockUnlock
 }
 
 //NewStorageMock returns a mock for github.com/namreg/godown-v2/internal/pkg/storage.Storage
@@ -63,7 +83,11 @@ func NewStorageMock(t minimock.Tester) *StorageMock {
 	m.DelMock = mStorageMockDel{mock: m}
 	m.GetMock = mStorageMockGet{mock: m}
 	m.KeysMock = mStorageMockKeys{mock: m}
+	m.LockMock = mStorageMockLock{mock: m}
 	m.PutMock = mStorageMockPut{mock: m}
+	m.RLockMock = mStorageMockRLock{mock: m}
+	m.RUnlockMock = mStorageMockRUnlock{mock: m}
+	m.UnlockMock = mStorageMockUnlock{mock: m}
 
 	return m
 }
@@ -321,6 +345,47 @@ func (m *StorageMock) KeysMinimockPreCounter() uint64 {
 	return atomic.LoadUint64(&m.KeysPreCounter)
 }
 
+type mStorageMockLock struct {
+	mock *StorageMock
+}
+
+//Return sets up a mock for Storage.Lock to return Return's arguments
+func (m *mStorageMockLock) Return() *StorageMock {
+	m.mock.LockFunc = func() {
+		return
+	}
+	return m.mock
+}
+
+//Set uses given function f as a mock of Storage.Lock method
+func (m *mStorageMockLock) Set(f func()) *StorageMock {
+	m.mock.LockFunc = f
+	return m.mock
+}
+
+//Lock implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
+func (m *StorageMock) Lock() {
+	atomic.AddUint64(&m.LockPreCounter, 1)
+	defer atomic.AddUint64(&m.LockCounter, 1)
+
+	if m.LockFunc == nil {
+		m.t.Fatal("Unexpected call to StorageMock.Lock")
+		return
+	}
+
+	m.LockFunc()
+}
+
+//LockMinimockCounter returns a count of StorageMock.LockFunc invocations
+func (m *StorageMock) LockMinimockCounter() uint64 {
+	return atomic.LoadUint64(&m.LockCounter)
+}
+
+//LockMinimockPreCounter returns the value of StorageMock.Lock invocations
+func (m *StorageMock) LockMinimockPreCounter() uint64 {
+	return atomic.LoadUint64(&m.LockPreCounter)
+}
+
 type mStorageMockPut struct {
 	mock             *StorageMock
 	mockExpectations *StorageMockPutParams
@@ -329,31 +394,31 @@ type mStorageMockPut struct {
 //StorageMockPutParams represents input parameters of the Storage.Put
 type StorageMockPutParams struct {
 	p  Key
-	p1 ValueSetter
+	p1 *Value
 }
 
 //Expect sets up expected params for the Storage.Put
-func (m *mStorageMockPut) Expect(p Key, p1 ValueSetter) *mStorageMockPut {
+func (m *mStorageMockPut) Expect(p Key, p1 *Value) *mStorageMockPut {
 	m.mockExpectations = &StorageMockPutParams{p, p1}
 	return m
 }
 
 //Return sets up a mock for Storage.Put to return Return's arguments
 func (m *mStorageMockPut) Return(r error) *StorageMock {
-	m.mock.PutFunc = func(p Key, p1 ValueSetter) error {
+	m.mock.PutFunc = func(p Key, p1 *Value) error {
 		return r
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Storage.Put method
-func (m *mStorageMockPut) Set(f func(p Key, p1 ValueSetter) (r error)) *StorageMock {
+func (m *mStorageMockPut) Set(f func(p Key, p1 *Value) (r error)) *StorageMock {
 	m.mock.PutFunc = f
 	return m.mock
 }
 
 //Put implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
-func (m *StorageMock) Put(p Key, p1 ValueSetter) (r error) {
+func (m *StorageMock) Put(p Key, p1 *Value) (r error) {
 	atomic.AddUint64(&m.PutPreCounter, 1)
 	defer atomic.AddUint64(&m.PutCounter, 1)
 
@@ -387,6 +452,129 @@ func (m *StorageMock) PutMinimockPreCounter() uint64 {
 	return atomic.LoadUint64(&m.PutPreCounter)
 }
 
+type mStorageMockRLock struct {
+	mock *StorageMock
+}
+
+//Return sets up a mock for Storage.RLock to return Return's arguments
+func (m *mStorageMockRLock) Return() *StorageMock {
+	m.mock.RLockFunc = func() {
+		return
+	}
+	return m.mock
+}
+
+//Set uses given function f as a mock of Storage.RLock method
+func (m *mStorageMockRLock) Set(f func()) *StorageMock {
+	m.mock.RLockFunc = f
+	return m.mock
+}
+
+//RLock implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
+func (m *StorageMock) RLock() {
+	atomic.AddUint64(&m.RLockPreCounter, 1)
+	defer atomic.AddUint64(&m.RLockCounter, 1)
+
+	if m.RLockFunc == nil {
+		m.t.Fatal("Unexpected call to StorageMock.RLock")
+		return
+	}
+
+	m.RLockFunc()
+}
+
+//RLockMinimockCounter returns a count of StorageMock.RLockFunc invocations
+func (m *StorageMock) RLockMinimockCounter() uint64 {
+	return atomic.LoadUint64(&m.RLockCounter)
+}
+
+//RLockMinimockPreCounter returns the value of StorageMock.RLock invocations
+func (m *StorageMock) RLockMinimockPreCounter() uint64 {
+	return atomic.LoadUint64(&m.RLockPreCounter)
+}
+
+type mStorageMockRUnlock struct {
+	mock *StorageMock
+}
+
+//Return sets up a mock for Storage.RUnlock to return Return's arguments
+func (m *mStorageMockRUnlock) Return() *StorageMock {
+	m.mock.RUnlockFunc = func() {
+		return
+	}
+	return m.mock
+}
+
+//Set uses given function f as a mock of Storage.RUnlock method
+func (m *mStorageMockRUnlock) Set(f func()) *StorageMock {
+	m.mock.RUnlockFunc = f
+	return m.mock
+}
+
+//RUnlock implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
+func (m *StorageMock) RUnlock() {
+	atomic.AddUint64(&m.RUnlockPreCounter, 1)
+	defer atomic.AddUint64(&m.RUnlockCounter, 1)
+
+	if m.RUnlockFunc == nil {
+		m.t.Fatal("Unexpected call to StorageMock.RUnlock")
+		return
+	}
+
+	m.RUnlockFunc()
+}
+
+//RUnlockMinimockCounter returns a count of StorageMock.RUnlockFunc invocations
+func (m *StorageMock) RUnlockMinimockCounter() uint64 {
+	return atomic.LoadUint64(&m.RUnlockCounter)
+}
+
+//RUnlockMinimockPreCounter returns the value of StorageMock.RUnlock invocations
+func (m *StorageMock) RUnlockMinimockPreCounter() uint64 {
+	return atomic.LoadUint64(&m.RUnlockPreCounter)
+}
+
+type mStorageMockUnlock struct {
+	mock *StorageMock
+}
+
+//Return sets up a mock for Storage.Unlock to return Return's arguments
+func (m *mStorageMockUnlock) Return() *StorageMock {
+	m.mock.UnlockFunc = func() {
+		return
+	}
+	return m.mock
+}
+
+//Set uses given function f as a mock of Storage.Unlock method
+func (m *mStorageMockUnlock) Set(f func()) *StorageMock {
+	m.mock.UnlockFunc = f
+	return m.mock
+}
+
+//Unlock implements github.com/namreg/godown-v2/internal/pkg/storage.Storage interface
+func (m *StorageMock) Unlock() {
+	atomic.AddUint64(&m.UnlockPreCounter, 1)
+	defer atomic.AddUint64(&m.UnlockCounter, 1)
+
+	if m.UnlockFunc == nil {
+		m.t.Fatal("Unexpected call to StorageMock.Unlock")
+		return
+	}
+
+	m.UnlockFunc()
+}
+
+//UnlockMinimockCounter returns a count of StorageMock.UnlockFunc invocations
+func (m *StorageMock) UnlockMinimockCounter() uint64 {
+	return atomic.LoadUint64(&m.UnlockCounter)
+}
+
+//UnlockMinimockPreCounter returns the value of StorageMock.Unlock invocations
+func (m *StorageMock) UnlockMinimockPreCounter() uint64 {
+	return atomic.LoadUint64(&m.UnlockPreCounter)
+}
+
 //ValidateCallCounters checks that all mocked methods of the interface have been called at least once
 //Deprecated: please use MinimockFinish method or use Finish method of minimock.Controller
 func (m *StorageMock) ValidateCallCounters() {
@@ -411,8 +599,24 @@ func (m *StorageMock) ValidateCallCounters() {
 		m.t.Fatal("Expected call to StorageMock.Keys")
 	}
 
+	if m.LockFunc != nil && atomic.LoadUint64(&m.LockCounter) == 0 {
+		m.t.Fatal("Expected call to StorageMock.Lock")
+	}
+
 	if m.PutFunc != nil && atomic.LoadUint64(&m.PutCounter) == 0 {
 		m.t.Fatal("Expected call to StorageMock.Put")
+	}
+
+	if m.RLockFunc != nil && atomic.LoadUint64(&m.RLockCounter) == 0 {
+		m.t.Fatal("Expected call to StorageMock.RLock")
+	}
+
+	if m.RUnlockFunc != nil && atomic.LoadUint64(&m.RUnlockCounter) == 0 {
+		m.t.Fatal("Expected call to StorageMock.RUnlock")
+	}
+
+	if m.UnlockFunc != nil && atomic.LoadUint64(&m.UnlockCounter) == 0 {
+		m.t.Fatal("Expected call to StorageMock.Unlock")
 	}
 
 }
@@ -452,8 +656,24 @@ func (m *StorageMock) MinimockFinish() {
 		m.t.Fatal("Expected call to StorageMock.Keys")
 	}
 
+	if m.LockFunc != nil && atomic.LoadUint64(&m.LockCounter) == 0 {
+		m.t.Fatal("Expected call to StorageMock.Lock")
+	}
+
 	if m.PutFunc != nil && atomic.LoadUint64(&m.PutCounter) == 0 {
 		m.t.Fatal("Expected call to StorageMock.Put")
+	}
+
+	if m.RLockFunc != nil && atomic.LoadUint64(&m.RLockCounter) == 0 {
+		m.t.Fatal("Expected call to StorageMock.RLock")
+	}
+
+	if m.RUnlockFunc != nil && atomic.LoadUint64(&m.RUnlockCounter) == 0 {
+		m.t.Fatal("Expected call to StorageMock.RUnlock")
+	}
+
+	if m.UnlockFunc != nil && atomic.LoadUint64(&m.UnlockCounter) == 0 {
+		m.t.Fatal("Expected call to StorageMock.Unlock")
 	}
 
 }
@@ -475,7 +695,11 @@ func (m *StorageMock) MinimockWait(timeout time.Duration) {
 		ok = ok && (m.DelFunc == nil || atomic.LoadUint64(&m.DelCounter) > 0)
 		ok = ok && (m.GetFunc == nil || atomic.LoadUint64(&m.GetCounter) > 0)
 		ok = ok && (m.KeysFunc == nil || atomic.LoadUint64(&m.KeysCounter) > 0)
+		ok = ok && (m.LockFunc == nil || atomic.LoadUint64(&m.LockCounter) > 0)
 		ok = ok && (m.PutFunc == nil || atomic.LoadUint64(&m.PutCounter) > 0)
+		ok = ok && (m.RLockFunc == nil || atomic.LoadUint64(&m.RLockCounter) > 0)
+		ok = ok && (m.RUnlockFunc == nil || atomic.LoadUint64(&m.RUnlockCounter) > 0)
+		ok = ok && (m.UnlockFunc == nil || atomic.LoadUint64(&m.UnlockCounter) > 0)
 
 		if ok {
 			return
@@ -504,8 +728,24 @@ func (m *StorageMock) MinimockWait(timeout time.Duration) {
 				m.t.Error("Expected call to StorageMock.Keys")
 			}
 
+			if m.LockFunc != nil && atomic.LoadUint64(&m.LockCounter) == 0 {
+				m.t.Error("Expected call to StorageMock.Lock")
+			}
+
 			if m.PutFunc != nil && atomic.LoadUint64(&m.PutCounter) == 0 {
 				m.t.Error("Expected call to StorageMock.Put")
+			}
+
+			if m.RLockFunc != nil && atomic.LoadUint64(&m.RLockCounter) == 0 {
+				m.t.Error("Expected call to StorageMock.RLock")
+			}
+
+			if m.RUnlockFunc != nil && atomic.LoadUint64(&m.RUnlockCounter) == 0 {
+				m.t.Error("Expected call to StorageMock.RUnlock")
+			}
+
+			if m.UnlockFunc != nil && atomic.LoadUint64(&m.UnlockCounter) == 0 {
+				m.t.Error("Expected call to StorageMock.Unlock")
 			}
 
 			m.t.Fatalf("Some mocks were not called on time: %s", timeout)
@@ -540,7 +780,23 @@ func (m *StorageMock) AllMocksCalled() bool {
 		return false
 	}
 
+	if m.LockFunc != nil && atomic.LoadUint64(&m.LockCounter) == 0 {
+		return false
+	}
+
 	if m.PutFunc != nil && atomic.LoadUint64(&m.PutCounter) == 0 {
+		return false
+	}
+
+	if m.RLockFunc != nil && atomic.LoadUint64(&m.RLockCounter) == 0 {
+		return false
+	}
+
+	if m.RUnlockFunc != nil && atomic.LoadUint64(&m.RUnlockCounter) == 0 {
+		return false
+	}
+
+	if m.UnlockFunc != nil && atomic.LoadUint64(&m.UnlockCounter) == 0 {
 		return false
 	}
 

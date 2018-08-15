@@ -73,6 +73,8 @@ func TestKeys_Execute_StorageErr(t *testing.T) {
 
 	strg := storage.NewStorageMock(t)
 	strg.KeysMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
 	cmd := new(Keys)
 	res := cmd.Execute(strg, "*")

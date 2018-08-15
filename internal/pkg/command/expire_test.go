@@ -55,19 +55,31 @@ func TestExpire_Execute_StorageErr(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	strg := storage.NewStorageMock(t)
 	err := errors.New("error")
-	strg.PutMock.Return(err)
 
-	cmd := new(Expire)
+	strg1 := storage.NewStorageMock(t)
+	strg1.GetMock.Return(nil, err)
+	strg1.LockMock.Return()
+	strg1.UnlockMock.Return()
+
+	strg2 := storage.NewStorageMock(t)
+	strg2.GetMock.Return(storage.NewStringValue("value"), nil)
+	strg2.PutMock.Return(err)
+	strg2.LockMock.Return()
+	strg2.UnlockMock.Return()
+
+	cmd := Expire{clck: clock.TimeClock{}}
 
 	expectedRes := ErrResult{Value: err}
-	actualRes := cmd.Execute(strg, []string{"key", "10"}...)
 
-	assert.Equal(t, expectedRes, actualRes)
+	actualRes1 := cmd.Execute(strg1, []string{"key", "10"}...)
+	assert.Equal(t, expectedRes, actualRes1)
+
+	actualRes2 := cmd.Execute(strg2, []string{"key", "10"}...)
+	assert.Equal(t, expectedRes, actualRes2)
 }
 
-func TestExpire_Execute_Setter(t *testing.T) {
+func TestExpire_Execute_WhiteBox(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 

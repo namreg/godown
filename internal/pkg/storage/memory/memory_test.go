@@ -1,7 +1,6 @@
 package memory
 
 import (
-	"errors"
 	"reflect"
 	"sort"
 	"testing"
@@ -53,108 +52,24 @@ func TestNew(t *testing.T) {
 }
 
 func TestStorage_Put(t *testing.T) {
-	type args struct {
-		key    storage.Key
-		setter storage.ValueSetter
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "setter_returns_nil_value_and_nil_err",
-			args: args{
-				key:    storage.Key("key1"),
-				setter: func(*storage.Value) (*storage.Value, error) { return nil, nil },
-			},
-			wantErr: false,
-		},
-		{
-			name: "setter_returns_nil_value_and_err",
-			args: args{
-				key:    storage.Key("key1"),
-				setter: func(*storage.Value) (*storage.Value, error) { return nil, errors.New("error") },
-			},
-			wantErr: true,
-		},
-		{
-			name: "setter_returns_value_and_nil_err",
-			args: args{
-				key:    storage.Key("key1"),
-				setter: func(*storage.Value) (*storage.Value, error) { return storage.NewStringValue("test"), nil },
-			},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			strg := &Storage{
-				items:        make(map[storage.Key]*storage.Value),
-				itemsWithTTL: make(map[storage.Key]*storage.Value),
-			}
-			if err := strg.Put(tt.args.key, tt.args.setter); (err != nil) != tt.wantErr {
-				t.Errorf("Storage.Put() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestStorage_Put_WhenValueShouldBeDeleted(t *testing.T) {
 	strg := &Storage{
-		clock:        clock.TimeClock{},
 		items:        make(map[storage.Key]*storage.Value),
 		itemsWithTTL: make(map[storage.Key]*storage.Value),
 	}
-	strg.items[storage.Key("key1")] = storage.NewListValue("value1")
-	strg.itemsWithTTL[storage.Key("key1")] = storage.NewListValue("value1")
-
-	assert.NoError(t, strg.Put(storage.Key("key2"), func(*storage.Value) (*storage.Value, error) {
-		return nil, nil
-	}))
-
-	_, ok := strg.items[storage.Key("key2")]
-	assert.False(t, ok)
-
-	_, ok = strg.itemsWithTTL[storage.Key("key2")]
-	assert.False(t, ok)
-}
-
-func TestStorage_Put_WhenValueShouldBeAdded(t *testing.T) {
-	strg := &Storage{
-		clock:        clock.TimeClock{},
-		items:        make(map[storage.Key]*storage.Value),
-		itemsWithTTL: make(map[storage.Key]*storage.Value),
-	}
-
-	assert.NoError(t, strg.Put(storage.Key("key"), func(*storage.Value) (*storage.Value, error) {
-		val := storage.NewStringValue("value")
-		val.SetTTL(time.Now().Add(1 * time.Second))
-		return val, nil
-	}))
-
-	_, ok := strg.items[storage.Key("key")]
-	assert.True(t, ok)
-
-	_, ok = strg.itemsWithTTL[storage.Key("key")]
-	assert.True(t, ok)
-}
-
-func TestStorage_Put_ExpiredKey(t *testing.T) {
 	expired := storage.NewStringValue("value")
-	expired.SetTTL(time.Now().Add(-1 * time.Second))
+	expired.SetTTL(time.Now().Add(1 * time.Second))
 
-	strg := &Storage{
-		clock:        clock.TimeClock{},
-		items:        map[storage.Key]*storage.Value{"expired": expired},
-		itemsWithTTL: map[storage.Key]*storage.Value{"expired": expired},
-	}
+	err := strg.Put("expired", expired)
 
-	err := strg.Put(storage.Key("expired"), func(old *storage.Value) (*storage.Value, error) {
-		assert.Nil(t, old)
-		return nil, nil
-	})
 	assert.NoError(t, err)
+
+	val, ok := strg.items["expired"]
+	assert.Equal(t, expired, val)
+	assert.True(t, ok)
+
+	val, ok = strg.itemsWithTTL["expired"]
+	assert.Equal(t, expired, val)
+	assert.True(t, ok)
 }
 
 func TestStorage_Get(t *testing.T) {

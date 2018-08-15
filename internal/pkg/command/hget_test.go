@@ -65,6 +65,8 @@ func TestHget_Execute_StorageErr(t *testing.T) {
 
 	strg := storage.NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
 	cmd := new(Hget)
 	res := cmd.Execute(strg, "key", "field")

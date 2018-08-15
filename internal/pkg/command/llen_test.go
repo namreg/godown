@@ -25,12 +25,12 @@ If key does not exist, it is interpreted as an empty list and 0 is returned.`
 }
 
 func TestLlen_Execute(t *testing.T) {
-	expired := storage.NewListValue("val1", "val2")
+	expired := storage.NewListValue([]string{"val1", "val2"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"string":  storage.NewStringValue("string"),
-		"list":    storage.NewListValue("val1", "val2"),
+		"list":    storage.NewListValue([]string{"val1", "val2"}),
 		"expired": expired,
 	})
 
@@ -63,6 +63,8 @@ func TestLlen_Execute_StorageErr(t *testing.T) {
 
 	strg := storage.NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
 	cmd := new(Llen)
 	res := cmd.Execute(strg, "key")

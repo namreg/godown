@@ -42,30 +42,40 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{Value: err}
 	}
 
-	setter := func(old *storage.Value) (*storage.Value, error) {
-		var value []uint64
-		if old != nil {
-			if old.Type() != storage.BitMapDataType {
-				return nil, ErrWrongTypeOp
-			}
-			value = old.Data().([]uint64)
-		}
+	key := storage.Key(args[0])
 
-		value = c.growSlice(value, offset)
-		idx := c.resolveIndex(offset)
+	strg.Lock()
+	defer strg.Unlock()
 
-		if bitValue == 1 {
-			value[idx] = value[idx] | 1<<(offset%64)
-		} else {
-			value[idx] = value[idx] & ^(1 << (offset % 64))
-		}
-		if c.isZeroSlice(value) {
-			return nil, nil
-		}
-		return storage.NewBitMapValue(value), nil
+	var value []uint64
+
+	old, err := strg.Get(key)
+	if err != nil && err != storage.ErrKeyNotExists {
+		return ErrResult{Value: err}
 	}
 
-	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
+	if old != nil {
+		if old.Type() != storage.BitMapDataType {
+			return ErrResult{Value: ErrWrongTypeOp}
+		}
+		value = old.Data().([]uint64)
+	}
+
+	value = c.growSlice(value, offset)
+	idx := c.resolveIndex(offset)
+
+	if bitValue == 1 {
+		value[idx] = value[idx] | 1<<(offset%64)
+	} else {
+		value[idx] = value[idx] & ^(1 << (offset % 64))
+	}
+	if c.isZeroSlice(value) {
+		if err = strg.Del(key); err != nil {
+			return ErrResult{Value: err}
+		}
+		return OkResult{}
+	}
+	if err = strg.Put(key, storage.NewBitMapValue(value)); err != nil {
 		return ErrResult{Value: err}
 	}
 	return OkResult{}

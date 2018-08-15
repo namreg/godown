@@ -46,7 +46,7 @@ func TestHset_Execute(t *testing.T) {
 	}
 }
 
-func TestHset_Execute_Setter(t *testing.T) {
+func TestHset_Execute_WhiteBox(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"map": storage.NewMapValue(map[string]string{"field": "value"}),
 	})
@@ -124,11 +124,22 @@ func TestHset_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
-	strg.PutMock.Return(err)
+	strg1 := storage.NewStorageMock(t)
+	strg1.GetMock.Return(nil, err)
+	strg1.LockMock.Return()
+	strg1.UnlockMock.Return()
+
+	strg2 := storage.NewStorageMock(t)
+	strg2.GetMock.Return(storage.NewMapValue(map[string]string{"key": "value"}), nil)
+	strg2.PutMock.Return(err)
+	strg2.LockMock.Return()
+	strg2.UnlockMock.Return()
 
 	cmd := new(Hset)
-	res := cmd.Execute(strg, "key", "field", "value")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	res1 := cmd.Execute(strg1, "key", "field", "value")
+	assert.Equal(t, ErrResult{Value: err}, res1)
+
+	res2 := cmd.Execute(strg2, "key", "field", "value")
+	assert.Equal(t, ErrResult{Value: err}, res2)
 }

@@ -29,30 +29,42 @@ func (c *Lrem) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	setter := func(old *storage.Value) (*storage.Value, error) {
-		if old == nil {
-			return nil, nil
-		}
-		if old.Type() != storage.ListDataType {
-			return nil, ErrWrongTypeOp
-		}
+	strg.Lock()
+	defer strg.Unlock()
 
-		list := old.Data().([]string)
-		newList := list[:0]
+	key := storage.Key(args[0])
 
-		for _, val := range list {
-			if val != args[1] {
-				newList = append(newList, val)
-			}
+	val, err := strg.Get(key)
+	if err != nil {
+		if err == storage.ErrKeyNotExists {
+			return OkResult{}
 		}
-
-		if len(newList) == 0 {
-			return nil, nil
-		}
-		return storage.NewListValue(newList...), nil
-	}
-	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
 		return ErrResult{Value: err}
 	}
+
+	if val.Type() != storage.ListDataType {
+		return ErrResult{Value: ErrWrongTypeOp}
+	}
+
+	list := val.Data().([]string)
+	newList := list[:0]
+
+	for _, val := range list {
+		if val != args[1] {
+			newList = append(newList, val)
+		}
+	}
+
+	if len(newList) == 0 {
+		if err = strg.Del(key); err != nil {
+			return ErrResult{Value: err}
+		}
+		return OkResult{}
+	}
+
+	if err = strg.Put(key, storage.NewListValue(newList)); err != nil {
+		return ErrResult{Value: err}
+	}
+
 	return OkResult{}
 }

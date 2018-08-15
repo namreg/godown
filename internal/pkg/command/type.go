@@ -29,7 +29,9 @@ func (c *Type) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
+	strg.RLock()
 	value, err := strg.Get(storage.Key(args[0]))
+	strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}

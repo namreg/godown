@@ -73,6 +73,8 @@ func TestHvals_Execute_StorageErr(t *testing.T) {
 
 	strg := storage.NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
 	cmd := new(Hvals)
 	res := cmd.Execute(strg, "key")

@@ -28,7 +28,9 @@ func (c *Del) Execute(strg storage.Storage, args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
+	strg.Lock()
 	err := strg.Del(storage.Key(args[0]))
+	strg.Unlock()
 	if err != nil {
 		return ErrResult{Value: err}
 	}

@@ -67,11 +67,12 @@ func TestGetBit_Execute_StorageErr(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	strg := storage.NewStorageMock(t)
-
 	err := errors.New("error")
 
+	strg := storage.NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
 	cmd := new(GetBit)
 	res := cmd.Execute(strg, "key", "10")

@@ -3,9 +3,8 @@ package memory
 import (
 	"sync"
 
-	"github.com/namreg/godown-v2/pkg/clock"
-
 	"github.com/namreg/godown-v2/internal/pkg/storage"
+	"github.com/namreg/godown-v2/pkg/clock"
 )
 
 //Storage represents a storage that store its all data in memory. Implements Storage interaface
@@ -51,83 +50,67 @@ func New(items map[storage.Key]*storage.Value, opts ...func(*Storage)) *Storage 
 	return strg
 }
 
-//Put puts a new value that will be returned by ValueSetter
-func (strg *Storage) Put(key storage.Key, setter storage.ValueSetter) error {
+//Lock locks storage for writing
+func (strg *Storage) Lock() {
 	strg.mu.Lock()
+}
 
-	var value *storage.Value
-	var exists bool
-	var err error
-
-	if value, exists = strg.items[key]; exists && value.IsExpired(strg.clock.Now()) {
-		value = nil
-	}
-
-	if value, err = setter(value); err == nil {
-		if value == nil {
-			delete(strg.items, key)
-			delete(strg.itemsWithTTL, key)
-		} else {
-			strg.items[key] = value
-			if value.TTL() != -1 {
-				strg.itemsWithTTL[key] = value
-			}
-		}
-	}
-
+//Unlock undoes a single Lock call
+func (strg *Storage) Unlock() {
 	strg.mu.Unlock()
+}
 
-	return err
+//RLock locks storage for reading
+func (strg *Storage) RLock() {
+	strg.mu.RLock()
+}
+
+//RUnlock undoes a single RLock call
+func (strg *Storage) RUnlock() {
+	strg.mu.RUnlock()
+}
+
+//Put puts a new *Value at the given Key
+func (strg *Storage) Put(key storage.Key, val *storage.Value) error {
+	strg.items[key] = val
+	if val.TTL() != -1 {
+		strg.itemsWithTTL[key] = val
+	}
+	return nil
 }
 
 //Get gets a value of the storage by the given Key
 func (strg *Storage) Get(key storage.Key) (*storage.Value, error) {
-	strg.mu.RLock()
-	defer strg.mu.RUnlock()
-
 	if value, exists := strg.items[key]; exists && !value.IsExpired(strg.clock.Now()) {
 		return value, nil
 	}
-
 	return nil, storage.ErrKeyNotExists
 }
 
 //Del deletes a value by the given key
 func (strg *Storage) Del(key storage.Key) error {
-	strg.mu.Lock()
 	delete(strg.items, key)
 	delete(strg.itemsWithTTL, key)
-	strg.mu.Unlock()
 	return nil
 }
 
 //Keys returns all stored keys
 func (strg *Storage) Keys() ([]storage.Key, error) {
-	strg.mu.RLock()
-
 	keys := make([]storage.Key, 0, len(strg.items))
 	for k, v := range strg.items {
 		if !v.IsExpired(strg.clock.Now()) {
 			keys = append(keys, k)
 		}
 	}
-
-	strg.mu.RUnlock()
 	return keys, nil
 }
 
 //All returns all stored values
 func (strg *Storage) All() (map[storage.Key]*storage.Value, error) {
-	strg.mu.RLock()
-	vals := strg.items
-	strg.mu.RUnlock()
-	return vals, nil
+	return strg.items, nil
 }
 
 //AllWithTTL returns all stored values thats have TTL
 func (strg *Storage) AllWithTTL() (map[storage.Key]*storage.Value, error) {
-	strg.mu.RLock()
-	vals := strg.itemsWithTTL
-	strg.mu.RUnlock()
-	return vals, nil
+	return strg.itemsWithTTL, nil
 }

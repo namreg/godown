@@ -75,6 +75,8 @@ func TestHkeys_Execute_StorageErr(t *testing.T) {
 
 	strg := storage.NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
 	cmd := new(Hkeys)
 	res := cmd.Execute(strg, "key")

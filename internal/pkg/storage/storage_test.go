@@ -118,7 +118,7 @@ func TestNewBitMapValue(t *testing.T) {
 }
 
 func TestNewListValue(t *testing.T) {
-	value := NewListValue("test 1", "test 2", "test 3")
+	value := NewListValue([]string{"test 1", "test 2", "test 3"})
 	assert.Equal(t, []string{"test 1", "test 2", "test 3"}, value.data)
 	assert.Equal(t, ListDataType, value.dataType)
 	assert.Equal(t, int64(-1), value.ttl)

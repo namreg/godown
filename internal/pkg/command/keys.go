@@ -33,7 +33,9 @@ func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
+	strg.RLock()
 	keys, err := strg.Keys()
+	strg.RUnlock()
 	if err != nil {
 		return ErrResult{Value: err}
 	}

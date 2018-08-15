@@ -69,6 +69,8 @@ func Test_gc_deleteExpired_StorageErr(t *testing.T) {
 	err := errors.New("error")
 
 	strg := storage.NewStorageMock(mc)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 	strg.AllWithTTLMock.Return(nil, err)
 
 	loggerOutput := new(bytes.Buffer)

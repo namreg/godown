@@ -25,12 +25,12 @@ Removes all occurrences of elements equal to value from the list stored at key.`
 }
 
 func TestLrem_Execute(t *testing.T) {
-	expired := storage.NewListValue("val")
+	expired := storage.NewListValue([]string{"val"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"string":  storage.NewStringValue("value"),
-		"list":    storage.NewListValue("val1", "val2"),
+		"list":    storage.NewListValue([]string{"val1", "val2"}),
 		"expired": expired,
 	})
 
@@ -54,13 +54,13 @@ func TestLrem_Execute(t *testing.T) {
 	}
 }
 
-func TestLrem_Execute_Setter(t *testing.T) {
-	expired := storage.NewListValue("val")
+func TestLrem_Execute_WhiteBox(t *testing.T) {
+	expired := storage.NewListValue([]string{"val"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"list1": storage.NewListValue("val1", "val2", "val1"),
-		"list2": storage.NewListValue("val1", "val1"),
+		"list1": storage.NewListValue([]string{"val1", "val2", "val1"}),
+		"list2": storage.NewListValue([]string{"val1", "val1"}),
 	})
 	tests := []struct {
 		name   string
@@ -104,17 +104,40 @@ func TestLrem_Execute_Setter(t *testing.T) {
 	}
 }
 
-func TestLrem_Execute_Storage_Err(t *testing.T) {
+func TestLrem_Execute_StorageErr(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
-	strg.PutMock.Return(err)
-
 	cmd := new(Lrem)
-	res := cmd.Execute(strg, "key", "val")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	//storage.Get err
+	strg1 := storage.NewStorageMock(t)
+	strg1.GetMock.Return(nil, err)
+	strg1.LockMock.Return()
+	strg1.UnlockMock.Return()
+
+	res1 := cmd.Execute(strg1, "key", "val")
+	assert.Equal(t, ErrResult{Value: err}, res1)
+
+	//storage.Put err
+	strg2 := storage.NewStorageMock(t)
+	strg2.GetMock.Return(storage.NewListValue([]string{"val", "val2"}), nil)
+	strg2.PutMock.Return(err)
+	strg2.LockMock.Return()
+	strg2.UnlockMock.Return()
+
+	res2 := cmd.Execute(strg2, "key", "val")
+	assert.Equal(t, ErrResult{Value: err}, res2)
+
+	//storage.Del err
+	strg3 := storage.NewStorageMock(t)
+	strg3.GetMock.Return(storage.NewListValue([]string{"val"}), nil)
+	strg3.DelMock.Return(err)
+	strg3.LockMock.Return()
+	strg3.UnlockMock.Return()
+
+	res3 := cmd.Execute(strg3, "key", "val")
+	assert.Equal(t, ErrResult{Value: err}, res3)
 }

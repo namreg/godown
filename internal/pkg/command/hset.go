@@ -29,19 +29,33 @@ func (c *Hset) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	setter := func(old *storage.Value) (*storage.Value, error) {
-		mfield, mvalue := args[1], args[2]
-		if old == nil {
-			return storage.NewMapValue(map[string]string{mfield: mvalue}), nil
-		}
-		if old.Type() != storage.MapDataType {
-			return nil, ErrWrongTypeOp
-		}
-		m := old.Data().(map[string]string)
-		m[mfield] = mvalue
-		return storage.NewMapValue(m), nil
+	key := storage.Key(args[0])
+	mfield, mvalue := args[1], args[2]
+
+	strg.Lock()
+	defer strg.Unlock()
+
+	old, err := strg.Get(key)
+	if err != nil && err != storage.ErrKeyNotExists {
+		return ErrResult{Value: err}
 	}
-	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
+
+	if old == nil {
+		return c.put(strg, key, storage.NewMapValue(map[string]string{mfield: mvalue}))
+	}
+
+	if old.Type() != storage.MapDataType {
+		return ErrResult{Value: ErrWrongTypeOp}
+	}
+
+	m := old.Data().(map[string]string)
+	m[mfield] = mvalue
+
+	return c.put(strg, key, storage.NewMapValue(m))
+}
+
+func (c *Hset) put(strg storage.Storage, key storage.Key, value *storage.Value) Result {
+	if err := strg.Put(key, value); err != nil {
 		return ErrResult{Value: err}
 	}
 	return OkResult{}
