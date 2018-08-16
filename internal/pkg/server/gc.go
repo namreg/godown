@@ -3,21 +3,18 @@ package server
 import (
 	"log"
 	"time"
-
-	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/namreg/godown-v2/pkg/clock"
 )
 
 //gc is the garbage collector that collects expired values
 type gc struct {
 	logger   *log.Logger
-	clck     clock.Clock
-	strg     storage.Storage
+	clck     serverClock
+	strg     serverStorage
 	interval time.Duration
 	ticker   *time.Ticker
 }
 
-func newGc(strg storage.Storage, logger *log.Logger, clck clock.Clock, interval time.Duration) *gc {
+func newGc(strg serverStorage, logger *log.Logger, clck serverClock, interval time.Duration) *gc {
 	return &gc{
 		logger:   logger,
 		clck:     clck,

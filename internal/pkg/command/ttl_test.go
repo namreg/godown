@@ -7,7 +7,6 @@ import (
 	"github.com/gojuno/minimock"
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
-	"github.com/namreg/godown-v2/pkg/clock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -30,7 +29,7 @@ func TestTTL_Execute(t *testing.T) {
 
 	testTime, _ := time.Parse("2006-01-02 15:04:05", "2018-01-01 11:11:11")
 
-	clck := clock.NewClockMock(t)
+	clck := NewcommandClockMock(t)
 	clck.NowMock.Return(testTime)
 
 	now := clck.Now()
@@ -65,8 +64,8 @@ func TestTTL_Execute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := TTL{clck: clck}
-			res := cmd.Execute(strg, tt.args...)
+			cmd := TTL{clck: clck, strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -78,13 +77,13 @@ func TestTTL_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
+	strg := NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
 	strg.RLockMock.Return()
 	strg.RUnlockMock.Return()
 
-	cmd := new(TTL)
-	res := cmd.Execute(strg, "key")
+	cmd := TTL{strg: strg}
+	res := cmd.Execute("key")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

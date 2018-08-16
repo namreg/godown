@@ -2,10 +2,15 @@ package clock
 
 import "time"
 
-//go:generate minimock -i github.com/namreg/godown-v2/pkg/clock.Clock -o ./ -s "_mock.go" -b test
+//Clock is the system clock
+type Clock struct{}
 
-//Clock represents clock
-type Clock interface {
-	//Now returns current time
-	Now() time.Time
+//Now returns current time
+func (c *Clock) Now() time.Time {
+	return time.Now()
+}
+
+//New creates a new clock
+func New() *Clock {
+	return &Clock{}
 }

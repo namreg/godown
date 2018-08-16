@@ -4,13 +4,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Hset)
-	commands[cmd.Name()] = cmd
-}
-
 //Hset is the HSET command
-type Hset struct{}
+type Hset struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Hset) Name() string {
@@ -24,7 +21,7 @@ Sets field in the hash stored at key to value.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Hset) Execute(strg storage.Storage, args ...string) Result {
+func (c *Hset) Execute(args ...string) Result {
 	if len(args) != 3 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
@@ -32,16 +29,16 @@ func (c *Hset) Execute(strg storage.Storage, args ...string) Result {
 	key := storage.Key(args[0])
 	mfield, mvalue := args[1], args[2]
 
-	strg.Lock()
-	defer strg.Unlock()
+	c.strg.Lock()
+	defer c.strg.Unlock()
 
-	old, err := strg.Get(key)
+	old, err := c.strg.Get(key)
 	if err != nil && err != storage.ErrKeyNotExists {
 		return ErrResult{Value: err}
 	}
 
 	if old == nil {
-		return c.put(strg, key, storage.NewMapValue(map[string]string{mfield: mvalue}))
+		return c.put(key, storage.NewMapValue(map[string]string{mfield: mvalue}))
 	}
 
 	if old.Type() != storage.MapDataType {
@@ -51,11 +48,11 @@ func (c *Hset) Execute(strg storage.Storage, args ...string) Result {
 	m := old.Data().(map[string]string)
 	m[mfield] = mvalue
 
-	return c.put(strg, key, storage.NewMapValue(m))
+	return c.put(key, storage.NewMapValue(m))
 }
 
-func (c *Hset) put(strg storage.Storage, key storage.Key, value *storage.Value) Result {
-	if err := strg.Put(key, value); err != nil {
+func (c *Hset) put(key storage.Key, value *storage.Value) Result {
+	if err := c.strg.Put(key, value); err != nil {
 		return ErrResult{Value: err}
 	}
 	return OkResult{}

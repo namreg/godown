@@ -23,7 +23,7 @@ func Test_gc_deleteExpired(t *testing.T) {
 
 	testTime, _ := time.Parse("2006-01-02 15:04:05", "2018-01-01 11:11:11")
 
-	clck := clock.NewClockMock(t)
+	clck := NewserverClockMock(t)
 	clck.NowMock.Return(testTime)
 
 	now := clck.Now()
@@ -69,14 +69,14 @@ func Test_gc_deleteExpired_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(mc)
+	strg := NewserverStorageMock(mc)
 	strg.RLockMock.Return()
 	strg.RUnlockMock.Return()
 	strg.AllWithTTLMock.Return(nil, err)
 
 	loggerOutput := new(bytes.Buffer)
 
-	gc := newGc(strg, log.New(loggerOutput, "", 0), clock.TimeClock{}, 1*time.Millisecond)
+	gc := newGc(strg, log.New(loggerOutput, "", 0), clock.New(), 1*time.Millisecond)
 	gc.deleteExpired()
 
 	assert.Equal(t, "[WARN] gc: could not retrieve values: error\n", loggerOutput.String())

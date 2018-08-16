@@ -7,13 +7,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Lindex)
-	commands[cmd.Name()] = cmd
-}
-
 //Lindex is the LINDEX command
-type Lindex struct{}
+type Lindex struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Lindex) Name() string {
@@ -29,14 +26,14 @@ Negative indices can be used to designate elements starting at the tail of the l
 }
 
 //Execute implements Execute of Command interface
-func (c *Lindex) Execute(strg storage.Storage, args ...string) Result {
+func (c *Lindex) Execute(args ...string) Result {
 	if len(args) != 2 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	strg.RLock()
-	value, err := strg.Get(storage.Key(args[0]))
-	strg.RUnlock()
+	c.strg.RLock()
+	value, err := c.strg.Get(storage.Key(args[0]))
+	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}

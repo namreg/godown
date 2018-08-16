@@ -36,8 +36,8 @@ func TestSet_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Set)
-			assert.Equal(t, tt.result, cmd.Execute(strg, tt.args...))
+			cmd := Set{strg: strg}
+			assert.Equal(t, tt.result, cmd.Execute(tt.args...))
 		})
 	}
 }
@@ -47,8 +47,8 @@ func TestSet_Execute_WhiteBox(t *testing.T) {
 		"string": storage.NewStringValue("value"),
 	})
 
-	cmd := new(Set)
-	_ = cmd.Execute(strg, "string", "new_value")
+	cmd := Set{strg: strg}
+	_ = cmd.Execute("string", "new_value")
 
 	items, err := strg.All()
 	assert.NoError(t, err)
@@ -64,13 +64,13 @@ func TestSet_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
+	strg := NewStorageMock(t)
 	strg.PutMock.Return(err)
 	strg.LockMock.Return()
 	strg.UnlockMock.Return()
 
-	cmd := new(Set)
-	res := cmd.Execute(strg, "key", "value")
+	cmd := Set{strg: strg}
+	res := cmd.Execute("key", "value")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

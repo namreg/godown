@@ -2,18 +2,12 @@ package command
 
 import (
 	"fmt"
-	"strings"
-
-	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Help)
-	commands[cmd.Name()] = cmd
-}
-
 //Help is the Help command
-type Help struct{}
+type Help struct {
+	parser commandParser
+}
 
 //Name implements Name of Command interface
 func (c *Help) Name() string {
@@ -27,14 +21,19 @@ Show the usage of the given command`
 }
 
 //Execute implements Execute of Command interface
-func (c *Help) Execute(strg storage.Storage, args ...string) Result {
+func (c *Help) Execute(args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
 	cmdName := args[0]
-	if cmd, ok := commands[strings.ToUpper(cmdName)]; ok {
-		return HelpResult{Value: cmd}
+
+	cmd, _, err := c.parser.Parse(cmdName)
+	if err != nil {
+		if err == ErrCommandNotFound {
+			return ErrResult{Value: fmt.Errorf("command %q not found", cmdName)}
+		}
+		return ErrResult{Value: err}
 	}
-	return ErrResult{Value: fmt.Errorf("command %q not found", cmdName)}
+	return HelpResult{Value: cmd.Help()}
 }

@@ -4,48 +4,138 @@ import (
 	"bytes"
 	"errors"
 	"strings"
+	"sync"
+	"time"
 	"unicode"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
 var (
-	//ErrCommandNotFound means that command could not be parsed. Returns by Parse
+	//ErrCommandNotFound means that command could not be parsed. Returns by Parser.Parse.
 	ErrCommandNotFound = errors.New("command: not found")
-	//ErrWrongArgsNumber means that given arguments not acceptable by Command. Returns by Parse
+	//ErrWrongArgsNumber means that given arguments not acceptable by Command.
 	ErrWrongArgsNumber = errors.New("command: wrong args number")
-	//ErrWrongTypeOp means that operation is not acceptable for the given key
+	//ErrWrongTypeOp means that operation is not acceptable for the given key.
 	ErrWrongTypeOp = errors.New("command: wrong type operation")
 )
 
-//commands is the all available commands
-var commands = make(map[string]Command)
+//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/command.Command -o ./
 
-//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/command.Command -o ./ -s "_mock.go" -b test
-
-//Command represents a command thats server can execute
+//Command represents a command thats server can execute.
 type Command interface {
-	//Name returns the command name
+	//Name returns the command name.
 	Name() string
 	//Help returns information about the command. Description, usage and etc.
 	Help() string
-	//Execute executes the command in the context of Storage with the given arguments
-	Execute(strg storage.Storage, args ...string) Result
+	//Execute executes the command with the given arguments.
+	Execute(args ...string) Result
+}
+
+type rwLocker interface {
+	sync.Locker
+	RLock()
+	RUnlock()
+}
+
+//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/command.commandStorage -o ./
+
+type commandStorage interface {
+	rwLocker
+	//Put puts a new value at the given Key.
+	//Warning: method is not thread safe! You should call Lock mannually before calling
+	Put(key storage.Key, value *storage.Value) error
+	//Get gets a value of a storage by the given key.
+	//Warning: method is not thread safe! You should call RLock mannually before calling.
+	Get(key storage.Key) (*storage.Value, error)
+	//Del deletes a value by the given key.
+	//Warning: method is not thread safe! You should call Lock mannually before calling.
+	Del(key storage.Key) error
+	//Keys returns all stored keys.
+	//Warning: method is not thread safe! You should call RLock mannually before calling.
+	Keys() ([]storage.Key, error)
+}
+
+//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/command.commandParser -o ./
+
+type commandParser interface {
+	Parse(str string) (cmd Command, args []string, err error)
+}
+
+//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/command.commandClock -o ./
+
+type commandClock interface {
+	//Now returns current time.
+	Now() time.Time
+}
+
+//Parser is a parser that parses user input and creates the appropriate command.
+type Parser struct {
+	strg commandStorage
+	clck commandClock
+}
+
+//NewParser creates a new parser
+func NewParser(strg commandStorage, clck commandClock) *Parser {
+	return &Parser{strg: strg, clck: clck}
 }
 
 //Parse parses string to Command with args
-func Parse(value string) (Command, []string, error) {
-	args := extractArgs(value)
+func (p *Parser) Parse(str string) (Command, []string, error) {
+	var cmd Command
+	args := p.extractArgs(str)
 
-	cmd, ok := commands[strings.ToUpper(args[0])]
-	if !ok {
+	switch strings.ToUpper(args[0]) {
+	case "HELP":
+		cmd = &Help{parser: p}
+	case "DEL":
+		cmd = &Del{strg: p.strg}
+	case "EXPIRE":
+		cmd = &Expire{clck: p.clck}
+	case "GET":
+		cmd = &Get{strg: p.strg}
+	case "SET":
+		cmd = &Set{strg: p.strg}
+	case "STRLEN":
+		cmd = &Strlen{strg: p.strg}
+	case "GETBIT":
+		cmd = &GetBit{strg: p.strg}
+	case "SETBIT":
+		cmd = &SetBit{strg: p.strg}
+	case "HGET":
+		cmd = &Hget{strg: p.strg}
+	case "HKEYS":
+		cmd = &Hkeys{strg: p.strg}
+	case "HSET":
+		cmd = &Hset{strg: p.strg}
+	case "HVALS":
+		cmd = &Hvals{strg: p.strg}
+	case "KEYS":
+		cmd = &Keys{strg: p.strg}
+	case "LINDEX":
+		cmd = &Lindex{strg: p.strg}
+	case "LLEN":
+		cmd = &Llen{strg: p.strg}
+	case "LPOP":
+		cmd = &Lpop{strg: p.strg}
+	case "LPUSH":
+		cmd = &Lpush{strg: p.strg}
+	case "LRANGE":
+		cmd = &Lrange{strg: p.strg}
+	case "LREM":
+		cmd = &Lrem{strg: p.strg}
+	case "TTL":
+		cmd = &TTL{strg: p.strg, clck: p.clck}
+	case "TYPE":
+		cmd = &Type{strg: p.strg}
+	default:
 		return nil, nil, ErrCommandNotFound
 	}
 
 	return cmd, args[1:], nil
 }
 
-func extractArgs(val string) []string {
+func (p *Parser) extractArgs(val string) []string {
 	args := make([]string, 0)
 	var inQuote bool
 	var buf bytes.Buffer

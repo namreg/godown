@@ -6,13 +6,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Strlen)
-	commands[cmd.Name()] = cmd
-}
-
 //Strlen is the Strlen command
-type Strlen struct{}
+type Strlen struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Strlen) Name() string {
@@ -27,14 +24,14 @@ If key does not exists, 0 will be returned.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Strlen) Execute(strg storage.Storage, args ...string) Result {
+func (c *Strlen) Execute(args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	strg.RLock()
-	value, err := strg.Get(storage.Key(args[0]))
-	strg.RUnlock()
+	c.strg.RLock()
+	value, err := c.strg.Get(storage.Key(args[0]))
+	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return IntResult{Value: 0}

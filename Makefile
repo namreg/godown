@@ -15,4 +15,4 @@ lint:
 
 .PHONY: test
 test: vendor generate
-	@go test -tags test -race $(SRC_PKGS) -cover
+	@go test -race $(SRC_PKGS) -cover

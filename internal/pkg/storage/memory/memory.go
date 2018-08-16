@@ -2,23 +2,28 @@ package memory
 
 import (
 	"sync"
+	"time"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/pkg/clock"
 )
 
+type memoryClock interface {
+	Now() time.Time
+}
+
 //Storage represents a storage that store its all data in memory. Implements Storage interaface
 type Storage struct {
-	clock        clock.Clock
+	clck         memoryClock
 	mu           sync.RWMutex
 	items        map[storage.Key]*storage.Value
 	itemsWithTTL map[storage.Key]*storage.Value // items thats have ttl and will be processed by GC
 }
 
-//WithClock sets Clock implementation
-func WithClock(clck clock.Clock) func(*Storage) {
+//WithClock sets memoryClock implementation
+func WithClock(clck memoryClock) func(*Storage) {
 	return func(strg *Storage) {
-		strg.clock = clck
+		strg.clck = clck
 	}
 }
 
@@ -43,8 +48,8 @@ func New(items map[storage.Key]*storage.Value, opts ...func(*Storage)) *Storage 
 		f(strg)
 	}
 
-	if strg.clock == nil {
-		strg.clock = clock.TimeClock{}
+	if strg.clck == nil {
+		strg.clck = clock.New()
 	}
 
 	return strg
@@ -81,7 +86,7 @@ func (strg *Storage) Put(key storage.Key, val *storage.Value) error {
 
 //Get gets a value of the storage by the given Key
 func (strg *Storage) Get(key storage.Key) (*storage.Value, error) {
-	if value, exists := strg.items[key]; exists && !value.IsExpired(strg.clock.Now()) {
+	if value, exists := strg.items[key]; exists && !value.IsExpired(strg.clck.Now()) {
 		return value, nil
 	}
 	return nil, storage.ErrKeyNotExists
@@ -98,7 +103,7 @@ func (strg *Storage) Del(key storage.Key) error {
 func (strg *Storage) Keys() ([]storage.Key, error) {
 	keys := make([]storage.Key, 0, len(strg.items))
 	for k, v := range strg.items {
-		if !v.IsExpired(strg.clock.Now()) {
+		if !v.IsExpired(strg.clck.Now()) {
 			keys = append(keys, k)
 		}
 	}

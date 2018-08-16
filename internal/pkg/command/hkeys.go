@@ -4,13 +4,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Hkeys)
-	commands[cmd.Name()] = cmd
-}
-
 //Hkeys is the HKEYS command
-type Hkeys struct{}
+type Hkeys struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Hkeys) Name() string {
@@ -24,14 +21,14 @@ Returns all field names in the hash stored at key. Order of fields is not guaran
 }
 
 //Execute implements Execute of Command interface
-func (c *Hkeys) Execute(strg storage.Storage, args ...string) Result {
+func (c *Hkeys) Execute(args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	strg.RLock()
-	value, err := strg.Get(storage.Key(args[0]))
-	strg.RUnlock()
+	c.strg.RLock()
+	value, err := c.strg.Get(storage.Key(args[0]))
+	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}

@@ -3,8 +3,6 @@ package command
 import (
 	"testing"
 
-	"github.com/gojuno/minimock"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,13 +25,7 @@ func TestNilResult_Val(t *testing.T) {
 }
 
 func TestHelpResult_Val(t *testing.T) {
-	mc := minimock.NewController(t)
-	defer mc.Finish()
-
-	cmd := NewCommandMock(t)
-	cmd.HelpMock.Return("help message")
-
-	res := HelpResult{Value: cmd}
+	res := HelpResult{Value: "help message"}
 	assert.Equal(t, "help message", res.Val())
 }
 

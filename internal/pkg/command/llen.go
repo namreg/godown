@@ -4,13 +4,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Llen)
-	commands[cmd.Name()] = cmd
-}
-
 //Llen is the LLEN command
-type Llen struct{}
+type Llen struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Llen) Name() string {
@@ -25,14 +22,14 @@ If key does not exist, it is interpreted as an empty list and 0 is returned.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Llen) Execute(strg storage.Storage, args ...string) Result {
+func (c *Llen) Execute(args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	strg.RLock()
-	value, err := strg.Get(storage.Key(args[0]))
-	strg.RUnlock()
+	c.strg.RLock()
+	value, err := c.strg.Get(storage.Key(args[0]))
+	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return IntResult{Value: 0}

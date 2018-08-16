@@ -7,13 +7,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(SetBit)
-	commands[cmd.Name()] = cmd
-}
-
 //SetBit is the SetBit command
-type SetBit struct{}
+type SetBit struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *SetBit) Name() string {
@@ -27,7 +24,7 @@ Sets or clears the bit at offset in the string value stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
+func (c *SetBit) Execute(args ...string) Result {
 	if len(args) != 3 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
@@ -44,12 +41,12 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 
 	key := storage.Key(args[0])
 
-	strg.Lock()
-	defer strg.Unlock()
+	c.strg.Lock()
+	defer c.strg.Unlock()
 
 	var value []uint64
 
-	old, err := strg.Get(key)
+	old, err := c.strg.Get(key)
 	if err != nil && err != storage.ErrKeyNotExists {
 		return ErrResult{Value: err}
 	}
@@ -70,12 +67,12 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 		value[idx] = value[idx] & ^(1 << (offset % 64))
 	}
 	if c.isZeroSlice(value) {
-		if err = strg.Del(key); err != nil {
+		if err = c.strg.Del(key); err != nil {
 			return ErrResult{Value: err}
 		}
 		return OkResult{}
 	}
-	if err = strg.Put(key, storage.NewBitMapValue(value)); err != nil {
+	if err = c.strg.Put(key, storage.NewBitMapValue(value)); err != nil {
 		return ErrResult{Value: err}
 	}
 	return OkResult{}

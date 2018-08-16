@@ -40,8 +40,8 @@ func TestHset_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Hset)
-			assert.Equal(t, tt.want, cmd.Execute(strg, tt.args...))
+			cmd := Hset{strg: strg}
+			assert.Equal(t, tt.want, cmd.Execute(tt.args...))
 		})
 	}
 }
@@ -106,8 +106,8 @@ func TestHset_Execute_WhiteBox(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Hset)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Hset{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, OkResult{}, res)
 
 			items, err := strg.All()
@@ -124,22 +124,23 @@ func TestHset_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg1 := storage.NewStorageMock(t)
+	strg1 := NewStorageMock(t)
 	strg1.GetMock.Return(nil, err)
 	strg1.LockMock.Return()
 	strg1.UnlockMock.Return()
 
-	strg2 := storage.NewStorageMock(t)
+	strg2 := NewStorageMock(t)
 	strg2.GetMock.Return(storage.NewMapValue(map[string]string{"key": "value"}), nil)
 	strg2.PutMock.Return(err)
 	strg2.LockMock.Return()
 	strg2.UnlockMock.Return()
 
-	cmd := new(Hset)
+	cmd1 := Hset{strg: strg1}
+	cmd2 := Hset{strg: strg2}
 
-	res1 := cmd.Execute(strg1, "key", "field", "value")
+	res1 := cmd1.Execute("key", "field", "value")
 	assert.Equal(t, ErrResult{Value: err}, res1)
 
-	res2 := cmd.Execute(strg2, "key", "field", "value")
+	res2 := cmd2.Execute("key", "field", "value")
 	assert.Equal(t, ErrResult{Value: err}, res2)
 }

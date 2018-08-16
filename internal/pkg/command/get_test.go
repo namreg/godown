@@ -49,8 +49,8 @@ func TestGet_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Get)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Get{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -62,13 +62,13 @@ func TestGet_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
+	strg := NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
 	strg.RLockMock.Return()
 	strg.RUnlockMock.Return()
 
-	cmd := new(Get)
-	res := cmd.Execute(strg, "key")
+	cmd := Get{strg: strg}
+	res := cmd.Execute("key")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

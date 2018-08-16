@@ -7,13 +7,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(GetBit)
-	commands[cmd.Name()] = cmd
-}
-
 //GetBit is the GetBit command
-type GetBit struct{}
+type GetBit struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *GetBit) Name() string {
@@ -27,7 +24,7 @@ Returns the bit value at offset in the string value stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
+func (c *GetBit) Execute(args ...string) Result {
 	if len(args) != 2 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
@@ -37,9 +34,9 @@ func (c *GetBit) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{Value: err}
 	}
 
-	strg.RLock()
-	value, err := strg.Get(storage.Key(args[0]))
-	strg.RUnlock()
+	c.strg.RLock()
+	value, err := c.strg.Get(storage.Key(args[0]))
+	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return IntResult{Value: 0}

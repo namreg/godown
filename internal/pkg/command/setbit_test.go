@@ -44,8 +44,8 @@ func TestSetBit_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(SetBit)
-			assert.Equal(t, tt.want, cmd.Execute(strg, tt.args...))
+			cmd := SetBit{strg: strg}
+			assert.Equal(t, tt.want, cmd.Execute(tt.args...))
 		})
 	}
 }
@@ -106,8 +106,8 @@ func TestSetBit_Execute_WhiteBox(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(SetBit)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := SetBit{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, OkResult{}, res)
 
 			tt.verify(t)
@@ -145,34 +145,38 @@ func TestSetBit_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	cmd := new(SetBit)
-
 	//storage.Get error
-	strg1 := storage.NewStorageMock(t)
+	strg1 := NewStorageMock(t)
 	strg1.GetMock.Return(nil, err)
 	strg1.LockMock.Return()
 	strg1.UnlockMock.Return()
 
-	res1 := cmd.Execute(strg1, "key", "1", "1")
+	cmd1 := SetBit{strg: strg1}
+
+	res1 := cmd1.Execute("key", "1", "1")
 	assert.Equal(t, ErrResult{Value: err}, res1)
 
 	//storage.Put error
-	strg2 := storage.NewStorageMock(t)
+	strg2 := NewStorageMock(t)
 	strg2.GetMock.Return(storage.NewBitMapValue([]uint64{5}), nil)
 	strg2.PutMock.Return(err)
 	strg2.LockMock.Return()
 	strg2.UnlockMock.Return()
 
-	res2 := cmd.Execute(strg2, "key", "1", "1")
+	cmd2 := SetBit{strg: strg2}
+
+	res2 := cmd2.Execute("key", "1", "1")
 	assert.Equal(t, ErrResult{Value: err}, res2)
 
 	//storage.Del error
-	strg3 := storage.NewStorageMock(t)
+	strg3 := NewStorageMock(t)
 	strg3.GetMock.Return(storage.NewBitMapValue([]uint64{2}), nil)
 	strg3.DelMock.Return(err)
 	strg3.LockMock.Return()
 	strg3.UnlockMock.Return()
 
-	res3 := cmd.Execute(strg3, "key", "1", "0")
+	cmd3 := SetBit{strg: strg3}
+
+	res3 := cmd3.Execute("key", "1", "0")
 	assert.Equal(t, ErrResult{Value: err}, res3)
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParse(t *testing.T) {
+func TestParser_Parse(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -21,11 +21,12 @@ func TestParse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd, args, err := Parse(tt.input)
+			p := Parser{strg: NewStorageMock(t)}
+			cmd, args, err := p.Parse(tt.input)
 			if err != nil {
 				assert.Equal(t, tt.wantErr, err)
 			}
-			assert.Equal(t, tt.wantCmd, cmd)
+			assert.IsType(t, tt.wantCmd, cmd)
 			assert.Equal(t, tt.wantArgs, args)
 		})
 	}

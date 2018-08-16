@@ -47,8 +47,8 @@ func TestLrem_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Lrem)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Lrem{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -92,8 +92,8 @@ func TestLrem_Execute_WhiteBox(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Lrem)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Lrem{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, OkResult{}, res)
 
 			items, err := strg.All()
@@ -110,34 +110,38 @@ func TestLrem_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	cmd := new(Lrem)
-
 	//storage.Get err
-	strg1 := storage.NewStorageMock(t)
+	strg1 := NewStorageMock(t)
 	strg1.GetMock.Return(nil, err)
 	strg1.LockMock.Return()
 	strg1.UnlockMock.Return()
 
-	res1 := cmd.Execute(strg1, "key", "val")
+	cmd1 := Lrem{strg: strg1}
+
+	res1 := cmd1.Execute("key", "val")
 	assert.Equal(t, ErrResult{Value: err}, res1)
 
 	//storage.Put err
-	strg2 := storage.NewStorageMock(t)
+	strg2 := NewStorageMock(t)
 	strg2.GetMock.Return(storage.NewListValue([]string{"val", "val2"}), nil)
 	strg2.PutMock.Return(err)
 	strg2.LockMock.Return()
 	strg2.UnlockMock.Return()
 
-	res2 := cmd.Execute(strg2, "key", "val")
+	cmd2 := Lrem{strg: strg2}
+
+	res2 := cmd2.Execute("key", "val")
 	assert.Equal(t, ErrResult{Value: err}, res2)
 
 	//storage.Del err
-	strg3 := storage.NewStorageMock(t)
+	strg3 := NewStorageMock(t)
 	strg3.GetMock.Return(storage.NewListValue([]string{"val"}), nil)
 	strg3.DelMock.Return(err)
 	strg3.LockMock.Return()
 	strg3.UnlockMock.Return()
 
-	res3 := cmd.Execute(strg3, "key", "val")
+	cmd3 := Lrem{strg: strg3}
+
+	res3 := cmd3.Execute("key", "val")
 	assert.Equal(t, ErrResult{Value: err}, res3)
 }

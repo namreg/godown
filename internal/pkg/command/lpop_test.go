@@ -48,8 +48,8 @@ func TestLpop_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Lpop)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Lpop{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -61,23 +61,24 @@ func TestLpop_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg1 := storage.NewStorageMock(mc)
+	strg1 := NewStorageMock(mc)
 	strg1.GetMock.Return(nil, err)
 	strg1.LockMock.Return()
 	strg1.UnlockMock.Return()
 
-	strg2 := storage.NewStorageMock(mc)
+	strg2 := NewStorageMock(mc)
 	strg2.GetMock.Return(storage.NewListValue([]string{"val", "val2"}), nil)
 	strg2.PutMock.Return(err)
 	strg2.LockMock.Return()
 	strg2.UnlockMock.Return()
 
-	cmd := new(Lpop)
+	cmd1 := Lpop{strg: strg1}
+	cmd2 := Lpop{strg: strg2}
 
-	res1 := cmd.Execute(strg1, "list")
+	res1 := cmd1.Execute("list")
 	assert.Equal(t, ErrResult{Value: err}, res1)
 
-	res2 := cmd.Execute(strg2, "list")
+	res2 := cmd2.Execute("list")
 	assert.Equal(t, ErrResult{Value: err}, res2)
 }
 
@@ -86,8 +87,8 @@ func TestLpop_Execute_DelEmptyList(t *testing.T) {
 		"list": storage.NewListValue([]string{"val1"}),
 	})
 
-	cmd := new(Lpop)
-	_ = cmd.Execute(strg, "list")
+	cmd := Lpop{strg: strg}
+	_ = cmd.Execute("list")
 
 	items, err := strg.All()
 	assert.NoError(t, err)
@@ -103,14 +104,14 @@ func TestLpop_Execute_DelEmptyListStorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(mc)
+	strg := NewStorageMock(mc)
 	strg.LockMock.Return()
 	strg.UnlockMock.Return()
 	strg.GetMock.Return(storage.NewListValue([]string{"val1"}), nil)
 	strg.DelMock.Return(err)
 
-	cmd := new(Lpop)
-	res := cmd.Execute(strg, "list")
+	cmd := Lpop{strg: strg}
+	res := cmd.Execute("list")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

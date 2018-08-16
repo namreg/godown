@@ -56,8 +56,8 @@ func TestGetBit_Execute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(GetBit)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := GetBit{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -69,13 +69,13 @@ func TestGetBit_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
+	strg := NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
 	strg.RLockMock.Return()
 	strg.RUnlockMock.Return()
 
-	cmd := new(GetBit)
-	res := cmd.Execute(strg, "key", "10")
+	cmd := GetBit{strg: strg}
+	res := cmd.Execute("key", "10")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

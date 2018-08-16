@@ -48,8 +48,8 @@ func TestKeys_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Keys)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Keys{strg: strg}
+			res := cmd.Execute(tt.args...)
 			if sr, ok := res.(SliceResult); ok {
 				expected := tt.want.(SliceResult).Value
 				sort.Strings(expected)
@@ -71,13 +71,13 @@ func TestKeys_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
+	strg := NewStorageMock(t)
 	strg.KeysMock.Return(nil, err)
 	strg.RLockMock.Return()
 	strg.RUnlockMock.Return()
 
-	cmd := new(Keys)
-	res := cmd.Execute(strg, "*")
+	cmd := Keys{strg: strg}
+	res := cmd.Execute("*")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

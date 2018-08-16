@@ -4,13 +4,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Hget)
-	commands[cmd.Name()] = cmd
-}
-
 //Hget is the HGET command
-type Hget struct{}
+type Hget struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Hget) Name() string {
@@ -24,14 +21,14 @@ Returns the value associated with field in the hash stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Hget) Execute(strg storage.Storage, args ...string) Result {
+func (c *Hget) Execute(args ...string) Result {
 	if len(args) != 2 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	strg.RLock()
-	value, err := strg.Get(storage.Key(args[0]))
-	strg.RUnlock()
+	c.strg.RLock()
+	value, err := c.strg.Get(storage.Key(args[0]))
+	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}

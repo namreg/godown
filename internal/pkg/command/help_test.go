@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/gojuno/minimock"
-	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -23,21 +22,23 @@ Show the usage of the given command`
 }
 
 func TestHelp_Execute(t *testing.T) {
-	strg := memory.New(nil)
-
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	mock := NewCommandMock(t)
-	mock.HelpMock.Return("help message")
-	commands["MOCK"] = mock
+	parserMock := NewcommandParserMock(mc)
+	parserMock.ParseFunc = func(str string) (Command, []string, error) {
+		if str == "mock" {
+			return NewCommandMock(mc).HelpMock.Return("help message"), nil, nil
+		}
+		return nil, nil, ErrCommandNotFound
+	}
 
 	tests := []struct {
 		name string
 		args []string
 		want Result
 	}{
-		{"existing_command", []string{"mock"}, HelpResult{Value: mock}},
+		{"existing_command", []string{"mock"}, HelpResult{Value: "help message"}},
 		{"not_existing_command", []string{"not_existing_command"}, ErrResult{Value: errors.New(`command "not_existing_command" not found`)}},
 		{"wrong_number_of_args/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
 		{"wrong_number_of_args/2", []string{"mock", "mock"}, ErrResult{Value: ErrWrongArgsNumber}},
@@ -45,8 +46,8 @@ func TestHelp_Execute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Help)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Help{parser: parserMock}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
