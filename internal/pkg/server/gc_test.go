@@ -34,14 +34,12 @@ func Test_gc_deleteExpired(t *testing.T) {
 	willExpire := storage.NewStringValue("value")
 	willExpire.SetTTL(now.Add(10 * time.Second))
 
-	strg := memory.New(
-		map[storage.Key]*storage.Value{
-			"no_timeout":  storage.NewStringValue("value"),
-			"expired":     expired,
-			"will_expire": willExpire,
-		},
-		memory.WithClock(clck),
-	)
+	items := map[storage.Key]*storage.Value{
+		"no_timeout":  storage.NewStringValue("value"),
+		"expired":     expired,
+		"will_expire": willExpire,
+	}
+	strg := memory.New(items, memory.WithClock(clck))
 
 	gc := newGc(strg, log.New(os.Stdout, "", 0), clck, 1*time.Millisecond)
 	go gc.start()
@@ -49,17 +47,20 @@ func Test_gc_deleteExpired(t *testing.T) {
 
 	time.Sleep(2 * time.Millisecond)
 
-	items, err := strg.All()
-	assert.NoError(t, err)
-
+	strg.RLock()
 	_, ok := items["no_timeout"]
 	assert.True(t, ok)
+	strg.RUnlock()
 
+	strg.RLock()
 	_, ok = items["expired"]
 	assert.False(t, ok)
+	strg.RUnlock()
 
+	strg.RLock()
 	_, ok = items["will_expire"]
 	assert.True(t, ok)
+	strg.RUnlock()
 }
 
 func Test_gc_deleteExpired_StorageErr(t *testing.T) {
