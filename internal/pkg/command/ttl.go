@@ -3,19 +3,13 @@ package command
 import (
 	"time"
 
-	"github.com/namreg/godown-v2/pkg/clock"
-
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := &TTL{clck: clock.TimeClock{}}
-	commands[cmd.Name()] = cmd
-}
-
 //TTL is the TTL command
 type TTL struct {
-	clck clock.Clock
+	strg commandStorage
+	clck commandClock
 }
 
 //Name implements Name of Command interface
@@ -30,12 +24,14 @@ Returns the remaining time to live of a key. -1 returns if key does not have tim
 }
 
 //Execute implements Execute of Command interface
-func (c *TTL) Execute(strg storage.Storage, args ...string) Result {
+func (c *TTL) Execute(args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	value, err := strg.Get(storage.Key(args[0]))
+	c.strg.RLock()
+	value, err := c.strg.Get(storage.Key(args[0]))
+	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}

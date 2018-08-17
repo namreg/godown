@@ -7,29 +7,49 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/namreg/godown-v2/internal/pkg/command"
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 	"github.com/namreg/godown-v2/pkg/clock"
 )
 
-const defaultGCInterval = 500 * time.Millisecond
-
-//Server represents a server
-type Server struct {
-	logger     *log.Logger
-	strg       storage.Storage
-	gcInterval time.Duration
-	clock      clock.Clock
+type commandParser interface {
+	Parse(str string) (cmd command.Command, args []string, err error)
 }
 
-//WithStorage sets the storage
-func WithStorage(strg storage.Storage) func(*Server) {
-	return func(srv *Server) {
-		srv.strg = strg
-	}
+//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/server.serverStorage -o ./
+
+//serverStorage describes storage interface that Server works with.
+type serverStorage interface {
+	sync.Locker
+	//RLock locks storage for reading.
+	RLock()
+	//RUnlock undoes single RLock call.
+	RUnlock()
+	//Del deletes the given key.
+	Del(storage.Key) error
+	//AllWithTTL returns all values that have TTL.
+	AllWithTTL() (map[storage.Key]*storage.Value, error)
+}
+
+//go:generate minimock -i github.com/namreg/godown-v2/internal/pkg/server.serverClock -o ./
+
+type serverClock interface {
+	//Now returns current time
+	Now() time.Time
+}
+
+const defaultGCInterval = 500 * time.Millisecond
+
+//Server represents a server that handles user requests and executes commands
+type Server struct {
+	parser     commandParser
+	strg       serverStorage
+	clck       serverClock
+	logger     *log.Logger
+	gcInterval time.Duration
 }
 
 //WithLogger sets the logger
@@ -47,15 +67,15 @@ func WithGCInterval(interval time.Duration) func(*Server) {
 }
 
 //WithClock sets the clock
-func WithClock(clck clock.Clock) func(*Server) {
+func WithClock(clck serverClock) func(*Server) {
 	return func(srv *Server) {
-		srv.clock = clck
+		srv.clck = clck
 	}
 }
 
 //New creates a server with given storage and options
-func New(opts ...func(*Server)) *Server {
-	srv := new(Server)
+func New(strg serverStorage, parser commandParser, opts ...func(*Server)) *Server {
+	srv := &Server{parser: parser, strg: strg}
 
 	for _, f := range opts {
 		f(srv)
@@ -69,12 +89,8 @@ func New(opts ...func(*Server)) *Server {
 		srv.gcInterval = defaultGCInterval
 	}
 
-	if srv.clock == nil {
-		srv.clock = clock.TimeClock{}
-	}
-
-	if srv.strg == nil {
-		srv.strg = memory.New(nil, memory.WithClock(srv.clock))
+	if srv.clck == nil {
+		srv.clck = clock.New()
 	}
 
 	return srv
@@ -86,7 +102,7 @@ func (s *Server) Run(hostPort string) error {
 
 	// starting a garbage collector
 	go func() {
-		gc := newGc(s.strg, s.logger, s.clock, s.gcInterval)
+		gc := newGc(s.strg, s.logger, s.clck, s.gcInterval)
 		gc.start()
 	}()
 
@@ -121,7 +137,7 @@ func (s *Server) handleConn(conn *conn) {
 			continue
 		}
 
-		cmd, args, err := command.Parse(input)
+		cmd, args, err := s.parser.Parse(input)
 
 		if err != nil {
 			switch err {
@@ -133,7 +149,7 @@ func (s *Server) handleConn(conn *conn) {
 			continue
 		}
 
-		res := cmd.Execute(s.strg, args...)
+		res := cmd.Execute(args...)
 
 		conn.writeCommandResult(res)
 	}

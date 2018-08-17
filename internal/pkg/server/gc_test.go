@@ -23,7 +23,7 @@ func Test_gc_deleteExpired(t *testing.T) {
 
 	testTime, _ := time.Parse("2006-01-02 15:04:05", "2018-01-01 11:11:11")
 
-	clck := clock.NewClockMock(t)
+	clck := NewserverClockMock(t)
 	clck.NowMock.Return(testTime)
 
 	now := clck.Now()
@@ -34,14 +34,12 @@ func Test_gc_deleteExpired(t *testing.T) {
 	willExpire := storage.NewStringValue("value")
 	willExpire.SetTTL(now.Add(10 * time.Second))
 
-	strg := memory.New(
-		map[storage.Key]*storage.Value{
-			"no_timeout":  storage.NewStringValue("value"),
-			"expired":     expired,
-			"will_expire": willExpire,
-		},
-		memory.WithClock(clck),
-	)
+	items := map[storage.Key]*storage.Value{
+		"no_timeout":  storage.NewStringValue("value"),
+		"expired":     expired,
+		"will_expire": willExpire,
+	}
+	strg := memory.New(items, memory.WithClock(clck))
 
 	gc := newGc(strg, log.New(os.Stdout, "", 0), clck, 1*time.Millisecond)
 	go gc.start()
@@ -49,17 +47,20 @@ func Test_gc_deleteExpired(t *testing.T) {
 
 	time.Sleep(2 * time.Millisecond)
 
-	items, err := strg.All()
-	assert.NoError(t, err)
-
+	strg.RLock()
 	_, ok := items["no_timeout"]
 	assert.True(t, ok)
+	strg.RUnlock()
 
+	strg.RLock()
 	_, ok = items["expired"]
 	assert.False(t, ok)
+	strg.RUnlock()
 
+	strg.RLock()
 	_, ok = items["will_expire"]
 	assert.True(t, ok)
+	strg.RUnlock()
 }
 
 func Test_gc_deleteExpired_StorageErr(t *testing.T) {
@@ -68,12 +69,14 @@ func Test_gc_deleteExpired_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(mc)
+	strg := NewserverStorageMock(mc)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 	strg.AllWithTTLMock.Return(nil, err)
 
 	loggerOutput := new(bytes.Buffer)
 
-	gc := newGc(strg, log.New(loggerOutput, "", 0), clock.TimeClock{}, 1*time.Millisecond)
+	gc := newGc(strg, log.New(loggerOutput, "", 0), clock.New(), 1*time.Millisecond)
 	gc.deleteExpired()
 
 	assert.Equal(t, "[WARN] gc: could not retrieve values: error\n", loggerOutput.String())

@@ -1,5 +1,3 @@
-// +build test
-
 package command
 
 /*
@@ -12,8 +10,6 @@ import (
 	"time"
 
 	"github.com/gojuno/minimock"
-	storage "github.com/namreg/godown-v2/internal/pkg/storage"
-
 	testify_assert "github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +17,7 @@ import (
 type CommandMock struct {
 	t minimock.Tester
 
-	ExecuteFunc       func(p storage.Storage, p1 ...string) (r Result)
+	ExecuteFunc       func(p ...string) (r Result)
 	ExecuteCounter    uint64
 	ExecutePreCounter uint64
 	ExecuteMock       mCommandMockExecute
@@ -59,37 +55,36 @@ type mCommandMockExecute struct {
 
 //CommandMockExecuteParams represents input parameters of the Command.Execute
 type CommandMockExecuteParams struct {
-	p  storage.Storage
-	p1 []string
+	p []string
 }
 
 //Expect sets up expected params for the Command.Execute
-func (m *mCommandMockExecute) Expect(p storage.Storage, p1 ...string) *mCommandMockExecute {
-	m.mockExpectations = &CommandMockExecuteParams{p, p1}
+func (m *mCommandMockExecute) Expect(p ...string) *mCommandMockExecute {
+	m.mockExpectations = &CommandMockExecuteParams{p}
 	return m
 }
 
 //Return sets up a mock for Command.Execute to return Return's arguments
 func (m *mCommandMockExecute) Return(r Result) *CommandMock {
-	m.mock.ExecuteFunc = func(p storage.Storage, p1 ...string) Result {
+	m.mock.ExecuteFunc = func(p ...string) Result {
 		return r
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Command.Execute method
-func (m *mCommandMockExecute) Set(f func(p storage.Storage, p1 ...string) (r Result)) *CommandMock {
+func (m *mCommandMockExecute) Set(f func(p ...string) (r Result)) *CommandMock {
 	m.mock.ExecuteFunc = f
 	return m.mock
 }
 
 //Execute implements github.com/namreg/godown-v2/internal/pkg/command.Command interface
-func (m *CommandMock) Execute(p storage.Storage, p1 ...string) (r Result) {
+func (m *CommandMock) Execute(p ...string) (r Result) {
 	atomic.AddUint64(&m.ExecutePreCounter, 1)
 	defer atomic.AddUint64(&m.ExecuteCounter, 1)
 
 	if m.ExecuteMock.mockExpectations != nil {
-		testify_assert.Equal(m.t, *m.ExecuteMock.mockExpectations, CommandMockExecuteParams{p, p1},
+		testify_assert.Equal(m.t, *m.ExecuteMock.mockExpectations, CommandMockExecuteParams{p},
 			"Command.Execute got unexpected parameters")
 
 		if m.ExecuteFunc == nil {
@@ -105,7 +100,7 @@ func (m *CommandMock) Execute(p storage.Storage, p1 ...string) (r Result) {
 		return
 	}
 
-	return m.ExecuteFunc(p, p1...)
+	return m.ExecuteFunc(p...)
 }
 
 //ExecuteMinimockCounter returns a count of CommandMock.ExecuteFunc invocations

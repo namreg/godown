@@ -31,14 +31,14 @@ func (nr NilResult) Val() interface{} {
 	return nil
 }
 
-//HelpResult contains underlying command help message
+//HelpResult contains command's help message
 type HelpResult struct {
-	Value Command
+	Value string
 }
 
 //Val returns underlying command help message
 func (ur HelpResult) Val() interface{} {
-	return ur.Value.Help()
+	return ur.Value
 }
 
 //StringResult contains a string

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gojuno/minimock"
+	"github.com/namreg/godown-v2/internal/pkg/command"
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
 	"github.com/namreg/godown-v2/pkg/clock"
@@ -16,77 +17,58 @@ import (
 
 func TestNew_WithoutOptions(t *testing.T) {
 	defaultLogger := log.New(os.Stdout, "[godown-server]: ", log.LstdFlags)
-	defaultClock := clock.TimeClock{}
-	defaultStorage := memory.New(nil, memory.WithClock(defaultClock))
 
-	srv := New()
+	strg := memory.New(nil)
+	parser := command.NewParser(strg, NewserverClockMock(t))
+	srv := New(strg, parser)
 
-	assert.IsType(t, &Server{}, srv)
 	assert.Equal(t, defaultLogger, srv.logger)
 	assert.Equal(t, defaultGCInterval, srv.gcInterval)
-	assert.Equal(t, clock.TimeClock{}, srv.clock)
-	assert.Equal(t, defaultStorage, srv.strg)
+	assert.Equal(t, clock.New(), srv.clck)
 }
 
-func TestNew_WithStorage_And_WithClock(t *testing.T) {
-	mc := minimock.NewController(t)
-	defer mc.Finish()
-
-	clck := clock.NewClockMock(mc)
-	strg := memory.New(map[storage.Key]*storage.Value{"key": storage.NewStringValue("value")}, memory.WithClock(clck))
-
-	srv := New(WithStorage(strg), WithClock(clck))
-
-	assert.IsType(t, &Server{}, srv)
-	assert.Equal(t, strg, srv.strg)
-	assert.Equal(t, clck, srv.clock)
-}
-
-func TestNew_WithLogger(t *testing.T) {
+func TestNew_WithOptions(t *testing.T) {
 	logger := log.New(os.Stdout, "[test server]: ", log.LUTC)
-	srv := New(WithLogger(logger))
+	clck := NewserverClockMock(t)
+	strg := memory.New(nil)
+	parser := command.NewParser(strg, clck)
+	srv := New(
+		strg,
+		parser,
+		WithLogger(logger),
+		WithClock(NewserverClockMock(t)),
+		WithGCInterval(10*time.Second),
+	)
 
 	assert.Equal(t, logger, srv.logger)
-}
-
-func TestNew_WithGCInterval(t *testing.T) {
-	interval := 10 * time.Second
-	srv := New(WithGCInterval(interval))
-
-	assert.Equal(t, interval, srv.gcInterval)
+	assert.Equal(t, 10*time.Second, srv.gcInterval)
+	assert.Equal(t, clck, srv.clck)
 }
 
 func TestServer_handleConn(t *testing.T) {
 	tests := []struct {
 		name  string
-		init  func() *Server
+		items map[storage.Key]*storage.Value
 		input []byte
 		want  []byte
 	}{
 		{
 			"existing_command",
-			func() *Server {
-				strg := memory.New(map[storage.Key]*storage.Value{
-					"key": storage.NewStringValue("value"),
-				})
-				return New(WithStorage(strg))
+			map[storage.Key]*storage.Value{
+				"key": storage.NewStringValue("value"),
 			},
 			[]byte("GET key"),
 			[]byte("(string): value"),
 		},
 		{
 			"not_existing_command",
-			func() *Server {
-				return New()
-			},
+			nil,
 			[]byte("UNKNOWN arg"),
 			[]byte("(error): command \"UNKNOWN arg\" not found"),
 		},
 		{
 			"empty_input",
-			func() *Server {
-				return New()
-			},
+			nil,
 			[]byte(" "),
 			[]byte("godown > "),
 		},
@@ -97,7 +79,10 @@ func TestServer_handleConn(t *testing.T) {
 			mc := minimock.NewController(t)
 			defer mc.Finish()
 
-			srv := tt.init()
+			strg := memory.New(tt.items)
+			parser := command.NewParser(strg, NewserverClockMock(t))
+			srv := New(strg, parser)
+
 			r := bytes.NewReader(tt.input)
 			w := new(bytes.Buffer)
 

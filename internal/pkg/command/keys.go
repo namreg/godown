@@ -4,17 +4,12 @@ import (
 	"errors"
 	"regexp"
 	"strings"
-
-	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Keys)
-	commands[cmd.Name()] = cmd
-}
-
 //Keys is the Keys command
-type Keys struct{}
+type Keys struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Keys) Name() string {
@@ -28,12 +23,14 @@ Find all keys matching the given pattern.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Keys) Execute(strg storage.Storage, args ...string) Result {
+func (c *Keys) Execute(args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	keys, err := strg.Keys()
+	c.strg.RLock()
+	keys, err := c.strg.Keys()
+	c.strg.RUnlock()
 	if err != nil {
 		return ErrResult{Value: err}
 	}

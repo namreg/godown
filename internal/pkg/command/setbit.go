@@ -7,13 +7,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(SetBit)
-	commands[cmd.Name()] = cmd
-}
-
 //SetBit is the SetBit command
-type SetBit struct{}
+type SetBit struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *SetBit) Name() string {
@@ -27,7 +24,7 @@ Sets or clears the bit at offset in the string value stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
+func (c *SetBit) Execute(args ...string) Result {
 	if len(args) != 3 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
@@ -42,30 +39,40 @@ func (c *SetBit) Execute(strg storage.Storage, args ...string) Result {
 		return ErrResult{Value: err}
 	}
 
-	setter := func(old *storage.Value) (*storage.Value, error) {
-		var value []uint64
-		if old != nil {
-			if old.Type() != storage.BitMapDataType {
-				return nil, ErrWrongTypeOp
-			}
-			value = old.Data().([]uint64)
-		}
+	key := storage.Key(args[0])
 
-		value = c.growSlice(value, offset)
-		idx := c.resolveIndex(offset)
+	c.strg.Lock()
+	defer c.strg.Unlock()
 
-		if bitValue == 1 {
-			value[idx] = value[idx] | 1<<(offset%64)
-		} else {
-			value[idx] = value[idx] & ^(1 << (offset % 64))
-		}
-		if c.isZeroSlice(value) {
-			return nil, nil
-		}
-		return storage.NewBitMapValue(value), nil
+	var value []uint64
+
+	old, err := c.strg.Get(key)
+	if err != nil && err != storage.ErrKeyNotExists {
+		return ErrResult{Value: err}
 	}
 
-	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
+	if old != nil {
+		if old.Type() != storage.BitMapDataType {
+			return ErrResult{Value: ErrWrongTypeOp}
+		}
+		value = old.Data().([]uint64)
+	}
+
+	value = c.growSlice(value, offset)
+	idx := c.resolveIndex(offset)
+
+	if bitValue == 1 {
+		value[idx] = value[idx] | 1<<(offset%64)
+	} else {
+		value[idx] = value[idx] & ^(1 << (offset % 64))
+	}
+	if c.isZeroSlice(value) {
+		if err = c.strg.Del(key); err != nil {
+			return ErrResult{Value: err}
+		}
+		return OkResult{}
+	}
+	if err = c.strg.Put(key, storage.NewBitMapValue(value)); err != nil {
 		return ErrResult{Value: err}
 	}
 	return OkResult{}

@@ -4,13 +4,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Lpop)
-	commands[cmd.Name()] = cmd
-}
-
 //Lpop is the LPOP command
-type Lpop struct{}
+type Lpop struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Lpop) Name() string {
@@ -24,36 +21,41 @@ Removes and returns the first element of the list stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Lpop) Execute(strg storage.Storage, args ...string) Result {
+func (c *Lpop) Execute(args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	var popped string
-	setter := func(old *storage.Value) (*storage.Value, error) {
-		if old == nil {
-			return nil, nil
+	c.strg.Lock()
+	defer c.strg.Unlock()
+
+	key := storage.Key(args[0])
+
+	val, err := c.strg.Get(key)
+	if err != nil {
+		if err == storage.ErrKeyNotExists {
+			return NilResult{}
 		}
-		if old.Type() != storage.ListDataType {
-			return nil, ErrWrongTypeOp
-		}
-
-		list := old.Data().([]string)
-		popped, list = list[0], list[1:]
-
-		if len(list) == 0 {
-			return nil, nil
-		}
-
-		return storage.NewListValue(list...), nil
-	}
-
-	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
 		return ErrResult{Value: err}
 	}
 
-	if popped == "" {
-		return NilResult{}
+	if val.Type() != storage.ListDataType {
+		return ErrResult{Value: ErrWrongTypeOp}
 	}
+
+	list := val.Data().([]string)
+	popped, list := list[0], list[1:]
+
+	if len(list) == 0 {
+		if err = c.strg.Del(key); err != nil {
+			return ErrResult{Value: err}
+		}
+		return StringResult{Value: popped}
+	}
+
+	if err = c.strg.Put(key, storage.NewListValue(list)); err != nil {
+		return ErrResult{Value: err}
+	}
+
 	return StringResult{Value: popped}
 }

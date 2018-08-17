@@ -42,8 +42,8 @@ func TestDel_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Del)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := &Del{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.result, res)
 		})
 	}
@@ -53,14 +53,15 @@ func TestDel_Execute_StorageErr(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	strg := storage.NewStorageMock(t)
-
 	err := errors.New("error")
 
+	strg := NewStorageMock(t)
 	strg.DelMock.Return(err)
+	strg.LockMock.Return()
+	strg.UnlockMock.Return()
 
-	cmd := new(Del)
-	res := cmd.Execute(strg, "key")
+	cmd := Del{strg: strg}
+	res := cmd.Execute("key")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

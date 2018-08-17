@@ -4,13 +4,10 @@ import (
 	"github.com/namreg/godown-v2/internal/pkg/storage"
 )
 
-func init() {
-	cmd := new(Del)
-	commands[cmd.Name()] = cmd
-}
-
 //Del is the DEL command
-type Del struct{}
+type Del struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command i`nterface
 func (c *Del) Name() string {
@@ -24,11 +21,13 @@ Del the given key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Del) Execute(strg storage.Storage, args ...string) Result {
+func (c *Del) Execute(args ...string) Result {
 	if len(args) != 1 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
-	err := strg.Del(storage.Key(args[0]))
+	c.strg.Lock()
+	err := c.strg.Del(storage.Key(args[0]))
+	c.strg.Unlock()
 	if err != nil {
 		return ErrResult{Value: err}
 	}

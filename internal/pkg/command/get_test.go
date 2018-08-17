@@ -31,7 +31,7 @@ func TestGet_Execute(t *testing.T) {
 	strg := memory.New(
 		map[storage.Key]*storage.Value{
 			"key_string": storage.NewStringValue("string_value"),
-			"key_list":   storage.NewListValue("list_value_1", "list_value_2"),
+			"key_list":   storage.NewListValue([]string{"list_value_1", "list_value_2"}),
 			"expired":    expired,
 		},
 	)
@@ -49,8 +49,8 @@ func TestGet_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Get)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Get{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -60,14 +60,15 @@ func TestGet_Execute_StorageErr(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	strg := storage.NewStorageMock(t)
-
 	err := errors.New("error")
 
+	strg := NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
-	cmd := new(Get)
-	res := cmd.Execute(strg, "key")
+	cmd := Get{strg: strg}
+	res := cmd.Execute("key")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

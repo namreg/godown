@@ -9,13 +9,10 @@ import (
 
 var errListOutOfRange = errors.New("lrange: out of range")
 
-func init() {
-	cmd := new(Lrange)
-	commands[cmd.Name()] = cmd
-}
-
 //Lrange is the LRANGE command
-type Lrange struct{}
+type Lrange struct {
+	strg commandStorage
+}
 
 //Name implements Name of Command interface
 func (c *Lrange) Name() string {
@@ -31,12 +28,14 @@ with 0 being the first element of the list (the head of the list), 1 being the n
 }
 
 //Execute implements Execute of Command interface
-func (c *Lrange) Execute(strg storage.Storage, args ...string) Result {
+func (c *Lrange) Execute(args ...string) Result {
 	if len(args) != 3 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	value, err := strg.Get(storage.Key(args[0]))
+	c.strg.RLock()
+	value, err := c.strg.Get(storage.Key(args[0]))
+	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}

@@ -27,12 +27,12 @@ Negative indices can be used to designate elements starting at the tail of the l
 }
 
 func TestLindex_Execute(t *testing.T) {
-	expired := storage.NewListValue("val1", "val2")
+	expired := storage.NewListValue([]string{"val1", "val2"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"string":  storage.NewStringValue("string"),
-		"list":    storage.NewListValue("val1", "val2"),
+		"list":    storage.NewListValue([]string{"val1", "val2"}),
 		"expired": expired,
 	})
 
@@ -55,8 +55,8 @@ func TestLindex_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Lindex)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Lindex{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -68,11 +68,13 @@ func TestLindex_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
+	strg := NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
-	cmd := new(Lindex)
-	res := cmd.Execute(strg, "key", "0")
+	cmd := Lindex{strg: strg}
+	res := cmd.Execute("key", "0")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

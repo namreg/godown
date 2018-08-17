@@ -44,28 +44,29 @@ func TestSetBit_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(SetBit)
-			assert.Equal(t, tt.want, cmd.Execute(strg, tt.args...))
+			cmd := SetBit{strg: strg}
+			assert.Equal(t, tt.want, cmd.Execute(tt.args...))
 		})
 	}
 }
 
-func TestSetBit_Execute_Setter(t *testing.T) {
-	strg := memory.New(map[storage.Key]*storage.Value{
+func TestSetBit_Execute_WhiteBox(t *testing.T) {
+	items := map[storage.Key]*storage.Value{
 		"bitmap2":                storage.NewBitMapValue([]uint64{2}),
 		"bitmap3":                storage.NewBitMapValue([]uint64{2}),
 		"bitmap_with_big_offset": storage.NewBitMapValue([]uint64{0, 1}),
-	})
+	}
+	strg := memory.New(items)
 
 	tests := []struct {
 		name   string
 		args   []string
-		verify func(t *testing.T, items map[storage.Key]*storage.Value)
+		verify func(t *testing.T)
 	}{
 		{
 			"set_bit_in_not_existing_key",
 			[]string{"bitmap", "1", "1"},
-			func(t *testing.T, items map[storage.Key]*storage.Value) {
+			func(t *testing.T) {
 				val, ok := items["bitmap"]
 				assert.True(t, ok)
 
@@ -77,7 +78,7 @@ func TestSetBit_Execute_Setter(t *testing.T) {
 		{
 			"set_bit_in_existing_key",
 			[]string{"bitmap2", "2", "1"},
-			func(t *testing.T, items map[storage.Key]*storage.Value) {
+			func(t *testing.T) {
 				val, ok := items["bitmap2"]
 				assert.True(t, ok)
 
@@ -89,7 +90,7 @@ func TestSetBit_Execute_Setter(t *testing.T) {
 		{
 			"delete_key_when_all_bits_not_set",
 			[]string{"bitmap3", "1", "0"},
-			func(t *testing.T, items map[storage.Key]*storage.Value) {
+			func(t *testing.T) {
 				_, ok := items["bitmap3"]
 				assert.False(t, ok)
 			},
@@ -97,7 +98,7 @@ func TestSetBit_Execute_Setter(t *testing.T) {
 		{
 			"delete_key_when_all_bits_not_set/big_offset",
 			[]string{"bitmap_with_big_offset", "64", "0"},
-			func(t *testing.T, items map[storage.Key]*storage.Value) {
+			func(t *testing.T) {
 				_, ok := items["bitmap_with_big_offset"]
 				assert.False(t, ok)
 			},
@@ -105,14 +106,11 @@ func TestSetBit_Execute_Setter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(SetBit)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := SetBit{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, OkResult{}, res)
 
-			items, err := strg.All()
-			assert.NoError(t, err)
-
-			tt.verify(t, items)
+			tt.verify(t)
 		})
 	}
 }
@@ -147,11 +145,38 @@ func TestSetBit_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
-	strg.PutMock.Return(err)
+	//storage.Get error
+	strg1 := NewStorageMock(t)
+	strg1.GetMock.Return(nil, err)
+	strg1.LockMock.Return()
+	strg1.UnlockMock.Return()
 
-	cmd := new(SetBit)
-	res := cmd.Execute(strg, "key", "1", "1")
+	cmd1 := SetBit{strg: strg1}
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	res1 := cmd1.Execute("key", "1", "1")
+	assert.Equal(t, ErrResult{Value: err}, res1)
+
+	//storage.Put error
+	strg2 := NewStorageMock(t)
+	strg2.GetMock.Return(storage.NewBitMapValue([]uint64{5}), nil)
+	strg2.PutMock.Return(err)
+	strg2.LockMock.Return()
+	strg2.UnlockMock.Return()
+
+	cmd2 := SetBit{strg: strg2}
+
+	res2 := cmd2.Execute("key", "1", "1")
+	assert.Equal(t, ErrResult{Value: err}, res2)
+
+	//storage.Del error
+	strg3 := NewStorageMock(t)
+	strg3.GetMock.Return(storage.NewBitMapValue([]uint64{2}), nil)
+	strg3.DelMock.Return(err)
+	strg3.LockMock.Return()
+	strg3.UnlockMock.Return()
+
+	cmd3 := SetBit{strg: strg3}
+
+	res3 := cmd3.Execute("key", "1", "0")
+	assert.Equal(t, ErrResult{Value: err}, res3)
 }

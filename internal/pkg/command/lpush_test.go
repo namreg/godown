@@ -27,7 +27,7 @@ Prepend one or multiple values to a list.`
 func TestLpush_Execute(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"string": storage.NewStringValue("string"),
-		"list":   storage.NewListValue("val1", "val2"),
+		"list":   storage.NewListValue([]string{"val1", "val2"}),
 	})
 
 	tests := []struct {
@@ -42,19 +42,19 @@ func TestLpush_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Lpush)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Lpush{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
 }
 
-func TestLpush_Execute_Setter(t *testing.T) {
-	expired := storage.NewListValue("val")
+func TestLpush_Execute_WhiteBox(t *testing.T) {
+	expired := storage.NewListValue([]string{"val"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"list":    storage.NewListValue("val1"),
+		"list":    storage.NewListValue([]string{"val1"}),
 		"expired": expired,
 	})
 	tests := []struct {
@@ -105,8 +105,8 @@ func TestLpush_Execute_Setter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Lpush)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Lpush{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, OkResult{}, res)
 
 			items, err := strg.All()
@@ -123,11 +123,23 @@ func TestLpush_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
-	strg.PutMock.Return(err)
+	strg1 := NewStorageMock(t)
+	strg1.GetMock.Return(nil, err)
+	strg1.LockMock.Return()
+	strg1.UnlockMock.Return()
 
-	cmd := new(Lpush)
-	res := cmd.Execute(strg, "key", "val")
+	strg2 := NewStorageMock(t)
+	strg2.GetMock.Return(storage.NewListValue([]string{"val"}), nil)
+	strg2.PutMock.Return(err)
+	strg2.LockMock.Return()
+	strg2.UnlockMock.Return()
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	cmd1 := Lpush{strg: strg1}
+	cmd2 := Lpush{strg: strg2}
+
+	res1 := cmd1.Execute("key", "val")
+	assert.Equal(t, ErrResult{Value: err}, res1)
+
+	res2 := cmd2.Execute("key", "val")
+	assert.Equal(t, ErrResult{Value: err}, res2)
 }

@@ -27,12 +27,12 @@ with 0 being the first element of the list (the head of the list), 1 being the n
 }
 
 func TestLrange_Execute(t *testing.T) {
-	expired := storage.NewListValue("val")
+	expired := storage.NewListValue([]string{"val"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"string":  storage.NewStringValue("value"),
-		"list":    storage.NewListValue("val1", "val2"),
+		"list":    storage.NewListValue([]string{"val1", "val2"}),
 		"expired": expired,
 	})
 
@@ -59,8 +59,8 @@ func TestLrange_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Lrange)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Lrange{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -72,11 +72,13 @@ func TestLrange_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
+	strg := NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
-	cmd := new(Lrange)
-	res := cmd.Execute(strg, "key", "0", "1")
+	cmd := Lrange{strg: strg}
+	res := cmd.Execute("key", "0", "1")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

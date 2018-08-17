@@ -50,8 +50,8 @@ func TestHget_Execute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := new(Hget)
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Hget{strg: strg}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -63,11 +63,13 @@ func TestHget_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := storage.NewStorageMock(t)
+	strg := NewStorageMock(t)
 	strg.GetMock.Return(nil, err)
+	strg.RLockMock.Return()
+	strg.RUnlockMock.Return()
 
-	cmd := new(Hget)
-	res := cmd.Execute(strg, "key", "field")
+	cmd := Hget{strg: strg}
+	res := cmd.Execute("key", "field")
 
 	assert.Equal(t, ErrResult{Value: err}, res)
 }

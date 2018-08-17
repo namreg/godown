@@ -21,7 +21,7 @@ run:
 # all available settings of specific linters
 linters-settings:
   gocyclo:
-    min-complexity: 20
+    min-complexity: 25
   misspell:
     # Correct spellings using locale preferences for US or UK.
     # Default is to use a neutral variety of English.

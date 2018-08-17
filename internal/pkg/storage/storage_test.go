@@ -70,10 +70,10 @@ func TestValue_IsExpired(t *testing.T) {
 		{"not_expired", &Value{ttl: time.Now().Add(1 * time.Second).Unix()}, false},
 		{"expired", &Value{ttl: time.Now().Add(-1 * time.Second).Unix()}, true},
 	}
-	clock := clock.TimeClock{}
+	clck := clock.New()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.value.IsExpired(clock.Now()); got != tt.want {
+			if got := tt.value.IsExpired(clck.Now()); got != tt.want {
 				t.Errorf("Value.IsExpired() = %v, want %v", got, tt.want)
 			}
 		})
@@ -118,7 +118,7 @@ func TestNewBitMapValue(t *testing.T) {
 }
 
 func TestNewListValue(t *testing.T) {
-	value := NewListValue("test 1", "test 2", "test 3")
+	value := NewListValue([]string{"test 1", "test 2", "test 3"})
 	assert.Equal(t, []string{"test 1", "test 2", "test 3"}, value.data)
 	assert.Equal(t, ListDataType, value.dataType)
 	assert.Equal(t, int64(-1), value.ttl)

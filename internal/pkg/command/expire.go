@@ -6,17 +6,12 @@ import (
 	"time"
 
 	"github.com/namreg/godown-v2/internal/pkg/storage"
-	"github.com/namreg/godown-v2/pkg/clock"
 )
-
-func init() {
-	cmd := &Expire{clck: clock.TimeClock{}}
-	commands[cmd.Name()] = cmd
-}
 
 //Expire is the Expire command
 type Expire struct {
-	clck clock.Clock
+	clck commandClock
+	strg commandStorage
 }
 
 //Name implements Name of Command interface
@@ -31,27 +26,39 @@ Set a timeout on key. After the timeout has expired, the key will automatically 
 }
 
 //Execute implements Execute of Command interface
-func (c *Expire) Execute(strg storage.Storage, args ...string) Result {
+func (c *Expire) Execute(args ...string) Result {
 	if len(args) != 2 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
+
 	secs, err := strconv.Atoi(args[1])
 	if err != nil {
 		return ErrResult{Value: errors.New("seconds should be integer")}
 	}
+
 	if secs < 0 {
 		return ErrResult{Value: errors.New("seconds should be positive")}
 	}
-	setter := func(old *storage.Value) (*storage.Value, error) {
-		if old == nil {
-			return nil, nil
+
+	c.strg.Lock()
+	defer c.strg.Unlock()
+
+	key := storage.Key(args[0])
+
+	val, err := c.strg.Get(key)
+	if err != nil {
+		if err == storage.ErrKeyNotExists {
+			return OkResult{}
 		}
-		now := c.clck.Now()
-		old.SetTTL(now.Add(time.Duration(secs) * time.Second))
-		return old, nil
-	}
-	if err := strg.Put(storage.Key(args[0]), setter); err != nil {
 		return ErrResult{Value: err}
 	}
+
+	now := c.clck.Now()
+
+	val.SetTTL(now.Add(time.Duration(secs) * time.Second))
+	if err = c.strg.Put(key, val); err != nil {
+		return ErrResult{Value: err}
+	}
+
 	return OkResult{}
 }

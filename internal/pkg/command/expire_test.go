@@ -14,12 +14,12 @@ import (
 )
 
 func TestExpire_Name(t *testing.T) {
-	cmd := Expire{clck: clock.TimeClock{}}
+	cmd := Expire{clck: clock.New()}
 	assert.Equal(t, "EXPIRE", cmd.Name())
 }
 
 func TestExpire_Help(t *testing.T) {
-	cmd := Expire{clck: clock.TimeClock{}}
+	cmd := Expire{clck: clock.New()}
 	expexted := `Usage: EXPIRE key seconds
 Set a timeout on key. After the timeout has expired, the key will automatically be deleted.`
 
@@ -44,8 +44,8 @@ func TestExpire_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := Expire{clck: clock.TimeClock{}}
-			res := cmd.Execute(strg, tt.args...)
+			cmd := Expire{strg: strg, clck: clock.New()}
+			res := cmd.Execute(tt.args...)
 			assert.Equal(t, tt.want, res)
 		})
 	}
@@ -55,34 +55,48 @@ func TestExpire_Execute_StorageErr(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
-	strg := storage.NewStorageMock(t)
 	err := errors.New("error")
-	strg.PutMock.Return(err)
 
-	cmd := new(Expire)
+	strg1 := NewStorageMock(t)
+	strg1.GetMock.Return(nil, err)
+	strg1.LockMock.Return()
+	strg1.UnlockMock.Return()
+
+	strg2 := NewStorageMock(t)
+	strg2.GetMock.Return(storage.NewStringValue("value"), nil)
+	strg2.PutMock.Return(err)
+	strg2.LockMock.Return()
+	strg2.UnlockMock.Return()
+
+	cmd1 := Expire{strg: strg1, clck: clock.New()}
+
+	cmd2 := Expire{strg: strg2, clck: clock.New()}
 
 	expectedRes := ErrResult{Value: err}
-	actualRes := cmd.Execute(strg, []string{"key", "10"}...)
 
-	assert.Equal(t, expectedRes, actualRes)
+	actualRes1 := cmd1.Execute([]string{"key", "10"}...)
+	assert.Equal(t, expectedRes, actualRes1)
+
+	actualRes2 := cmd2.Execute([]string{"key", "10"}...)
+	assert.Equal(t, expectedRes, actualRes2)
 }
 
-func TestExpire_Execute_Setter(t *testing.T) {
+func TestExpire_Execute_WhiteBox(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
 	now, _ := time.Parse("2006-01-02 15:04:05", "2018-01-01 11:11:11")
 
-	clck := clock.NewClockMock(t)
+	clck := NewcommandClockMock(t)
 	clck.NowMock.Return(now)
 
 	strg := memory.New(map[storage.Key]*storage.Value{
 		"key": storage.NewStringValue("value"),
 	})
 
-	cmd := Expire{clck: clck}
+	cmd := Expire{strg: strg, clck: clck}
 
-	res := cmd.Execute(strg, []string{"key", "10"}...)
+	res := cmd.Execute([]string{"key", "10"}...)
 	assert.Equal(t, OkResult{}, res)
 
 	items, err := strg.All()
