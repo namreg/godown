@@ -2,6 +2,7 @@ package server
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -9,6 +10,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+
+	"github.com/namreg/godown-v2/internal/api"
 
 	"github.com/namreg/godown-v2/internal/clock"
 	"github.com/namreg/godown-v2/internal/command"
@@ -94,6 +99,22 @@ func New(strg serverStorage, parser commandParser, opts ...func(*Server)) *Serve
 	}
 
 	return srv
+}
+
+//Start starts a server
+func (s *Server) Start(hostPort string) error {
+	l, err := net.Listen("tcp", hostPort)
+	if err != nil {
+		return fmt.Errorf("could not listen on %s: %v", hostPort, err)
+	}
+	srv := grpc.NewServer()
+	api.RegisterGodownServer(srv, s)
+	return srv.Serve(l)
+}
+
+//ExecuteCommand executes a command that placed into the request.
+func (s *Server) ExecuteCommand(ctx context.Context, req *api.Request) (*api.Response, error) {
+	return nil, nil
 }
 
 //Run runs the server on the given host and port

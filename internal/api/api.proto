@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+//Request is a request to a server.
+message Request {
+    string command = 1;
+}
+
+//Response is a response that contains command's execution result.
+message Response {
+    enum Type {
+        NIL = 0;
+        OK = 1;
+        STRING = 2;
+        INT = 3;
+        SLICE = 4;
+        HELP = 5;
+        ERR = 6;
+    }
+    message Result {
+        Type type = 1;
+        string item = 2;
+        repeated string items = 3; //uses only when type = SLICE
+    }
+    Result result = 1;
+}
+
+//Godown is a service that executes commands.
+service Godown {
+    rpc ExecuteCommand (Request) returns (Response);
+}

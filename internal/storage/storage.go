@@ -104,8 +104,6 @@ func NewMapValue(val map[string]string) *Value {
 	}
 }
 
-//go:generate minimock -i github.com/namreg/godown-v2/internal/storage.Storage -o ./
-
 //Storage represents a storage
 type Storage interface {
 	sync.Locker
