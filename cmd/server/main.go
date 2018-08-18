@@ -6,12 +6,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/namreg/godown-v2/internal/pkg/command"
+	"github.com/namreg/godown-v2/internal/command"
 
-	"github.com/namreg/godown-v2/internal/pkg/storage/memory"
+	"github.com/namreg/godown-v2/internal/storage/memory"
 
-	"github.com/namreg/godown-v2/internal/pkg/server"
-	"github.com/namreg/godown-v2/pkg/clock"
+	"github.com/namreg/godown-v2/internal/server"
+	"github.com/namreg/godown-v2/internal/clock"
 )
 
 var host = flag.String("host", "127.0.0.1", "Server host")
