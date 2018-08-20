@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/Bowery/prompt"
+  packages = ["."]
+  revision = "8a1d5376df1cbec3468f2138fecc44dd8b48e342"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -130,6 +136,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4e90b4754cb807c354289a65da6d2ae39c88f5a973fa32f8b630826365dee54f"
+  inputs-digest = "ec364479de7e0fc06a257766fcc79dfce34fa118d6d18fbd8deca2ca51e47728"
   solver-name = "gps-cdcl"
   solver-version = 1

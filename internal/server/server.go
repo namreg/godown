@@ -1,12 +1,10 @@
 package server
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"net"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -171,67 +169,4 @@ func (s *Server) ExecuteCommand(ctx context.Context, req *api.Request) (*api.Res
 	}
 
 	return &api.Response{Result: apiRes}, nil
-}
-
-//Run runs the server on the given host and port
-func (s *Server) Run(hostPort string) error {
-	s.logger.Printf("[INFO] running on %s\n", hostPort)
-
-	// starting a garbage collector
-	go func() {
-		gc := newGc(s.strg, s.logger, s.clck, s.gcInterval)
-		gc.start()
-	}()
-
-	l, err := net.Listen("tcp", hostPort)
-	if err != nil {
-		return fmt.Errorf("server: could not listen %s: %v", hostPort, err)
-	}
-
-	defer l.Close()
-
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			s.logger.Printf("[WARN] could not accept connection: %v\n", err)
-			continue
-		}
-
-		go s.handleConn(newConn(conn))
-	}
-}
-
-func (s *Server) handleConn(conn *conn) {
-	defer conn.Close()
-
-	conn.writeWelcomeMessage()
-
-	scanner := bufio.NewScanner(conn.conn)
-	for scanner.Scan() {
-		input := strings.TrimSpace(scanner.Text())
-		if input == "" {
-			conn.writePrompt()
-			continue
-		}
-
-		cmd, args, err := s.parser.Parse(input)
-
-		if err != nil {
-			switch err {
-			case command.ErrCommandNotFound:
-				conn.writeError(fmt.Errorf("command %q not found", input))
-			default:
-				conn.writeError(err)
-			}
-			continue
-		}
-
-		res := cmd.Execute(args...)
-
-		conn.writeCommandResult(res)
-	}
-
-	if err := scanner.Err(); err != nil {
-		s.logger.Printf("[WARN] scanner error: %v", err)
-	}
 }

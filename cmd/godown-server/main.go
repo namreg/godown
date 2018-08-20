@@ -33,5 +33,5 @@ func main() {
 
 	srv := server.New(strg, parser, server.WithClock(clck), server.WithGCInterval(1*time.Second))
 
-	log.Fatal(srv.Run(net.JoinHostPort(*host, *port)))
+	log.Fatal(srv.Start(net.JoinHostPort(*host, *port)))
 }
