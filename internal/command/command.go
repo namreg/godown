@@ -128,6 +128,8 @@ func (p *Parser) Parse(str string) (Command, []string, error) {
 		cmd = &TTL{strg: p.strg, clck: p.clck}
 	case "TYPE":
 		cmd = &Type{strg: p.strg}
+	case "PING":
+		cmd = &Ping{}
 	default:
 		return nil, nil, ErrCommandNotFound
 	}
