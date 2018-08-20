@@ -10,10 +10,10 @@ message Response {
     enum Type {
         NIL = 0;
         OK = 1;
-        STRING = 2;
-        INT = 3;
-        SLICE = 4;
-        HELP = 5;
+        RAW_STRING = 2;
+        STRING = 3;
+        INT = 4;
+        SLICE = 5;
         ERR = 6;
     }
     message Result {

@@ -24,8 +24,8 @@ func TestNilResult_Val(t *testing.T) {
 	assert.Nil(t, res.Val())
 }
 
-func TestHelpResult_Val(t *testing.T) {
-	res := HelpResult{Value: "help message"}
+func TestRawStringResult_Val(t *testing.T) {
+	res := RawStringResult{Value: "help message"}
 	assert.Equal(t, "help message", res.Val())
 }
 

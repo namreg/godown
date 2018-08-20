@@ -45,6 +45,8 @@ func (p *printer) printResponse(resp *api.Response) {
 		p.println(okString)
 	case api.Response_NIL:
 		p.println(nilString)
+	case api.Response_RAW_STRING:
+		p.println(strings.Replace(resp.Result.Item, "\n", "\r\n", -1))
 	case api.Response_STRING:
 		p.println(fmt.Sprintf("(string) %s", resp.Result.Item))
 	case api.Response_INT:
@@ -53,8 +55,6 @@ func (p *printer) printResponse(resp *api.Response) {
 		} else {
 			p.println(fmt.Sprintf("(integer) %d", n))
 		}
-	case api.Response_HELP:
-		p.println(strings.Replace(resp.Result.Item, "\n", "\r\n", -1))
 	case api.Response_ERR:
 		p.println(fmt.Sprintf("(error) %s", resp.Result.Item))
 	case api.Response_SLICE:

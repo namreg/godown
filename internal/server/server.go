@@ -149,6 +149,9 @@ func (s *Server) ExecuteCommand(ctx context.Context, req *api.Request) (*api.Res
 		apiRes.Type = api.Response_NIL
 	case command.OkResult:
 		apiRes.Type = api.Response_OK
+	case command.RawStringResult:
+		apiRes.Type = api.Response_RAW_STRING
+		apiRes.Item = t.Value
 	case command.StringResult:
 		apiRes.Type = api.Response_STRING
 		apiRes.Item = t.Value
@@ -158,9 +161,6 @@ func (s *Server) ExecuteCommand(ctx context.Context, req *api.Request) (*api.Res
 	case command.SliceResult:
 		apiRes.Type = api.Response_SLICE
 		apiRes.Items = t.Value
-	case command.HelpResult:
-		apiRes.Type = api.Response_HELP
-		apiRes.Item = t.Value
 	case command.ErrResult:
 		apiRes.Type = api.Response_ERR
 		apiRes.Item = t.Value.Error()

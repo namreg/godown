@@ -35,5 +35,5 @@ func (c *Help) Execute(args ...string) Result {
 		}
 		return ErrResult{Value: err}
 	}
-	return HelpResult{Value: cmd.Help()}
+	return RawStringResult{Value: cmd.Help()}
 }

@@ -31,13 +31,13 @@ func (nr NilResult) Val() interface{} {
 	return nil
 }
 
-//HelpResult contains command's help message
-type HelpResult struct {
+//RawStringResult contain a string that should not be formatted
+type RawStringResult struct {
 	Value string
 }
 
 //Val returns underlying command help message
-func (ur HelpResult) Val() interface{} {
+func (ur RawStringResult) Val() interface{} {
 	return ur.Value
 }
 
