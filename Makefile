@@ -1,5 +1,5 @@
 PACKAGE=github.com/namreg/godown-v2
-SRC_PKGS=$(shell go list ./... | grep -v vendor)
+SRC_PKGS=$(shell go list ./... | grep -v vendor | grep -v cmd)
 
 .PHONY: vendor
 vendor:

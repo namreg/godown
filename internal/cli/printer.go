@@ -11,9 +11,8 @@ import (
 )
 
 const (
-	okString        = "OK"
-	nilString       = "(nil)"
-	emptyListString = "(empty list)"
+	okString  = "OK"
+	nilString = "(nil)"
 )
 
 type printer struct {

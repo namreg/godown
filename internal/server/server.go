@@ -41,7 +41,6 @@ type serverStorage interface {
 //go:generate minimock -i github.com/namreg/godown-v2/internal/server.serverClock -o ./
 
 type serverClock interface {
-	//Now returns current time
 	Now() time.Time
 }
 
