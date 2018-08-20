@@ -1,10 +1,19 @@
 package cli
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"strconv"
+	"strings"
 
 	"github.com/namreg/godown-v2/internal/api"
+)
+
+const (
+	okString        = "OK"
+	nilString       = "(nil)"
+	emptyListString = "(empty list)"
 )
 
 type printer struct {
@@ -24,7 +33,7 @@ func (p *printer) Close() error {
 }
 
 func (p *printer) println(str string) {
-	fmt.Fprintln(p.out, str)
+	fmt.Fprintf(p.out, "%s\r\n", str)
 }
 
 func (p *printer) printError(err error) {
@@ -32,5 +41,34 @@ func (p *printer) printError(err error) {
 }
 
 func (p *printer) printResponse(resp *api.Response) {
-	fmt.Fprintf(p.out, "%v\n", resp)
+	switch resp.Result.Type {
+	case api.Response_OK:
+		p.println(okString)
+	case api.Response_NIL:
+		p.println(nilString)
+	case api.Response_STRING:
+		p.println(fmt.Sprintf("(string) %s", resp.Result.Item))
+	case api.Response_INT:
+		if n, err := strconv.Atoi(resp.Result.Item); err != nil {
+			p.printError(err)
+		} else {
+			p.println(fmt.Sprintf("(integer) %d", n))
+		}
+	case api.Response_HELP:
+		p.println(strings.Replace(resp.Result.Item, "\n", "\r\n", -1))
+	case api.Response_ERR:
+		p.println(fmt.Sprintf("(error) %s", resp.Result.Item))
+	case api.Response_SLICE:
+		items := resp.Result.Items
+		buf := new(bytes.Buffer)
+		for i, v := range resp.Result.Items {
+			buf.WriteString(fmt.Sprintf("%d) %q", i+1, v))
+			if i != len(items)-1 { // check whether the current item is not last
+				buf.WriteString("\r\n")
+			}
+		}
+		p.println(buf.String())
+	default:
+		fmt.Fprintf(p.out, "%v\n", resp)
+	}
 }

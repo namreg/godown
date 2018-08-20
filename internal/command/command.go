@@ -91,7 +91,7 @@ func (p *Parser) Parse(str string) (Command, []string, error) {
 	case "DEL":
 		cmd = &Del{strg: p.strg}
 	case "EXPIRE":
-		cmd = &Expire{clck: p.clck}
+		cmd = &Expire{clck: p.clck, strg: p.strg}
 	case "GET":
 		cmd = &Get{strg: p.strg}
 	case "SET":

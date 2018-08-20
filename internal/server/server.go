@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -154,7 +155,7 @@ func (s *Server) ExecuteCommand(ctx context.Context, req *api.Request) (*api.Res
 		apiRes.Item = t.Value
 	case command.IntResult:
 		apiRes.Type = api.Response_INT
-		apiRes.Item = string(t.Value)
+		apiRes.Item = strconv.FormatInt(t.Value, 10)
 	case command.SliceResult:
 		apiRes.Type = api.Response_SLICE
 		apiRes.Items = t.Value

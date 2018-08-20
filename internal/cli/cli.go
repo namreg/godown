@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/namreg/godown-v2/internal/api"
 
 	"github.com/Bowery/prompt"
 	"google.golang.org/grpc"
 )
+
+const connectTimeout = 200 * time.Millisecond
 
 const prefix = "godown >"
 
@@ -23,13 +26,17 @@ type CLI struct {
 
 //Run runs a new CLI.
 func Run(hostPort string) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), connectTimeout)
+	defer cancel()
+
+	conn, err := grpc.DialContext(ctx, hostPort, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return fmt.Errorf("could not connect to %s", hostPort)
+	}
+
 	term, err := prompt.NewTerminal()
 	if err != nil {
 		return fmt.Errorf("could not create a terminal: %v", err)
-	}
-	conn, err := grpc.Dial(hostPort, grpc.WithInsecure())
-	if err != nil {
-		return fmt.Errorf("could not dial the server: %v", err)
 	}
 
 	c := &CLI{
@@ -68,6 +75,9 @@ func (c *CLI) run() {
 				break
 			}
 			c.printer.printError(err)
+			continue
+		}
+		if input == "" {
 			continue
 		}
 		req := &api.Request{Command: input}
