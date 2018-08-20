@@ -2,7 +2,6 @@ package server
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"log"
 	"net"
@@ -11,10 +10,11 @@ import (
 	"sync"
 	"time"
 
+	context "golang.org/x/net/context"
+
 	"google.golang.org/grpc"
 
 	"github.com/namreg/godown-v2/internal/api"
-
 	"github.com/namreg/godown-v2/internal/clock"
 	"github.com/namreg/godown-v2/internal/command"
 	"github.com/namreg/godown-v2/internal/storage"
@@ -50,9 +50,12 @@ const defaultGCInterval = 500 * time.Millisecond
 
 //Server represents a server that handles user requests and executes commands
 type Server struct {
-	parser     commandParser
-	strg       serverStorage
-	clck       serverClock
+	parser commandParser
+	strg   serverStorage
+	clck   serverClock
+
+	srv *grpc.Server
+
 	logger     *log.Logger
 	gcInterval time.Duration
 }
@@ -107,14 +110,67 @@ func (s *Server) Start(hostPort string) error {
 	if err != nil {
 		return fmt.Errorf("could not listen on %s: %v", hostPort, err)
 	}
-	srv := grpc.NewServer()
-	api.RegisterGodownServer(srv, s)
-	return srv.Serve(l)
+
+	s.srv = grpc.NewServer()
+	api.RegisterGodownServer(s.srv, s)
+
+	// starting a garbage collector
+	go func() {
+		gc := newGc(s.strg, s.logger, s.clck, s.gcInterval)
+		gc.start()
+	}()
+
+	return s.srv.Serve(l)
+}
+
+//Stop stops a grpc server
+func (s *Server) Stop() {
+	s.srv.Stop()
 }
 
 //ExecuteCommand executes a command that placed into the request.
 func (s *Server) ExecuteCommand(ctx context.Context, req *api.Request) (*api.Response, error) {
-	return nil, nil
+	cmd, args, err := s.parser.Parse(req.Command)
+	if err != nil {
+		if err == command.ErrCommandNotFound {
+			return &api.Response{
+				Result: &api.Response_Result{
+					Type: api.Response_ERR,
+					Item: fmt.Sprintf("command %q not found", req.Command),
+				},
+			}, nil
+		}
+		return nil, fmt.Errorf("could not parse command: %v", err)
+	}
+	res := cmd.Execute(args...)
+
+	apiRes := new(api.Response_Result)
+
+	switch t := res.(type) {
+	case command.NilResult:
+		apiRes.Type = api.Response_NIL
+	case command.OkResult:
+		apiRes.Type = api.Response_OK
+	case command.StringResult:
+		apiRes.Type = api.Response_STRING
+		apiRes.Item = t.Value
+	case command.IntResult:
+		apiRes.Type = api.Response_INT
+		apiRes.Item = string(t.Value)
+	case command.SliceResult:
+		apiRes.Type = api.Response_SLICE
+		apiRes.Items = t.Value
+	case command.HelpResult:
+		apiRes.Type = api.Response_HELP
+		apiRes.Item = t.Value
+	case command.ErrResult:
+		apiRes.Type = api.Response_ERR
+		apiRes.Item = t.Value.Error()
+	default:
+		return nil, fmt.Errorf("unsupported type %T", res)
+	}
+
+	return &api.Response{Result: apiRes}, nil
 }
 
 //Run runs the server on the given host and port
