@@ -37,21 +37,21 @@ func TestHvals_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"existing_key", []string{"map"}, SliceResult{Value: []string{"val1", "val2"}}},
-		{"expired_key", []string{"expired"}, NilResult{}},
-		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
-		{"wrong_type_op", []string{"string"}, ErrResult{Value: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key", "field"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"existing_key", []string{"map"}, SliceReply{Value: []string{"val1", "val2"}}},
+		{"expired_key", []string{"expired"}, NilReply{}},
+		{"not_existing_key", []string{"not_existing_key"}, NilReply{}},
+		{"wrong_type_op", []string{"string"}, ErrReply{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "field"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := Hvals{strg: strg}
 			res := cmd.Execute(tt.args...)
-			if sr, ok := res.(SliceResult); ok {
-				expected := tt.want.(SliceResult).Value
+			if sr, ok := res.(SliceReply); ok {
+				expected := tt.want.(SliceReply).Value
 				sort.Strings(expected)
 
 				actual := sr.Value
@@ -71,11 +71,11 @@ func TestHvals_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.GetMock.Return(nil, err)
 
 	cmd := Hvals{strg: strg}
 	res := cmd.Execute("key")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

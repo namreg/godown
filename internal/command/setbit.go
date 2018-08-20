@@ -9,7 +9,7 @@ import (
 
 //SetBit is the SetBit command
 type SetBit struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -24,19 +24,19 @@ Sets or clears the bit at offset in the string value stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *SetBit) Execute(args ...string) Result {
+func (c *SetBit) Execute(args ...string) Reply {
 	if len(args) != 3 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	offset, err := c.parseOffset(args)
 	if err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	bitValue, err := c.parseValue(args)
 	if err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	setter := func(old *storage.Value) (*storage.Value, error) {
@@ -63,9 +63,9 @@ func (c *SetBit) Execute(args ...string) Result {
 	}
 
 	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
-	return OkResult{}
+	return OkReply{}
 }
 
 func (c *SetBit) resolveIndex(offset uint64) uint64 {

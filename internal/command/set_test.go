@@ -28,11 +28,11 @@ func TestSet_Execute(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		result Result
+		result Reply
 	}{
-		{"ok", []string{"key", "value"}, OkResult{}},
-		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key", "value1", "value2"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"ok", []string{"key", "value"}, OkReply{}},
+		{"wrong_args_number/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "value1", "value2"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -64,11 +64,11 @@ func TestSet_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.PutMock.Return(err)
 
 	cmd := Set{strg: strg}
 	res := cmd.Execute("key", "value")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

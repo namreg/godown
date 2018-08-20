@@ -80,7 +80,7 @@ func (c *CLI) run() {
 		if input == "" {
 			continue
 		}
-		req := &api.Request{Command: input}
+		req := &api.ExecuteCommandRequest{Command: input}
 		if resp, err := c.client.ExecuteCommand(context.Background(), req); err != nil {
 			c.printer.printError(err)
 		} else {

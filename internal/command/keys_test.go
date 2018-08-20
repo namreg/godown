@@ -38,20 +38,20 @@ func TestKeys_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"all_keys", []string{"*"}, SliceResult{Value: []string{"string", "string2", "map"}}},
-		{"partial_match", []string{"str*"}, SliceResult{Value: []string{"string", "string2"}}},
-		{"invalid_pattern", []string{"str++"}, ErrResult{Value: errors.New("invalid pattern syntax")}},
-		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"*", "*"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"all_keys", []string{"*"}, SliceReply{Value: []string{"string", "string2", "map"}}},
+		{"partial_match", []string{"str*"}, SliceReply{Value: []string{"string", "string2"}}},
+		{"invalid_pattern", []string{"str++"}, ErrReply{Value: errors.New("invalid pattern syntax")}},
+		{"wrong_args_number/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"*", "*"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := Keys{strg: strg}
 			res := cmd.Execute(tt.args...)
-			if sr, ok := res.(SliceResult); ok {
-				expected := tt.want.(SliceResult).Value
+			if sr, ok := res.(SliceReply); ok {
+				expected := tt.want.(SliceReply).Value
 				sort.Strings(expected)
 
 				actual := sr.Value
@@ -71,11 +71,11 @@ func TestKeys_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.KeysMock.Return(nil, err)
 
 	cmd := Keys{strg: strg}
 	res := cmd.Execute("*")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

@@ -37,14 +37,14 @@ func TestLpop_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"ok", []string{"list"}, StringResult{Value: "val1"}},
-		{"expired_key", []string{"expired"}, NilResult{}},
-		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
-		{"wrong_type_op", []string{"string"}, ErrResult{Value: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"list", "0"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"ok", []string{"list"}, StringReply{Value: "val1"}},
+		{"expired_key", []string{"expired"}, NilReply{}},
+		{"not_existing_key", []string{"not_existing_key"}, NilReply{}},
+		{"wrong_type_op", []string{"string"}, ErrReply{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"list", "0"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -61,13 +61,13 @@ func TestLpop_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.PutMock.Return(err)
 
 	cmd := Lpop{strg: strg}
 
 	res := cmd.Execute("list")
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }
 
 func TestLpop_Execute_DelEmptyList(t *testing.T) {

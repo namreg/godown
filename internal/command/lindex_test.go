@@ -39,19 +39,19 @@ func TestLindex_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"ok", []string{"list", "0"}, StringResult{Value: "val1"}},
-		{"negative_index/1", []string{"list", "-1"}, StringResult{Value: "val2"}},
-		{"negative_index/2", []string{"list", "-2"}, StringResult{Value: "val1"}},
-		{"expired_key", []string{"expired", "0"}, NilResult{}},
-		{"not_existing_key", []string{"not_existing_key", "0"}, NilResult{}},
-		{"not_existing_index/1", []string{"list", "2"}, NilResult{}},
-		{"not_existing_index/2", []string{"list", "-3"}, NilResult{}},
-		{"wrong_type_op", []string{"string", "0"}, ErrResult{Value: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"list", "0", "1"}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"index_not_integer", []string{"list", "string"}, ErrResult{Value: errors.New("index should be an integer")}},
+		{"ok", []string{"list", "0"}, StringReply{Value: "val1"}},
+		{"negative_index/1", []string{"list", "-1"}, StringReply{Value: "val2"}},
+		{"negative_index/2", []string{"list", "-2"}, StringReply{Value: "val1"}},
+		{"expired_key", []string{"expired", "0"}, NilReply{}},
+		{"not_existing_key", []string{"not_existing_key", "0"}, NilReply{}},
+		{"not_existing_index/1", []string{"list", "2"}, NilReply{}},
+		{"not_existing_index/2", []string{"list", "-3"}, NilReply{}},
+		{"wrong_type_op", []string{"string", "0"}, ErrReply{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"list", "0", "1"}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"index_not_integer", []string{"list", "string"}, ErrReply{Value: errors.New("index should be an integer")}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -68,11 +68,11 @@ func TestLindex_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.GetMock.Return(nil, err)
 
 	cmd := Lindex{strg: strg}
 	res := cmd.Execute("key", "0")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

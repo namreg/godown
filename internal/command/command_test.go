@@ -21,7 +21,7 @@ func TestParser_Parse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := Parser{strg: NewcommandStorageMock(t)}
+			p := Parser{strg: NewdataStoreMock(t)}
 			cmd, args, err := p.Parse(tt.input)
 			if err != nil {
 				assert.Equal(t, tt.wantErr, err)

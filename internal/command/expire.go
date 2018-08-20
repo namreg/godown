@@ -11,7 +11,7 @@ import (
 //Expire is the Expire command
 type Expire struct {
 	clck commandClock
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -26,16 +26,16 @@ Set a timeout on key. After the timeout has expired, the key will automatically 
 }
 
 //Execute implements Execute of Command interface
-func (c *Expire) Execute(args ...string) Result {
+func (c *Expire) Execute(args ...string) Reply {
 	if len(args) != 2 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 	secs, err := strconv.Atoi(args[1])
 	if err != nil {
-		return ErrResult{Value: errors.New("seconds should be integer")}
+		return ErrReply{Value: errors.New("seconds should be integer")}
 	}
 	if secs < 0 {
-		return ErrResult{Value: errors.New("seconds should be positive")}
+		return ErrReply{Value: errors.New("seconds should be positive")}
 	}
 	setter := func(old *storage.Value) (*storage.Value, error) {
 		if old == nil {
@@ -49,7 +49,7 @@ func (c *Expire) Execute(args ...string) Result {
 		return old, nil
 	}
 	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
-	return OkResult{}
+	return OkReply{}
 }

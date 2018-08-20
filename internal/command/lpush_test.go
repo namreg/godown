@@ -33,12 +33,12 @@ func TestLpush_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"ok", []string{"key", "field", "value"}, OkResult{}},
-		{"wrong_type_op", []string{"string", "value"}, ErrResult{Value: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"ok", []string{"key", "field", "value"}, OkReply{}},
+		{"wrong_type_op", []string{"string", "value"}, ErrReply{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -107,7 +107,7 @@ func TestLpush_Execute_WhiteBox(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := Lpush{strg: strg}
 			res := cmd.Execute(tt.args...)
-			assert.Equal(t, OkResult{}, res)
+			assert.Equal(t, OkReply{}, res)
 
 			items, err := strg.All()
 			assert.NoError(t, err)
@@ -123,11 +123,11 @@ func TestLpush_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.PutMock.Return(err)
 
 	cmd := Lpush{strg: strg}
 
 	res := cmd.Execute("key", "val")
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

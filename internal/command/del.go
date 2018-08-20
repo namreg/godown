@@ -6,7 +6,7 @@ import (
 
 //Del is the DEL command
 type Del struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command i`nterface
@@ -21,13 +21,13 @@ Del the given key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Del) Execute(args ...string) Result {
+func (c *Del) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	if err := c.strg.Del(storage.Key(args[0])); err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
-	return OkResult{}
+	return OkReply{}
 }

@@ -8,7 +8,7 @@ import (
 
 //Set is the SET command
 type Set struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -24,9 +24,9 @@ If key already holds a value, it is overwritten.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Set) Execute(args ...string) Result {
+func (c *Set) Execute(args ...string) Reply {
 	if len(args) != 2 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value := strings.Join(args[1:], " ")
@@ -36,7 +36,7 @@ func (c *Set) Execute(args ...string) Result {
 	}
 
 	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
-	return OkResult{}
+	return OkReply{}
 }

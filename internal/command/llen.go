@@ -6,7 +6,7 @@ import (
 
 //Llen is the LLEN command
 type Llen struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -22,21 +22,21 @@ If key does not exist, it is interpreted as an empty list and 0 is returned.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Llen) Execute(args ...string) Result {
+func (c *Llen) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return IntResult{Value: 0}
+			return IntReply{Value: 0}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 	if value.Type() != storage.ListDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+		return ErrReply{Value: ErrWrongTypeOp}
 	}
 	l := len(value.Data().([]string))
-	return IntResult{Value: int64(l)}
+	return IntReply{Value: int64(l)}
 }

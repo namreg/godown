@@ -6,7 +6,7 @@ import (
 
 //Type is the Type command
 type Type struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -21,17 +21,17 @@ Returns the type stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Type) Execute(args ...string) Result {
+func (c *Type) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return NilResult{}
+			return NilReply{}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
-	return StringResult{Value: string(value.Type())}
+	return StringReply{Value: string(value.Type())}
 }

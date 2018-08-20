@@ -14,7 +14,11 @@ type memoryClock interface {
 
 //Storage represents a storage that store its all data in memory. Implements Storage interaface
 type Storage struct {
-	clck         memoryClock
+	clck memoryClock
+
+	metaMu sync.RWMutex
+	meta   map[storage.MetaKey]storage.MetaValue
+
 	mu           sync.RWMutex
 	items        map[storage.Key]*storage.Value
 	itemsWithTTL map[storage.Key]*storage.Value // items thats have ttl and will be processed by GC
@@ -40,6 +44,7 @@ func New(items map[storage.Key]*storage.Value, opts ...func(*Storage)) *Storage 
 		}
 	}
 	strg := &Storage{
+		meta:         make(map[storage.MetaKey]storage.MetaValue),
 		items:        items,
 		itemsWithTTL: itemsWithTTL,
 	}
@@ -130,4 +135,20 @@ func (strg *Storage) AllWithTTL() (map[storage.Key]*storage.Value, error) {
 	strg.mu.RLock()
 	defer strg.mu.RUnlock()
 	return strg.itemsWithTTL, nil
+}
+
+//PutMeta puts a meta value at the given key.
+func (strg *Storage) PutMeta(key storage.MetaKey, value storage.MetaValue) error {
+	strg.metaMu.Lock()
+	strg.meta[key] = value
+	strg.metaMu.Unlock()
+	return nil
+}
+
+//GetMeta gets a meta value at the given key.
+func (strg *Storage) GetMeta(key storage.MetaKey) (storage.MetaValue, error) {
+	strg.metaMu.RLock()
+	value := strg.meta[key]
+	strg.metaMu.RUnlock()
+	return value, nil
 }

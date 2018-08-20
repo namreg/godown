@@ -3,7 +3,7 @@ package server
 /*
 DO NOT EDIT!
 This code was generated automatically using github.com/gojuno/minimock v1.9
-The original interface "serverStorage" can be found in github.com/namreg/godown-v2/internal/server
+The original interface "dataStore" can be found in github.com/namreg/godown-v2/internal/server
 */
 import (
 	"sync/atomic"
@@ -15,191 +15,191 @@ import (
 	testify_assert "github.com/stretchr/testify/assert"
 )
 
-//serverStorageMock implements github.com/namreg/godown-v2/internal/server.serverStorage
-type serverStorageMock struct {
+//dataStoreMock implements github.com/namreg/godown-v2/internal/server.dataStore
+type dataStoreMock struct {
 	t minimock.Tester
 
 	AllWithTTLFunc       func() (r map[storage.Key]*storage.Value, r1 error)
 	AllWithTTLCounter    uint64
 	AllWithTTLPreCounter uint64
-	AllWithTTLMock       mserverStorageMockAllWithTTL
+	AllWithTTLMock       mdataStoreMockAllWithTTL
 
 	DelFunc       func(p storage.Key) (r error)
 	DelCounter    uint64
 	DelPreCounter uint64
-	DelMock       mserverStorageMockDel
+	DelMock       mdataStoreMockDel
 }
 
-//NewserverStorageMock returns a mock for github.com/namreg/godown-v2/internal/server.serverStorage
-func NewserverStorageMock(t minimock.Tester) *serverStorageMock {
-	m := &serverStorageMock{t: t}
+//NewdataStoreMock returns a mock for github.com/namreg/godown-v2/internal/server.dataStore
+func NewdataStoreMock(t minimock.Tester) *dataStoreMock {
+	m := &dataStoreMock{t: t}
 
 	if controller, ok := t.(minimock.MockController); ok {
 		controller.RegisterMocker(m)
 	}
 
-	m.AllWithTTLMock = mserverStorageMockAllWithTTL{mock: m}
-	m.DelMock = mserverStorageMockDel{mock: m}
+	m.AllWithTTLMock = mdataStoreMockAllWithTTL{mock: m}
+	m.DelMock = mdataStoreMockDel{mock: m}
 
 	return m
 }
 
-type mserverStorageMockAllWithTTL struct {
-	mock *serverStorageMock
+type mdataStoreMockAllWithTTL struct {
+	mock *dataStoreMock
 }
 
-//Return sets up a mock for serverStorage.AllWithTTL to return Return's arguments
-func (m *mserverStorageMockAllWithTTL) Return(r map[storage.Key]*storage.Value, r1 error) *serverStorageMock {
+//Return sets up a mock for dataStore.AllWithTTL to return Return's arguments
+func (m *mdataStoreMockAllWithTTL) Return(r map[storage.Key]*storage.Value, r1 error) *dataStoreMock {
 	m.mock.AllWithTTLFunc = func() (map[storage.Key]*storage.Value, error) {
 		return r, r1
 	}
 	return m.mock
 }
 
-//Set uses given function f as a mock of serverStorage.AllWithTTL method
-func (m *mserverStorageMockAllWithTTL) Set(f func() (r map[storage.Key]*storage.Value, r1 error)) *serverStorageMock {
+//Set uses given function f as a mock of dataStore.AllWithTTL method
+func (m *mdataStoreMockAllWithTTL) Set(f func() (r map[storage.Key]*storage.Value, r1 error)) *dataStoreMock {
 	m.mock.AllWithTTLFunc = f
 
 	return m.mock
 }
 
-//AllWithTTL implements github.com/namreg/godown-v2/internal/server.serverStorage interface
-func (m *serverStorageMock) AllWithTTL() (r map[storage.Key]*storage.Value, r1 error) {
+//AllWithTTL implements github.com/namreg/godown-v2/internal/server.dataStore interface
+func (m *dataStoreMock) AllWithTTL() (r map[storage.Key]*storage.Value, r1 error) {
 	atomic.AddUint64(&m.AllWithTTLPreCounter, 1)
 	defer atomic.AddUint64(&m.AllWithTTLCounter, 1)
 
 	if m.AllWithTTLFunc == nil {
-		m.t.Fatal("Unexpected call to serverStorageMock.AllWithTTL")
+		m.t.Fatal("Unexpected call to dataStoreMock.AllWithTTL")
 		return
 	}
 
 	return m.AllWithTTLFunc()
 }
 
-//AllWithTTLMinimockCounter returns a count of serverStorageMock.AllWithTTLFunc invocations
-func (m *serverStorageMock) AllWithTTLMinimockCounter() uint64 {
+//AllWithTTLMinimockCounter returns a count of dataStoreMock.AllWithTTLFunc invocations
+func (m *dataStoreMock) AllWithTTLMinimockCounter() uint64 {
 	return atomic.LoadUint64(&m.AllWithTTLCounter)
 }
 
-//AllWithTTLMinimockPreCounter returns the value of serverStorageMock.AllWithTTL invocations
-func (m *serverStorageMock) AllWithTTLMinimockPreCounter() uint64 {
+//AllWithTTLMinimockPreCounter returns the value of dataStoreMock.AllWithTTL invocations
+func (m *dataStoreMock) AllWithTTLMinimockPreCounter() uint64 {
 	return atomic.LoadUint64(&m.AllWithTTLPreCounter)
 }
 
-type mserverStorageMockDel struct {
-	mock             *serverStorageMock
-	mockExpectations *serverStorageMockDelParams
+type mdataStoreMockDel struct {
+	mock             *dataStoreMock
+	mockExpectations *dataStoreMockDelParams
 }
 
-//serverStorageMockDelParams represents input parameters of the serverStorage.Del
-type serverStorageMockDelParams struct {
+//dataStoreMockDelParams represents input parameters of the dataStore.Del
+type dataStoreMockDelParams struct {
 	p storage.Key
 }
 
-//Expect sets up expected params for the serverStorage.Del
-func (m *mserverStorageMockDel) Expect(p storage.Key) *mserverStorageMockDel {
-	m.mockExpectations = &serverStorageMockDelParams{p}
+//Expect sets up expected params for the dataStore.Del
+func (m *mdataStoreMockDel) Expect(p storage.Key) *mdataStoreMockDel {
+	m.mockExpectations = &dataStoreMockDelParams{p}
 	return m
 }
 
-//Return sets up a mock for serverStorage.Del to return Return's arguments
-func (m *mserverStorageMockDel) Return(r error) *serverStorageMock {
+//Return sets up a mock for dataStore.Del to return Return's arguments
+func (m *mdataStoreMockDel) Return(r error) *dataStoreMock {
 	m.mock.DelFunc = func(p storage.Key) error {
 		return r
 	}
 	return m.mock
 }
 
-//Set uses given function f as a mock of serverStorage.Del method
-func (m *mserverStorageMockDel) Set(f func(p storage.Key) (r error)) *serverStorageMock {
+//Set uses given function f as a mock of dataStore.Del method
+func (m *mdataStoreMockDel) Set(f func(p storage.Key) (r error)) *dataStoreMock {
 	m.mock.DelFunc = f
 	m.mockExpectations = nil
 	return m.mock
 }
 
-//Del implements github.com/namreg/godown-v2/internal/server.serverStorage interface
-func (m *serverStorageMock) Del(p storage.Key) (r error) {
+//Del implements github.com/namreg/godown-v2/internal/server.dataStore interface
+func (m *dataStoreMock) Del(p storage.Key) (r error) {
 	atomic.AddUint64(&m.DelPreCounter, 1)
 	defer atomic.AddUint64(&m.DelCounter, 1)
 
 	if m.DelMock.mockExpectations != nil {
-		testify_assert.Equal(m.t, *m.DelMock.mockExpectations, serverStorageMockDelParams{p},
-			"serverStorage.Del got unexpected parameters")
+		testify_assert.Equal(m.t, *m.DelMock.mockExpectations, dataStoreMockDelParams{p},
+			"dataStore.Del got unexpected parameters")
 
 		if m.DelFunc == nil {
 
-			m.t.Fatal("No results are set for the serverStorageMock.Del")
+			m.t.Fatal("No results are set for the dataStoreMock.Del")
 
 			return
 		}
 	}
 
 	if m.DelFunc == nil {
-		m.t.Fatal("Unexpected call to serverStorageMock.Del")
+		m.t.Fatal("Unexpected call to dataStoreMock.Del")
 		return
 	}
 
 	return m.DelFunc(p)
 }
 
-//DelMinimockCounter returns a count of serverStorageMock.DelFunc invocations
-func (m *serverStorageMock) DelMinimockCounter() uint64 {
+//DelMinimockCounter returns a count of dataStoreMock.DelFunc invocations
+func (m *dataStoreMock) DelMinimockCounter() uint64 {
 	return atomic.LoadUint64(&m.DelCounter)
 }
 
-//DelMinimockPreCounter returns the value of serverStorageMock.Del invocations
-func (m *serverStorageMock) DelMinimockPreCounter() uint64 {
+//DelMinimockPreCounter returns the value of dataStoreMock.Del invocations
+func (m *dataStoreMock) DelMinimockPreCounter() uint64 {
 	return atomic.LoadUint64(&m.DelPreCounter)
 }
 
 //ValidateCallCounters checks that all mocked methods of the interface have been called at least once
 //Deprecated: please use MinimockFinish method or use Finish method of minimock.Controller
-func (m *serverStorageMock) ValidateCallCounters() {
+func (m *dataStoreMock) ValidateCallCounters() {
 
 	if m.AllWithTTLFunc != nil && atomic.LoadUint64(&m.AllWithTTLCounter) == 0 {
-		m.t.Fatal("Expected call to serverStorageMock.AllWithTTL")
+		m.t.Fatal("Expected call to dataStoreMock.AllWithTTL")
 	}
 
 	if m.DelFunc != nil && atomic.LoadUint64(&m.DelCounter) == 0 {
-		m.t.Fatal("Expected call to serverStorageMock.Del")
+		m.t.Fatal("Expected call to dataStoreMock.Del")
 	}
 
 }
 
 //CheckMocksCalled checks that all mocked methods of the interface have been called at least once
 //Deprecated: please use MinimockFinish method or use Finish method of minimock.Controller
-func (m *serverStorageMock) CheckMocksCalled() {
+func (m *dataStoreMock) CheckMocksCalled() {
 	m.Finish()
 }
 
 //Finish checks that all mocked methods of the interface have been called at least once
 //Deprecated: please use MinimockFinish or use Finish method of minimock.Controller
-func (m *serverStorageMock) Finish() {
+func (m *dataStoreMock) Finish() {
 	m.MinimockFinish()
 }
 
 //MinimockFinish checks that all mocked methods of the interface have been called at least once
-func (m *serverStorageMock) MinimockFinish() {
+func (m *dataStoreMock) MinimockFinish() {
 
 	if m.AllWithTTLFunc != nil && atomic.LoadUint64(&m.AllWithTTLCounter) == 0 {
-		m.t.Fatal("Expected call to serverStorageMock.AllWithTTL")
+		m.t.Fatal("Expected call to dataStoreMock.AllWithTTL")
 	}
 
 	if m.DelFunc != nil && atomic.LoadUint64(&m.DelCounter) == 0 {
-		m.t.Fatal("Expected call to serverStorageMock.Del")
+		m.t.Fatal("Expected call to dataStoreMock.Del")
 	}
 
 }
 
 //Wait waits for all mocked methods to be called at least once
 //Deprecated: please use MinimockWait or use Wait method of minimock.Controller
-func (m *serverStorageMock) Wait(timeout time.Duration) {
+func (m *dataStoreMock) Wait(timeout time.Duration) {
 	m.MinimockWait(timeout)
 }
 
 //MinimockWait waits for all mocked methods to be called at least once
 //this method is called by minimock.Controller
-func (m *serverStorageMock) MinimockWait(timeout time.Duration) {
+func (m *dataStoreMock) MinimockWait(timeout time.Duration) {
 	timeoutCh := time.After(timeout)
 	for {
 		ok := true
@@ -214,11 +214,11 @@ func (m *serverStorageMock) MinimockWait(timeout time.Duration) {
 		case <-timeoutCh:
 
 			if m.AllWithTTLFunc != nil && atomic.LoadUint64(&m.AllWithTTLCounter) == 0 {
-				m.t.Error("Expected call to serverStorageMock.AllWithTTL")
+				m.t.Error("Expected call to dataStoreMock.AllWithTTL")
 			}
 
 			if m.DelFunc != nil && atomic.LoadUint64(&m.DelCounter) == 0 {
-				m.t.Error("Expected call to serverStorageMock.Del")
+				m.t.Error("Expected call to dataStoreMock.Del")
 			}
 
 			m.t.Fatalf("Some mocks were not called on time: %s", timeout)
@@ -231,7 +231,7 @@ func (m *serverStorageMock) MinimockWait(timeout time.Duration) {
 
 //AllMocksCalled returns true if all mocked methods were called before the execution of AllMocksCalled,
 //it can be used with assert/require, i.e. assert.True(mock.AllMocksCalled())
-func (m *serverStorageMock) AllMocksCalled() bool {
+func (m *dataStoreMock) AllMocksCalled() bool {
 
 	if m.AllWithTTLFunc != nil && atomic.LoadUint64(&m.AllWithTTLCounter) == 0 {
 		return false

@@ -33,12 +33,12 @@ func TestDel_Execute(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		result Result
+		result Reply
 	}{
-		{"ok", []string{"key"}, OkResult{}},
-		{"not_existing_key", []string{"not_existing_key"}, OkResult{}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"key1", "key2"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"ok", []string{"key"}, OkReply{}},
+		{"not_existing_key", []string{"not_existing_key"}, OkReply{}},
+		{"wrong_number_of_args/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key1", "key2"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -55,11 +55,11 @@ func TestDel_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.DelMock.Return(err)
 
 	cmd := Del{strg: strg}
 	res := cmd.Execute("key")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

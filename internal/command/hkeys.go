@@ -6,7 +6,7 @@ import (
 
 //Hkeys is the HKEYS command
 type Hkeys struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -21,20 +21,20 @@ Returns all field names in the hash stored at key. Order of fields is not guaran
 }
 
 //Execute implements Execute of Command interface
-func (c *Hkeys) Execute(args ...string) Result {
+func (c *Hkeys) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return NilResult{}
+			return NilReply{}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 	if value.Type() != storage.MapDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+		return ErrReply{Value: ErrWrongTypeOp}
 	}
 
 	m := value.Data().(map[string]string)
@@ -43,5 +43,5 @@ func (c *Hkeys) Execute(args ...string) Result {
 	for k := range m {
 		keys = append(keys, k)
 	}
-	return SliceResult{Value: keys}
+	return SliceReply{Value: keys}
 }

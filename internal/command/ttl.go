@@ -8,7 +8,7 @@ import (
 
 //TTL is the TTL command
 type TTL struct {
-	strg commandStorage
+	strg dataStore
 	clck commandClock
 }
 
@@ -24,21 +24,21 @@ Returns the remaining time to live of a key. -1 returns if key does not have tim
 }
 
 //Execute implements Execute of Command interface
-func (c *TTL) Execute(args ...string) Result {
+func (c *TTL) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return NilResult{}
+			return NilReply{}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 	if value.TTL() < 0 {
-		return IntResult{Value: -1}
+		return IntReply{Value: -1}
 	}
 	secs := time.Unix(value.TTL(), 0).Sub(c.clck.Now()).Seconds()
-	return IntResult{Value: int64(secs)}
+	return IntReply{Value: int64(secs)}
 }
