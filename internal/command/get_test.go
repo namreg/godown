@@ -25,13 +25,13 @@ If provided key does not exist NIL will be returned.`
 }
 
 func TestGet_Execute(t *testing.T) {
-	expired := storage.NewStringValue("expired_value")
+	expired := storage.NewString("expired_value")
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(
 		map[storage.Key]*storage.Value{
-			"key_string": storage.NewStringValue("string_value"),
-			"key_list":   storage.NewListValue([]string{"list_value_1", "list_value_2"}),
+			"key_string": storage.NewString("string_value"),
+			"key_list":   storage.NewList([]string{"list_value_1", "list_value_2"}),
 			"expired":    expired,
 		},
 	)
@@ -62,10 +62,8 @@ func TestGet_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := Get{strg: strg}
 	res := cmd.Execute("key")

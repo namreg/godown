@@ -24,13 +24,13 @@ Returns the bit value at offset in the string value stored at key.`
 }
 
 func TestGetBit_Execute(t *testing.T) {
-	expired := storage.NewBitMapValue([]uint64{1 << 10})
+	expired := storage.NewBitMap([]uint64{1 << 10})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string":                 storage.NewStringValue("string"),
-		"bitmap":                 storage.NewBitMapValue([]uint64{1 << 5}),
-		"bitmap_with_big_offset": storage.NewBitMapValue([]uint64{0, 3}),
+		"string":                 storage.NewString("string"),
+		"bitmap":                 storage.NewBitMap([]uint64{1 << 5}),
+		"bitmap_with_big_offset": storage.NewBitMap([]uint64{0, 3}),
 		"expired_bitmap":         expired,
 	})
 
@@ -69,10 +69,8 @@ func TestGetBit_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := GetBit{strg: strg}
 	res := cmd.Execute("key", "10")

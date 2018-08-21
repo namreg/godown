@@ -25,12 +25,12 @@ Returns all values in the hash stored at key`
 }
 
 func TestHvals_Execute(t *testing.T) {
-	expired := storage.NewMapValue(map[string]string{"field1": "val1", "field2": "val2"})
+	expired := storage.NewMap(map[string]string{"field1": "val1", "field2": "val2"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string":  storage.NewStringValue("value"),
-		"map":     storage.NewMapValue(map[string]string{"field1": "val1", "field2": "val2"}),
+		"string":  storage.NewString("value"),
+		"map":     storage.NewMap(map[string]string{"field1": "val1", "field2": "val2"}),
 		"expired": expired,
 	})
 
@@ -71,10 +71,8 @@ func TestHvals_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := Hvals{strg: strg}
 	res := cmd.Execute("key")

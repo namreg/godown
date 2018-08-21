@@ -25,12 +25,12 @@ Removes and returns the first element of the list stored at key.`
 }
 
 func TestLpop_Execute(t *testing.T) {
-	expired := storage.NewListValue([]string{"val1", "val2"})
+	expired := storage.NewList([]string{"val1", "val2"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string":  storage.NewStringValue("string"),
-		"list":    storage.NewListValue([]string{"val1", "val2"}),
+		"string":  storage.NewString("string"),
+		"list":    storage.NewList([]string{"val1", "val2"}),
 		"expired": expired,
 	})
 
@@ -61,30 +61,18 @@ func TestLpop_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg1 := NewStorageMock(mc)
-	strg1.GetMock.Return(nil, err)
-	strg1.LockMock.Return()
-	strg1.UnlockMock.Return()
+	strg := NewcommandStorageMock(mc)
+	strg.PutMock.Return(err)
 
-	strg2 := NewStorageMock(mc)
-	strg2.GetMock.Return(storage.NewListValue([]string{"val", "val2"}), nil)
-	strg2.PutMock.Return(err)
-	strg2.LockMock.Return()
-	strg2.UnlockMock.Return()
+	cmd := Lpop{strg: strg}
 
-	cmd1 := Lpop{strg: strg1}
-	cmd2 := Lpop{strg: strg2}
-
-	res1 := cmd1.Execute("list")
-	assert.Equal(t, ErrResult{Value: err}, res1)
-
-	res2 := cmd2.Execute("list")
-	assert.Equal(t, ErrResult{Value: err}, res2)
+	res := cmd.Execute("list")
+	assert.Equal(t, ErrResult{Value: err}, res)
 }
 
 func TestLpop_Execute_DelEmptyList(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"list": storage.NewListValue([]string{"val1"}),
+		"list": storage.NewList([]string{"val1"}),
 	})
 
 	cmd := Lpop{strg: strg}
@@ -96,22 +84,4 @@ func TestLpop_Execute_DelEmptyList(t *testing.T) {
 	value, ok := items["list"]
 	assert.Nil(t, value)
 	assert.False(t, ok)
-}
-
-func TestLpop_Execute_DelEmptyListStorageErr(t *testing.T) {
-	mc := minimock.NewController(t)
-	defer mc.Finish()
-
-	err := errors.New("error")
-
-	strg := NewStorageMock(mc)
-	strg.LockMock.Return()
-	strg.UnlockMock.Return()
-	strg.GetMock.Return(storage.NewListValue([]string{"val1"}), nil)
-	strg.DelMock.Return(err)
-
-	cmd := Lpop{strg: strg}
-	res := cmd.Execute("list")
-
-	assert.Equal(t, ErrResult{Value: err}, res)
 }

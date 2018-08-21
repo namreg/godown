@@ -26,14 +26,14 @@ If key does not exists, 0 will be returned.`
 }
 
 func TestStrlen_Execute(t *testing.T) {
-	expired := storage.NewStringValue("val")
+	expired := storage.NewString("val")
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string":       storage.NewStringValue("value"),
-		"empty_string": storage.NewStringValue(""),
+		"string":       storage.NewString("value"),
+		"empty_string": storage.NewString(""),
 		"expired":      expired,
-		"list":         storage.NewListValue([]string{"val1", "val2"}),
+		"list":         storage.NewList([]string{"val1", "val2"}),
 	})
 
 	tests := []struct {
@@ -64,10 +64,8 @@ func TestStrlen_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := Strlen{strg: strg}
 	res := cmd.Execute("key")

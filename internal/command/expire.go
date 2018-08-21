@@ -30,35 +30,26 @@ func (c *Expire) Execute(args ...string) Result {
 	if len(args) != 2 {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
-
 	secs, err := strconv.Atoi(args[1])
 	if err != nil {
 		return ErrResult{Value: errors.New("seconds should be integer")}
 	}
-
 	if secs < 0 {
 		return ErrResult{Value: errors.New("seconds should be positive")}
 	}
-
-	c.strg.Lock()
-	defer c.strg.Unlock()
-
-	key := storage.Key(args[0])
-
-	val, err := c.strg.Get(key)
-	if err != nil {
-		if err == storage.ErrKeyNotExists {
-			return OkResult{}
+	setter := func(old *storage.Value) (*storage.Value, error) {
+		if old == nil {
+			return nil, nil
 		}
+
+		now := c.clck.Now()
+
+		old.SetTTL(now.Add(time.Duration(secs) * time.Second))
+
+		return old, nil
+	}
+	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
 		return ErrResult{Value: err}
 	}
-
-	now := c.clck.Now()
-
-	val.SetTTL(now.Add(time.Duration(secs) * time.Second))
-	if err = c.strg.Put(key, val); err != nil {
-		return ErrResult{Value: err}
-	}
-
 	return OkResult{}
 }

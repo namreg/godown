@@ -25,7 +25,7 @@ Sets field in the hash stored at key to value.`
 
 func TestHset_Execute(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string": storage.NewStringValue("value"),
+		"string": storage.NewString("value"),
 	})
 
 	tests := []struct {
@@ -48,7 +48,7 @@ func TestHset_Execute(t *testing.T) {
 
 func TestHset_Execute_WhiteBox(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"map": storage.NewMapValue(map[string]string{"field": "value"}),
+		"map": storage.NewMap(map[string]string{"field": "value"}),
 	})
 
 	tests := []struct {
@@ -124,23 +124,11 @@ func TestHset_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg1 := NewStorageMock(t)
-	strg1.GetMock.Return(nil, err)
-	strg1.LockMock.Return()
-	strg1.UnlockMock.Return()
+	strg := NewcommandStorageMock(mc)
+	strg.PutMock.Return(err)
 
-	strg2 := NewStorageMock(t)
-	strg2.GetMock.Return(storage.NewMapValue(map[string]string{"key": "value"}), nil)
-	strg2.PutMock.Return(err)
-	strg2.LockMock.Return()
-	strg2.UnlockMock.Return()
+	cmd := Hset{strg: strg}
+	res := cmd.Execute("key", "field", "value")
 
-	cmd1 := Hset{strg: strg1}
-	cmd2 := Hset{strg: strg2}
-
-	res1 := cmd1.Execute("key", "field", "value")
-	assert.Equal(t, ErrResult{Value: err}, res1)
-
-	res2 := cmd2.Execute("key", "field", "value")
-	assert.Equal(t, ErrResult{Value: err}, res2)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

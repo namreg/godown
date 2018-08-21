@@ -26,33 +26,23 @@ func (c *Hset) Execute(args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	key := storage.Key(args[0])
-	mfield, mvalue := args[1], args[2]
+	setter := func(old *storage.Value) (*storage.Value, error) {
+		mfield, mvalue := args[1], args[2]
+		if old == nil {
+			return storage.NewMap(map[string]string{mfield: mvalue}), nil
+		}
 
-	c.strg.Lock()
-	defer c.strg.Unlock()
+		if old.Type() != storage.MapDataType {
+			return nil, ErrWrongTypeOp
+		}
 
-	old, err := c.strg.Get(key)
-	if err != nil && err != storage.ErrKeyNotExists {
-		return ErrResult{Value: err}
+		m := old.Data().(map[string]string)
+
+		m[mfield] = mvalue
+
+		return storage.NewMap(m), nil
 	}
-
-	if old == nil {
-		return c.put(key, storage.NewMapValue(map[string]string{mfield: mvalue}))
-	}
-
-	if old.Type() != storage.MapDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
-	}
-
-	m := old.Data().(map[string]string)
-	m[mfield] = mvalue
-
-	return c.put(key, storage.NewMapValue(m))
-}
-
-func (c *Hset) put(key storage.Key, value *storage.Value) Result {
-	if err := c.strg.Put(key, value); err != nil {
+	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
 		return ErrResult{Value: err}
 	}
 	return OkResult{}

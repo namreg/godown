@@ -104,28 +104,28 @@ func TestValue_TTL(t *testing.T) {
 }
 
 func TestNewStringValue(t *testing.T) {
-	value := NewStringValue("test string")
+	value := NewString("test string")
 	assert.Equal(t, "test string", value.data)
 	assert.Equal(t, StringDataType, value.dataType)
 	assert.Equal(t, int64(-1), value.ttl)
 }
 
 func TestNewBitMapValue(t *testing.T) {
-	value := NewBitMapValue([]uint64{35})
+	value := NewBitMap([]uint64{35})
 	assert.Equal(t, uint64(35), value.data.([]uint64)[0])
 	assert.Equal(t, BitMapDataType, value.dataType)
 	assert.Equal(t, int64(-1), value.ttl)
 }
 
 func TestNewListValue(t *testing.T) {
-	value := NewListValue([]string{"test 1", "test 2", "test 3"})
+	value := NewList([]string{"test 1", "test 2", "test 3"})
 	assert.Equal(t, []string{"test 1", "test 2", "test 3"}, value.data)
 	assert.Equal(t, ListDataType, value.dataType)
 	assert.Equal(t, int64(-1), value.ttl)
 }
 
 func TestNewMapValue(t *testing.T) {
-	value := NewMapValue(map[string]string{"key": "value"})
+	value := NewMap(map[string]string{"key": "value"})
 	assert.Equal(t, map[string]string{"key": "value"}, value.data)
 	assert.Equal(t, MapDataType, value.dataType)
 	assert.Equal(t, int64(-1), value.ttl)

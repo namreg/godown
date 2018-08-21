@@ -25,13 +25,13 @@ Returns the value associated with field in the hash stored at key.`
 }
 
 func TestHget_Execute(t *testing.T) {
-	expired := storage.NewMapValue(map[string]string{"field": "value"})
+	expired := storage.NewMap(map[string]string{"field": "value"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string_key":  storage.NewStringValue("string"),
+		"string_key":  storage.NewString("string"),
 		"expired_key": expired,
-		"key":         storage.NewMapValue(map[string]string{"field": "value"}),
+		"key":         storage.NewMap(map[string]string{"field": "value"}),
 	})
 
 	tests := []struct {
@@ -63,10 +63,8 @@ func TestHget_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := Hget{strg: strg}
 	res := cmd.Execute("key", "field")

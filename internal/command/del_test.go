@@ -27,7 +27,7 @@ Del the given key.`
 func TestDel_Execute(t *testing.T) {
 	strg := memory.New(
 		map[storage.Key]*storage.Value{
-			"key": storage.NewStringValue("value"),
+			"key": storage.NewString("value"),
 		},
 	)
 	tests := []struct {
@@ -55,10 +55,8 @@ func TestDel_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.DelMock.Return(err)
-	strg.LockMock.Return()
-	strg.UnlockMock.Return()
 
 	cmd := Del{strg: strg}
 	res := cmd.Execute("key")

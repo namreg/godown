@@ -26,36 +26,33 @@ func (c *Lpop) Execute(args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	c.strg.Lock()
-	defer c.strg.Unlock()
+	var popped string
 
-	key := storage.Key(args[0])
-
-	val, err := c.strg.Get(key)
-	if err != nil {
-		if err == storage.ErrKeyNotExists {
-			return NilResult{}
+	setter := func(old *storage.Value) (*storage.Value, error) {
+		if old == nil {
+			return nil, nil
 		}
+
+		if old.Type() != storage.ListDataType {
+			return nil, ErrWrongTypeOp
+		}
+
+		list := old.Data().([]string)
+		popped, list = list[0], list[1:]
+
+		if len(list) == 0 {
+			return nil, nil
+		}
+
+		return storage.NewList(list), nil
+	}
+
+	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
 		return ErrResult{Value: err}
 	}
 
-	if val.Type() != storage.ListDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+	if popped == "" {
+		return NilResult{}
 	}
-
-	list := val.Data().([]string)
-	popped, list := list[0], list[1:]
-
-	if len(list) == 0 {
-		if err = c.strg.Del(key); err != nil {
-			return ErrResult{Value: err}
-		}
-		return StringResult{Value: popped}
-	}
-
-	if err = c.strg.Put(key, storage.NewListValue(list)); err != nil {
-		return ErrResult{Value: err}
-	}
-
 	return StringResult{Value: popped}
 }

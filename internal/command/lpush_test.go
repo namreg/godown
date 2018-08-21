@@ -26,8 +26,8 @@ Prepend one or multiple values to a list.`
 
 func TestLpush_Execute(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string": storage.NewStringValue("string"),
-		"list":   storage.NewListValue([]string{"val1", "val2"}),
+		"string": storage.NewString("string"),
+		"list":   storage.NewList([]string{"val1", "val2"}),
 	})
 
 	tests := []struct {
@@ -50,11 +50,11 @@ func TestLpush_Execute(t *testing.T) {
 }
 
 func TestLpush_Execute_WhiteBox(t *testing.T) {
-	expired := storage.NewListValue([]string{"val"})
+	expired := storage.NewList([]string{"val"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"list":    storage.NewListValue([]string{"val1"}),
+		"list":    storage.NewList([]string{"val1"}),
 		"expired": expired,
 	})
 	tests := []struct {
@@ -123,23 +123,11 @@ func TestLpush_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg1 := NewStorageMock(t)
-	strg1.GetMock.Return(nil, err)
-	strg1.LockMock.Return()
-	strg1.UnlockMock.Return()
+	strg := NewcommandStorageMock(mc)
+	strg.PutMock.Return(err)
 
-	strg2 := NewStorageMock(t)
-	strg2.GetMock.Return(storage.NewListValue([]string{"val"}), nil)
-	strg2.PutMock.Return(err)
-	strg2.LockMock.Return()
-	strg2.UnlockMock.Return()
+	cmd := Lpush{strg: strg}
 
-	cmd1 := Lpush{strg: strg1}
-	cmd2 := Lpush{strg: strg2}
-
-	res1 := cmd1.Execute("key", "val")
-	assert.Equal(t, ErrResult{Value: err}, res1)
-
-	res2 := cmd2.Execute("key", "val")
-	assert.Equal(t, ErrResult{Value: err}, res2)
+	res := cmd.Execute("key", "val")
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

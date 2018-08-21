@@ -29,12 +29,14 @@ func (c *Set) Execute(args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	key := storage.Key(args[0])
 	value := strings.Join(args[1:], " ")
 
-	if err := c.strg.Put(key, storage.NewStringValue(value)); err != nil {
-		return ErrResult{Value: err}
+	setter := func(old *storage.Value) (*storage.Value, error) {
+		return storage.NewString(value), nil
 	}
 
+	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
+		return ErrResult{Value: err}
+	}
 	return OkResult{}
 }

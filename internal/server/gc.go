@@ -38,19 +38,15 @@ func (g *gc) stop() {
 }
 
 func (g *gc) deleteExpired() {
-	g.strg.RLock()
 	items, err := g.strg.AllWithTTL()
-	g.strg.RUnlock()
 	if err != nil {
 		g.logger.Printf("[WARN] gc: could not retrieve values: %v", err)
 	}
 	for k, v := range items {
 		if v.IsExpired(g.clck.Now()) {
-			g.strg.Lock()
 			if err := g.strg.Del(k); err != nil {
 				g.logger.Printf("[WANR] gc: could not delete item: %v", err)
 			}
-			g.strg.Unlock()
 		}
 	}
 }

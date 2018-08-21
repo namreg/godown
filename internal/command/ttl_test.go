@@ -34,15 +34,15 @@ func TestTTL_Execute(t *testing.T) {
 
 	now := clck.Now()
 
-	expired := storage.NewStringValue("value")
+	expired := storage.NewString("value")
 	expired.SetTTL(now.Add(-1 * time.Second))
 
-	willExpire := storage.NewStringValue("value")
+	willExpire := storage.NewString("value")
 	willExpire.SetTTL(now.Add(10 * time.Second))
 
 	strg := memory.New(
 		map[storage.Key]*storage.Value{
-			"no_timeout":  storage.NewStringValue("value"),
+			"no_timeout":  storage.NewString("value"),
 			"expired":     expired,
 			"will_expire": willExpire,
 		},
@@ -77,10 +77,8 @@ func TestTTL_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := TTL{strg: strg}
 	res := cmd.Execute("key")

@@ -28,9 +28,7 @@ func (c *Keys) Execute(args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	c.strg.RLock()
 	keys, err := c.strg.Keys()
-	c.strg.RUnlock()
 	if err != nil {
 		return ErrResult{Value: err}
 	}

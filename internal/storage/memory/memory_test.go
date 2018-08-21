@@ -13,9 +13,9 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	val := storage.NewStringValue("value1")
+	val := storage.NewString("value1")
 
-	valWithTTL := storage.NewStringValue("value2")
+	valWithTTL := storage.NewString("value2")
 	valWithTTL.SetTTL(time.Now().Add(1 * time.Second))
 
 	tests := []struct {
@@ -45,41 +45,76 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		strg := New(tt.items)
-		assert.Implements(t, new(storage.Storage), strg)
 		assert.Equal(t, tt.expectedItems, strg.items)
 		assert.Equal(t, tt.expectedItemsWithTTL, strg.itemsWithTTL)
 	}
 }
 
-func TestStorage_Put(t *testing.T) {
+func TestStorage_Put_WhenValueShouldBeDeleted(t *testing.T) {
 	strg := &Storage{
+		clck:         clock.New(),
 		items:        make(map[storage.Key]*storage.Value),
 		itemsWithTTL: make(map[storage.Key]*storage.Value),
 	}
-	expired := storage.NewStringValue("value")
-	expired.SetTTL(time.Now().Add(1 * time.Second))
+	strg.items[storage.Key("key1")] = storage.NewList([]string{"value1"})
+	strg.itemsWithTTL[storage.Key("key1")] = storage.NewList([]string{"value1"})
 
-	err := strg.Put("expired", expired)
+	assert.NoError(t, strg.Put(storage.Key("key2"), func(*storage.Value) (*storage.Value, error) {
+		return nil, nil
+	}))
 
-	assert.NoError(t, err)
+	_, ok := strg.items[storage.Key("key2")]
+	assert.False(t, ok)
 
-	val, ok := strg.items["expired"]
-	assert.Equal(t, expired, val)
+	_, ok = strg.itemsWithTTL[storage.Key("key2")]
+	assert.False(t, ok)
+}
+
+func TestStorage_Put_WhenValueShouldBeAdded(t *testing.T) {
+	strg := &Storage{
+		clck:         clock.New(),
+		items:        make(map[storage.Key]*storage.Value),
+		itemsWithTTL: make(map[storage.Key]*storage.Value),
+	}
+
+	assert.NoError(t, strg.Put(storage.Key("key"), func(*storage.Value) (*storage.Value, error) {
+		val := storage.NewString("value")
+		val.SetTTL(time.Now().Add(1 * time.Second))
+		return val, nil
+	}))
+
+	_, ok := strg.items[storage.Key("key")]
 	assert.True(t, ok)
 
-	val, ok = strg.itemsWithTTL["expired"]
-	assert.Equal(t, expired, val)
+	_, ok = strg.itemsWithTTL[storage.Key("key")]
 	assert.True(t, ok)
 }
 
+func TestStorage_Put_ExpiredKey(t *testing.T) {
+	expired := storage.NewString("value")
+	expired.SetTTL(time.Now().Add(-1 * time.Second))
+
+	strg := &Storage{
+		clck:         clock.New(),
+		items:        map[storage.Key]*storage.Value{"expired": expired},
+		itemsWithTTL: map[storage.Key]*storage.Value{"expired": expired},
+	}
+
+	err := strg.Put(storage.Key("expired"), func(old *storage.Value) (*storage.Value, error) {
+		assert.Nil(t, old)
+		return nil, nil
+	})
+	assert.NoError(t, err)
+}
+
 func TestStorage_Get(t *testing.T) {
-	expired := storage.NewStringValue("expired_value")
+	expired := storage.NewString("expired_value")
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := &Storage{
 		clck: clock.New(),
 		items: map[storage.Key]*storage.Value{
-			"key":         storage.NewStringValue("value"),
+			"key":         storage.NewString("value"),
 			"expired_key": expired,
 		},
 		itemsWithTTL: map[storage.Key]*storage.Value{
@@ -95,7 +130,7 @@ func TestStorage_Get(t *testing.T) {
 		{
 			name: "existing_key",
 			key:  storage.Key("key"),
-			want: storage.NewStringValue("value"),
+			want: storage.NewString("value"),
 		},
 		{
 			name: "not_existing_key",
@@ -127,11 +162,11 @@ func TestStorage_Del(t *testing.T) {
 	strg := Storage{
 		clck: clock.New(),
 		items: map[storage.Key]*storage.Value{
-			storage.Key("key"):  storage.NewStringValue("value"),
-			storage.Key("key2"): storage.NewStringValue("value2"),
+			storage.Key("key"):  storage.NewString("value"),
+			storage.Key("key2"): storage.NewString("value2"),
 		},
 		itemsWithTTL: map[storage.Key]*storage.Value{
-			storage.Key("key"): storage.NewStringValue("value"),
+			storage.Key("key"): storage.NewString("value"),
 		},
 	}
 
@@ -140,7 +175,7 @@ func TestStorage_Del(t *testing.T) {
 	assert.Equal(
 		t,
 		map[storage.Key]*storage.Value{
-			storage.Key("key2"): storage.NewStringValue("value2"),
+			storage.Key("key2"): storage.NewString("value2"),
 		},
 		strg.items,
 	)
@@ -153,14 +188,14 @@ func TestStorage_Del(t *testing.T) {
 }
 
 func TestStorage_Keys(t *testing.T) {
-	expired := storage.NewStringValue("expired_value")
+	expired := storage.NewString("expired_value")
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := Storage{
 		clck: clock.New(),
 		items: map[storage.Key]*storage.Value{
-			storage.Key("key"):     storage.NewStringValue("value"),
-			storage.Key("key2"):    storage.NewStringValue("value2"),
+			storage.Key("key"):     storage.NewString("value"),
+			storage.Key("key2"):    storage.NewString("value2"),
 			storage.Key("expired"): expired,
 		},
 	}
@@ -176,13 +211,13 @@ func TestStorage_All(t *testing.T) {
 	strg := Storage{
 		clck: clock.New(),
 		items: map[storage.Key]*storage.Value{
-			storage.Key("key"):  storage.NewStringValue("value"),
-			storage.Key("key2"): storage.NewStringValue("value2"),
+			storage.Key("key"):  storage.NewString("value"),
+			storage.Key("key2"): storage.NewString("value2"),
 		},
 	}
 	expected := map[storage.Key]*storage.Value{
-		storage.Key("key"):  storage.NewStringValue("value"),
-		storage.Key("key2"): storage.NewStringValue("value2"),
+		storage.Key("key"):  storage.NewString("value"),
+		storage.Key("key2"): storage.NewString("value2"),
 	}
 	actual, err := strg.All()
 
@@ -194,15 +229,15 @@ func TestStorage_AllWithTTL(t *testing.T) {
 	strg := Storage{
 		clck: clock.New(),
 		items: map[storage.Key]*storage.Value{
-			storage.Key("key"):  storage.NewStringValue("value"),
-			storage.Key("key2"): storage.NewStringValue("value2"),
+			storage.Key("key"):  storage.NewString("value"),
+			storage.Key("key2"): storage.NewString("value2"),
 		},
 		itemsWithTTL: map[storage.Key]*storage.Value{
-			storage.Key("key2"): storage.NewStringValue("value2"),
+			storage.Key("key2"): storage.NewString("value2"),
 		},
 	}
 	expected := map[storage.Key]*storage.Value{
-		storage.Key("key2"): storage.NewStringValue("value2"),
+		storage.Key("key2"): storage.NewString("value2"),
 	}
 	actual, err := strg.AllWithTTL()
 

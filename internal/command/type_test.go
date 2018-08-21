@@ -25,10 +25,10 @@ Returns the type stored at key.`
 
 func TestType_Execute(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string": storage.NewStringValue("value"),
-		"list":   storage.NewListValue([]string{"val1"}),
-		"map":    storage.NewMapValue(map[string]string{"field": "values"}),
-		"bitmap": storage.NewBitMapValue([]uint64{1}),
+		"string": storage.NewString("value"),
+		"list":   storage.NewList([]string{"val1"}),
+		"map":    storage.NewMap(map[string]string{"field": "values"}),
+		"bitmap": storage.NewBitMap([]uint64{1}),
 	})
 
 	tests := []struct {
@@ -60,10 +60,8 @@ func TestType_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := Type{strg: strg}
 	res := cmd.Execute("key")

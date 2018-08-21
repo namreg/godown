@@ -27,12 +27,12 @@ Negative indices can be used to designate elements starting at the tail of the l
 }
 
 func TestLindex_Execute(t *testing.T) {
-	expired := storage.NewListValue([]string{"val1", "val2"})
+	expired := storage.NewList([]string{"val1", "val2"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string":  storage.NewStringValue("string"),
-		"list":    storage.NewListValue([]string{"val1", "val2"}),
+		"string":  storage.NewString("string"),
+		"list":    storage.NewList([]string{"val1", "val2"}),
 		"expired": expired,
 	})
 
@@ -68,10 +68,8 @@ func TestLindex_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := Lindex{strg: strg}
 	res := cmd.Execute("key", "0")

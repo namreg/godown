@@ -24,7 +24,7 @@ Sets or clears the bit at offset in the string value stored at key.`
 
 func TestSetBit_Execute(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string": storage.NewStringValue("value"),
+		"string": storage.NewString("value"),
 	})
 
 	tests := []struct {
@@ -52,9 +52,9 @@ func TestSetBit_Execute(t *testing.T) {
 
 func TestSetBit_Execute_WhiteBox(t *testing.T) {
 	items := map[storage.Key]*storage.Value{
-		"bitmap2":                storage.NewBitMapValue([]uint64{2}),
-		"bitmap3":                storage.NewBitMapValue([]uint64{2}),
-		"bitmap_with_big_offset": storage.NewBitMapValue([]uint64{0, 1}),
+		"bitmap2":                storage.NewBitMap([]uint64{2}),
+		"bitmap3":                storage.NewBitMap([]uint64{2}),
+		"bitmap_with_big_offset": storage.NewBitMap([]uint64{0, 1}),
 	}
 	strg := memory.New(items)
 
@@ -145,38 +145,11 @@ func TestSetBit_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	//storage.Get error
-	strg1 := NewStorageMock(t)
-	strg1.GetMock.Return(nil, err)
-	strg1.LockMock.Return()
-	strg1.UnlockMock.Return()
+	strg := NewcommandStorageMock(mc)
+	strg.PutMock.Return(err)
 
-	cmd1 := SetBit{strg: strg1}
+	cmd := SetBit{strg: strg}
+	res := cmd.Execute("key", "1", "1")
 
-	res1 := cmd1.Execute("key", "1", "1")
-	assert.Equal(t, ErrResult{Value: err}, res1)
-
-	//storage.Put error
-	strg2 := NewStorageMock(t)
-	strg2.GetMock.Return(storage.NewBitMapValue([]uint64{5}), nil)
-	strg2.PutMock.Return(err)
-	strg2.LockMock.Return()
-	strg2.UnlockMock.Return()
-
-	cmd2 := SetBit{strg: strg2}
-
-	res2 := cmd2.Execute("key", "1", "1")
-	assert.Equal(t, ErrResult{Value: err}, res2)
-
-	//storage.Del error
-	strg3 := NewStorageMock(t)
-	strg3.GetMock.Return(storage.NewBitMapValue([]uint64{2}), nil)
-	strg3.DelMock.Return(err)
-	strg3.LockMock.Return()
-	strg3.UnlockMock.Return()
-
-	cmd3 := SetBit{strg: strg3}
-
-	res3 := cmd3.Execute("key", "1", "0")
-	assert.Equal(t, ErrResult{Value: err}, res3)
+	assert.Equal(t, ErrResult{Value: err}, res)
 }

@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"sync"
 	"time"
 
 	context "golang.org/x/net/context"
@@ -23,15 +22,9 @@ type commandParser interface {
 	Parse(str string) (cmd command.Command, args []string, err error)
 }
 
-//go:generate minimock -i github.com/namreg/godown-v2/internal/server.serverStorage -o ./
-
 //serverStorage describes storage interface that Server works with.
+//go:generate minimock -i github.com/namreg/godown-v2/internal/server.serverStorage -o ./
 type serverStorage interface {
-	sync.Locker
-	//RLock locks storage for reading.
-	RLock()
-	//RUnlock undoes single RLock call.
-	RUnlock()
 	//Del deletes the given key.
 	Del(storage.Key) error
 	//AllWithTTL returns all values that have TTL.
@@ -39,7 +32,6 @@ type serverStorage interface {
 }
 
 //go:generate minimock -i github.com/namreg/godown-v2/internal/server.serverClock -o ./
-
 type serverClock interface {
 	Now() time.Time
 }

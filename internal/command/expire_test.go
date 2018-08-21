@@ -28,7 +28,7 @@ Set a timeout on key. After the timeout has expired, the key will automatically 
 
 func TestExpire_Execute(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"key": storage.NewStringValue("value"),
+		"key": storage.NewString("value"),
 	})
 	tests := []struct {
 		name string
@@ -57,28 +57,15 @@ func TestExpire_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg1 := NewStorageMock(t)
-	strg1.GetMock.Return(nil, err)
-	strg1.LockMock.Return()
-	strg1.UnlockMock.Return()
+	strg := NewcommandStorageMock(mc)
+	strg.PutMock.Return(err)
 
-	strg2 := NewStorageMock(t)
-	strg2.GetMock.Return(storage.NewStringValue("value"), nil)
-	strg2.PutMock.Return(err)
-	strg2.LockMock.Return()
-	strg2.UnlockMock.Return()
-
-	cmd1 := Expire{strg: strg1, clck: clock.New()}
-
-	cmd2 := Expire{strg: strg2, clck: clock.New()}
+	cmd := Expire{strg: strg}
 
 	expectedRes := ErrResult{Value: err}
+	actualRes := cmd.Execute("key", "10")
 
-	actualRes1 := cmd1.Execute([]string{"key", "10"}...)
-	assert.Equal(t, expectedRes, actualRes1)
-
-	actualRes2 := cmd2.Execute([]string{"key", "10"}...)
-	assert.Equal(t, expectedRes, actualRes2)
+	assert.Equal(t, expectedRes, actualRes)
 }
 
 func TestExpire_Execute_WhiteBox(t *testing.T) {
@@ -87,11 +74,11 @@ func TestExpire_Execute_WhiteBox(t *testing.T) {
 
 	now, _ := time.Parse("2006-01-02 15:04:05", "2018-01-01 11:11:11")
 
-	clck := NewcommandClockMock(t)
+	clck := NewcommandClockMock(mc)
 	clck.NowMock.Return(now)
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"key": storage.NewStringValue("value"),
+		"key": storage.NewString("value"),
 	})
 
 	cmd := Expire{strg: strg, clck: clck}

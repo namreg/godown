@@ -29,9 +29,7 @@ func (c *Strlen) Execute(args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	c.strg.RLock()
 	value, err := c.strg.Get(storage.Key(args[0]))
-	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return IntResult{Value: 0}

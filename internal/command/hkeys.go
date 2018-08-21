@@ -26,9 +26,7 @@ func (c *Hkeys) Execute(args ...string) Result {
 		return ErrResult{Value: ErrWrongArgsNumber}
 	}
 
-	c.strg.RLock()
 	value, err := c.strg.Get(storage.Key(args[0]))
-	c.strg.RUnlock()
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
 			return NilResult{}
@@ -38,7 +36,9 @@ func (c *Hkeys) Execute(args ...string) Result {
 	if value.Type() != storage.MapDataType {
 		return ErrResult{Value: ErrWrongTypeOp}
 	}
+
 	m := value.Data().(map[string]string)
+
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)

@@ -25,13 +25,13 @@ Find all keys matching the given pattern.`
 }
 
 func TestKeys_Execute(t *testing.T) {
-	expired := storage.NewStringValue("value")
+	expired := storage.NewString("value")
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string":  storage.NewStringValue("value"),
-		"string2": storage.NewStringValue("value2"),
-		"map":     storage.NewMapValue(map[string]string{"field1": "val1", "field2": "val2"}),
+		"string":  storage.NewString("value"),
+		"string2": storage.NewString("value2"),
+		"map":     storage.NewMap(map[string]string{"field1": "val1", "field2": "val2"}),
 		"expired": expired,
 	})
 
@@ -71,10 +71,8 @@ func TestKeys_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.KeysMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := Keys{strg: strg}
 	res := cmd.Execute("*")

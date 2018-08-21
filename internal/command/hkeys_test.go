@@ -26,12 +26,12 @@ Returns all field names in the hash stored at key. Order of fields is not guaran
 }
 
 func TestHkeys_Execute(t *testing.T) {
-	expired := storage.NewMapValue(map[string]string{"field": "value", "field2": "value2"})
+	expired := storage.NewMap(map[string]string{"field": "value", "field2": "value2"})
 	expired.SetTTL(time.Now().Add(-1 * time.Second))
 
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string":       storage.NewStringValue("value"),
-		"hash":         storage.NewMapValue(map[string]string{"field": "value", "field2": "value2"}),
+		"string":       storage.NewString("value"),
+		"hash":         storage.NewMap(map[string]string{"field": "value", "field2": "value2"}),
 		"expired_hash": expired,
 	})
 
@@ -73,10 +73,8 @@ func TestHkeys_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.GetMock.Return(nil, err)
-	strg.RLockMock.Return()
-	strg.RUnlockMock.Return()
 
 	cmd := Hkeys{strg: strg}
 	res := cmd.Execute("key")

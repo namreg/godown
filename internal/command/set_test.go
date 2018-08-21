@@ -44,7 +44,7 @@ func TestSet_Execute(t *testing.T) {
 
 func TestSet_Execute_WhiteBox(t *testing.T) {
 	strg := memory.New(map[storage.Key]*storage.Value{
-		"string": storage.NewStringValue("value"),
+		"string": storage.NewString("value"),
 	})
 
 	cmd := Set{strg: strg}
@@ -64,10 +64,8 @@ func TestSet_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewStorageMock(t)
+	strg := NewcommandStorageMock(mc)
 	strg.PutMock.Return(err)
-	strg.LockMock.Return()
-	strg.UnlockMock.Return()
 
 	cmd := Set{strg: strg}
 	res := cmd.Execute("key", "value")
