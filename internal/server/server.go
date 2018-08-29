@@ -48,17 +48,27 @@ type commandParser interface {
 
 //metaStore is used for storing meta information.
 type metaStore interface {
+	//AllMeta returns all stored metadata.
+	AllMeta() (map[storage.MetaKey]storage.MetaValue, error)
+	//PutMeta puts a new value at the given key.
 	PutMeta(storage.MetaKey, storage.MetaValue) error
+	//GetMeta get a value at the given key.
 	GetMeta(storage.MetaKey) (storage.MetaValue, error)
+	//RestoreMeta replaces current metadata with the given one.
+	RestoreMeta(map[storage.MetaKey]storage.MetaValue) error
 }
 
 //dataStore is used to access stored data.
 //go:generate minimock -i github.com/namreg/godown-v2/internal/server.dataStore -o ./
 type dataStore interface {
-	//Del deletes the given key.
-	Del(storage.Key) error
+	//AllWithTTL returns all stored values.
+	All() (map[storage.Key]*storage.Value, error)
 	//AllWithTTL returns all values that have TTL.
 	AllWithTTL() (map[storage.Key]*storage.Value, error)
+	//Del deletes the given key.
+	Del(storage.Key) error
+	//Restore restores current data with the given one.
+	Restore(map[storage.Key]*storage.Value) error
 }
 
 //go:generate minimock -i github.com/namreg/godown-v2/internal/server.serverClock -o ./
@@ -167,6 +177,12 @@ func (s *Server) setupRaft() error {
 	if s.opts.ID == "" {
 		return errors.New("empty server ID")
 	}
+	absDir, err := filepath.Abs(s.opts.Dir)
+	if err != nil {
+		return err
+	}
+	s.opts.Dir = absDir
+
 	config := raft.DefaultConfig()
 	config.LocalID = raft.ServerID(s.opts.ID)
 

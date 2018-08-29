@@ -26,6 +26,13 @@ func (v *Value) UnmarshalJSON(j []byte) error {
 		return err
 	}
 
+	t, ok := m[typeJSONField]
+	if !ok {
+		return fmt.Errorf("could not recognize type")
+	}
+
+	val.dataType = DataType(t.(string))
+
 	for k, mv := range m {
 		switch k {
 		case ttlJSONField:
@@ -34,26 +41,41 @@ func (v *Value) UnmarshalJSON(j []byte) error {
 				return fmt.Errorf("could not unmarshal ttl: ttl is not a float64")
 			}
 			val.ttl = int64(f)
-		case typeJSONField:
-			s, ok := mv.(string)
-			if !ok {
-				return fmt.Errorf("could not unmarshal type: type is not a string")
-			}
-			val.dataType = DataType(s)
 		case valueJSONField:
-			tm, ok := mv.(map[string]interface{})
-			if !ok {
-				return fmt.Errorf("could not unmarshal value: type is not a map[string]interface{}")
-			}
-			vmap := make(map[string]string, len(tm))
-			for mkey, mvalue := range tm {
-				sv, ok := mvalue.(string)
+			switch val.dataType {
+			case StringDataType:
+				s, ok := mv.(string)
 				if !ok {
-					return fmt.Errorf("could not unmarshal value: key %q is not a string", mkey)
+					return fmt.Errorf("could not unmarshal string value: not a string representaion")
 				}
-				vmap[mkey] = sv
+				val.data = s
+			case ListDataType:
+				l, ok := mv.([]string)
+				if !ok {
+					return fmt.Errorf("could not unmarshal list value: not a list representation")
+				}
+				val.data = l
+			case MapDataType:
+				tm, ok := mv.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("could not unmarshal map value: not a map representaion")
+				}
+				vmap := make(map[string]string, len(tm))
+				for mkey, mvalue := range tm {
+					sv, ok := mvalue.(string)
+					if !ok {
+						return fmt.Errorf("could not unmarshal map value: key %q is not a string", mkey)
+					}
+					vmap[mkey] = sv
+				}
+				val.data = vmap
+			case BitMapDataType:
+				l, ok := mv.([]uint64)
+				if !ok {
+					return fmt.Errorf("could not unmarshal bitmap value: not a bitmap representaion")
+				}
+				val.data = l
 			}
-			val.data = vmap
 		}
 	}
 

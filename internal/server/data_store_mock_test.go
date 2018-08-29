@@ -7,7 +7,7 @@ The original interface "dataStore" can be found in github.com/namreg/godown-v2/i
 */
 import (
 	"sync/atomic"
-	"time"
+	time "time"
 
 	"github.com/gojuno/minimock"
 	storage "github.com/namreg/godown-v2/internal/storage"
@@ -19,6 +19,11 @@ import (
 type dataStoreMock struct {
 	t minimock.Tester
 
+	AllFunc       func() (r map[storage.Key]*storage.Value, r1 error)
+	AllCounter    uint64
+	AllPreCounter uint64
+	AllMock       mdataStoreMockAll
+
 	AllWithTTLFunc       func() (r map[storage.Key]*storage.Value, r1 error)
 	AllWithTTLCounter    uint64
 	AllWithTTLPreCounter uint64
@@ -28,6 +33,11 @@ type dataStoreMock struct {
 	DelCounter    uint64
 	DelPreCounter uint64
 	DelMock       mdataStoreMockDel
+
+	RestoreFunc       func(p map[storage.Key]*storage.Value) (r error)
+	RestoreCounter    uint64
+	RestorePreCounter uint64
+	RestoreMock       mdataStoreMockRestore
 }
 
 //NewdataStoreMock returns a mock for github.com/namreg/godown-v2/internal/server.dataStore
@@ -38,10 +48,54 @@ func NewdataStoreMock(t minimock.Tester) *dataStoreMock {
 		controller.RegisterMocker(m)
 	}
 
+	m.AllMock = mdataStoreMockAll{mock: m}
 	m.AllWithTTLMock = mdataStoreMockAllWithTTL{mock: m}
 	m.DelMock = mdataStoreMockDel{mock: m}
+	m.RestoreMock = mdataStoreMockRestore{mock: m}
 
 	return m
+}
+
+type mdataStoreMockAll struct {
+	mock *dataStoreMock
+}
+
+//Return sets up a mock for dataStore.All to return Return's arguments
+func (m *mdataStoreMockAll) Return(r map[storage.Key]*storage.Value, r1 error) *dataStoreMock {
+	m.mock.AllFunc = func() (map[storage.Key]*storage.Value, error) {
+		return r, r1
+	}
+	return m.mock
+}
+
+//Set uses given function f as a mock of dataStore.All method
+func (m *mdataStoreMockAll) Set(f func() (r map[storage.Key]*storage.Value, r1 error)) *dataStoreMock {
+	m.mock.AllFunc = f
+
+	return m.mock
+}
+
+//All implements github.com/namreg/godown-v2/internal/server.dataStore interface
+func (m *dataStoreMock) All() (r map[storage.Key]*storage.Value, r1 error) {
+	atomic.AddUint64(&m.AllPreCounter, 1)
+	defer atomic.AddUint64(&m.AllCounter, 1)
+
+	if m.AllFunc == nil {
+		m.t.Fatal("Unexpected call to dataStoreMock.All")
+		return
+	}
+
+	return m.AllFunc()
+}
+
+//AllMinimockCounter returns a count of dataStoreMock.AllFunc invocations
+func (m *dataStoreMock) AllMinimockCounter() uint64 {
+	return atomic.LoadUint64(&m.AllCounter)
+}
+
+//AllMinimockPreCounter returns the value of dataStoreMock.All invocations
+func (m *dataStoreMock) AllMinimockPreCounter() uint64 {
+	return atomic.LoadUint64(&m.AllPreCounter)
 }
 
 type mdataStoreMockAllWithTTL struct {
@@ -152,9 +206,79 @@ func (m *dataStoreMock) DelMinimockPreCounter() uint64 {
 	return atomic.LoadUint64(&m.DelPreCounter)
 }
 
+type mdataStoreMockRestore struct {
+	mock             *dataStoreMock
+	mockExpectations *dataStoreMockRestoreParams
+}
+
+//dataStoreMockRestoreParams represents input parameters of the dataStore.Restore
+type dataStoreMockRestoreParams struct {
+	p map[storage.Key]*storage.Value
+}
+
+//Expect sets up expected params for the dataStore.Restore
+func (m *mdataStoreMockRestore) Expect(p map[storage.Key]*storage.Value) *mdataStoreMockRestore {
+	m.mockExpectations = &dataStoreMockRestoreParams{p}
+	return m
+}
+
+//Return sets up a mock for dataStore.Restore to return Return's arguments
+func (m *mdataStoreMockRestore) Return(r error) *dataStoreMock {
+	m.mock.RestoreFunc = func(p map[storage.Key]*storage.Value) error {
+		return r
+	}
+	return m.mock
+}
+
+//Set uses given function f as a mock of dataStore.Restore method
+func (m *mdataStoreMockRestore) Set(f func(p map[storage.Key]*storage.Value) (r error)) *dataStoreMock {
+	m.mock.RestoreFunc = f
+	m.mockExpectations = nil
+	return m.mock
+}
+
+//Restore implements github.com/namreg/godown-v2/internal/server.dataStore interface
+func (m *dataStoreMock) Restore(p map[storage.Key]*storage.Value) (r error) {
+	atomic.AddUint64(&m.RestorePreCounter, 1)
+	defer atomic.AddUint64(&m.RestoreCounter, 1)
+
+	if m.RestoreMock.mockExpectations != nil {
+		testify_assert.Equal(m.t, *m.RestoreMock.mockExpectations, dataStoreMockRestoreParams{p},
+			"dataStore.Restore got unexpected parameters")
+
+		if m.RestoreFunc == nil {
+
+			m.t.Fatal("No results are set for the dataStoreMock.Restore")
+
+			return
+		}
+	}
+
+	if m.RestoreFunc == nil {
+		m.t.Fatal("Unexpected call to dataStoreMock.Restore")
+		return
+	}
+
+	return m.RestoreFunc(p)
+}
+
+//RestoreMinimockCounter returns a count of dataStoreMock.RestoreFunc invocations
+func (m *dataStoreMock) RestoreMinimockCounter() uint64 {
+	return atomic.LoadUint64(&m.RestoreCounter)
+}
+
+//RestoreMinimockPreCounter returns the value of dataStoreMock.Restore invocations
+func (m *dataStoreMock) RestoreMinimockPreCounter() uint64 {
+	return atomic.LoadUint64(&m.RestorePreCounter)
+}
+
 //ValidateCallCounters checks that all mocked methods of the interface have been called at least once
 //Deprecated: please use MinimockFinish method or use Finish method of minimock.Controller
 func (m *dataStoreMock) ValidateCallCounters() {
+
+	if m.AllFunc != nil && atomic.LoadUint64(&m.AllCounter) == 0 {
+		m.t.Fatal("Expected call to dataStoreMock.All")
+	}
 
 	if m.AllWithTTLFunc != nil && atomic.LoadUint64(&m.AllWithTTLCounter) == 0 {
 		m.t.Fatal("Expected call to dataStoreMock.AllWithTTL")
@@ -162,6 +286,10 @@ func (m *dataStoreMock) ValidateCallCounters() {
 
 	if m.DelFunc != nil && atomic.LoadUint64(&m.DelCounter) == 0 {
 		m.t.Fatal("Expected call to dataStoreMock.Del")
+	}
+
+	if m.RestoreFunc != nil && atomic.LoadUint64(&m.RestoreCounter) == 0 {
+		m.t.Fatal("Expected call to dataStoreMock.Restore")
 	}
 
 }
@@ -181,12 +309,20 @@ func (m *dataStoreMock) Finish() {
 //MinimockFinish checks that all mocked methods of the interface have been called at least once
 func (m *dataStoreMock) MinimockFinish() {
 
+	if m.AllFunc != nil && atomic.LoadUint64(&m.AllCounter) == 0 {
+		m.t.Fatal("Expected call to dataStoreMock.All")
+	}
+
 	if m.AllWithTTLFunc != nil && atomic.LoadUint64(&m.AllWithTTLCounter) == 0 {
 		m.t.Fatal("Expected call to dataStoreMock.AllWithTTL")
 	}
 
 	if m.DelFunc != nil && atomic.LoadUint64(&m.DelCounter) == 0 {
 		m.t.Fatal("Expected call to dataStoreMock.Del")
+	}
+
+	if m.RestoreFunc != nil && atomic.LoadUint64(&m.RestoreCounter) == 0 {
+		m.t.Fatal("Expected call to dataStoreMock.Restore")
 	}
 
 }
@@ -203,8 +339,10 @@ func (m *dataStoreMock) MinimockWait(timeout time.Duration) {
 	timeoutCh := time.After(timeout)
 	for {
 		ok := true
+		ok = ok && (m.AllFunc == nil || atomic.LoadUint64(&m.AllCounter) > 0)
 		ok = ok && (m.AllWithTTLFunc == nil || atomic.LoadUint64(&m.AllWithTTLCounter) > 0)
 		ok = ok && (m.DelFunc == nil || atomic.LoadUint64(&m.DelCounter) > 0)
+		ok = ok && (m.RestoreFunc == nil || atomic.LoadUint64(&m.RestoreCounter) > 0)
 
 		if ok {
 			return
@@ -213,12 +351,20 @@ func (m *dataStoreMock) MinimockWait(timeout time.Duration) {
 		select {
 		case <-timeoutCh:
 
+			if m.AllFunc != nil && atomic.LoadUint64(&m.AllCounter) == 0 {
+				m.t.Error("Expected call to dataStoreMock.All")
+			}
+
 			if m.AllWithTTLFunc != nil && atomic.LoadUint64(&m.AllWithTTLCounter) == 0 {
 				m.t.Error("Expected call to dataStoreMock.AllWithTTL")
 			}
 
 			if m.DelFunc != nil && atomic.LoadUint64(&m.DelCounter) == 0 {
 				m.t.Error("Expected call to dataStoreMock.Del")
+			}
+
+			if m.RestoreFunc != nil && atomic.LoadUint64(&m.RestoreCounter) == 0 {
+				m.t.Error("Expected call to dataStoreMock.Restore")
 			}
 
 			m.t.Fatalf("Some mocks were not called on time: %s", timeout)
@@ -233,11 +379,19 @@ func (m *dataStoreMock) MinimockWait(timeout time.Duration) {
 //it can be used with assert/require, i.e. assert.True(mock.AllMocksCalled())
 func (m *dataStoreMock) AllMocksCalled() bool {
 
+	if m.AllFunc != nil && atomic.LoadUint64(&m.AllCounter) == 0 {
+		return false
+	}
+
 	if m.AllWithTTLFunc != nil && atomic.LoadUint64(&m.AllWithTTLCounter) == 0 {
 		return false
 	}
 
 	if m.DelFunc != nil && atomic.LoadUint64(&m.DelCounter) == 0 {
+		return false
+	}
+
+	if m.RestoreFunc != nil && atomic.LoadUint64(&m.RestoreCounter) == 0 {
 		return false
 	}
 

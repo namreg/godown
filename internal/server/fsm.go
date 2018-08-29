@@ -1,6 +1,8 @@
 package server
 
 import (
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -9,8 +11,10 @@ import (
 
 	"github.com/hashicorp/raft"
 	"github.com/namreg/godown-v2/internal/api"
+	"github.com/namreg/godown-v2/internal/storage"
 )
 
+//fsm stands for a finite state machine.
 type fsm struct {
 	srv *Server
 }
@@ -59,11 +63,76 @@ func (f *fsm) Apply(entry *raft.Log) interface{} {
 	return b
 }
 
+//Snapshot implements raft.FSM interface.
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
-	return nil, nil
+	s := &fsmSnapshot{}
+	meta, err := f.srv.meta.AllMeta()
+	if err != nil {
+		return nil, fmt.Errorf("could not get all metadata: %v", err)
+	}
+	mb, err := json.Marshal(meta)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal metadata: %v", err)
+	}
+	s.meta = mb
+
+	data, err := f.srv.data.All()
+	if err != nil {
+		return nil, fmt.Errorf("could not get all data: %v", err)
+	}
+	db, err := json.Marshal(data)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal data: %v", err)
+	}
+	s.data = db
+	return s, nil
 }
 
-func (f *fsm) Restore(io.ReadCloser) error {
+//Restore implements raft.FSM interface.
+func (f *fsm) Restore(rc io.ReadCloser) error {
+	defer rc.Close()
+
+	var l length
+
+	if err := binary.Read(rc, binary.LittleEndian, &l); err != nil {
+		return fmt.Errorf("could not read meta length: %v", err)
+	}
+
+	mb := make([]byte, l)
+
+	if n, err := io.ReadFull(rc, mb); int64(n) != int64(l) || err != nil {
+		return fmt.Errorf("could not read meta")
+	}
+
+	meta := make(map[storage.MetaKey]storage.MetaValue)
+
+	if err := json.Unmarshal(mb, &meta); err != nil {
+		return fmt.Errorf("could not unmarshal meta: %v", err)
+	}
+
+	if err := f.srv.meta.RestoreMeta(meta); err != nil {
+		return fmt.Errorf("could restore meta: %v", err)
+	}
+
+	if err := binary.Read(rc, binary.LittleEndian, &l); err != nil {
+		return fmt.Errorf("could not read data length: %v", err)
+	}
+
+	db := make([]byte, l)
+
+	if n, err := io.ReadFull(rc, db); int64(n) != int64(l) || err != nil {
+		return fmt.Errorf("could not read data")
+	}
+
+	data := make(map[storage.Key]*storage.Value)
+	if err := json.Unmarshal(db, &data); err != nil {
+		return fmt.Errorf("could unmarshal data: %v", err)
+	}
+
+	if err := f.srv.data.Restore(data); err != nil {
+		return fmt.Errorf("could not restore data: %v", err)
+	}
+
 	return nil
 }
 
