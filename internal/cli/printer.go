@@ -39,28 +39,28 @@ func (p *printer) printError(err error) {
 	fmt.Fprintf(p.out, "Error: %s\n", err.Error())
 }
 
-func (p *printer) printResponse(resp *api.Response) {
-	switch resp.Result.Type {
-	case api.Response_OK:
+func (p *printer) printResponse(resp *api.ExecuteCommandResponse) {
+	switch resp.Reply {
+	case api.OkCommandReply:
 		p.println(okString)
-	case api.Response_NIL:
+	case api.NilCommandReply:
 		p.println(nilString)
-	case api.Response_RAW_STRING:
-		p.println(strings.Replace(resp.Result.Item, "\n", "\r\n", -1))
-	case api.Response_STRING:
-		p.println(fmt.Sprintf("(string) %s", resp.Result.Item))
-	case api.Response_INT:
-		if n, err := strconv.Atoi(resp.Result.Item); err != nil {
+	case api.RawStringCommandReply:
+		p.println(strings.Replace(resp.Item, "\n", "\r\n", -1))
+	case api.StringCommandReply:
+		p.println(fmt.Sprintf("(string) %s", resp.Item))
+	case api.IntCommandReply:
+		if n, err := strconv.Atoi(resp.Item); err != nil {
 			p.printError(err)
 		} else {
 			p.println(fmt.Sprintf("(integer) %d", n))
 		}
-	case api.Response_ERR:
-		p.println(fmt.Sprintf("(error) %s", resp.Result.Item))
-	case api.Response_SLICE:
-		items := resp.Result.Items
+	case api.ErrCommandReply:
+		p.println(fmt.Sprintf("(error) %s", resp.Item))
+	case api.SliceCommandReply:
+		items := resp.Items
 		buf := new(bytes.Buffer)
-		for i, v := range resp.Result.Items {
+		for i, v := range resp.Items {
 			buf.WriteString(fmt.Sprintf("%d) %q", i+1, v))
 			if i != len(items)-1 { // check whether the current item is not last
 				buf.WriteString("\r\n")

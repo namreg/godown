@@ -21,9 +21,9 @@ Show the usage of the given command`
 }
 
 //Execute implements Execute of Command interface
-func (c *Help) Execute(args ...string) Result {
+func (c *Help) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	cmdName := args[0]
@@ -31,9 +31,9 @@ func (c *Help) Execute(args ...string) Result {
 	cmd, _, err := c.parser.Parse(cmdName)
 	if err != nil {
 		if err == ErrCommandNotFound {
-			return ErrResult{Value: fmt.Errorf("command %q not found", cmdName)}
+			return ErrReply{Value: fmt.Errorf("command %q not found", cmdName)}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
-	return RawStringResult{Value: cmd.Help()}
+	return RawStringReply{Value: cmd.Help()}
 }

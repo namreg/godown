@@ -8,7 +8,7 @@ import (
 
 //Strlen is the Strlen command
 type Strlen struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -24,21 +24,21 @@ If key does not exists, 0 will be returned.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Strlen) Execute(args ...string) Result {
+func (c *Strlen) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return IntResult{Value: 0}
+			return IntReply{Value: 0}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 	if value.Type() != storage.StringDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+		return ErrReply{Value: ErrWrongTypeOp}
 	}
 	cnt := utf8.RuneCountInString(value.Data().(string))
-	return IntResult{Value: int64(cnt)}
+	return IntReply{Value: int64(cnt)}
 }

@@ -6,7 +6,7 @@ import (
 
 //Get is the GET command
 type Get struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -22,19 +22,19 @@ If provided key does not exist NIL will be returned.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Get) Execute(args ...string) Result {
+func (c *Get) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return NilResult{}
+			return NilReply{}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 	if value.Type() != storage.StringDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+		return ErrReply{Value: ErrWrongTypeOp}
 	}
-	return StringResult{Value: value.Data().(string)}
+	return StringReply{Value: value.Data().(string)}
 }

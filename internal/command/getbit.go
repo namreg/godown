@@ -9,7 +9,7 @@ import (
 
 //GetBit is the GetBit command
 type GetBit struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -24,39 +24,39 @@ Returns the bit value at offset in the string value stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *GetBit) Execute(args ...string) Result {
+func (c *GetBit) Execute(args ...string) Reply {
 	if len(args) != 2 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	offset, err := c.parseOffset(args)
 	if err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return IntResult{Value: 0}
+			return IntReply{Value: 0}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	if value.Type() != storage.BitMapDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+		return ErrReply{Value: ErrWrongTypeOp}
 	}
 
 	vals := value.Data().([]uint64)
 	idx := c.resolveIndex(offset)
 
 	if idx > uint64(len(vals)-1) {
-		return IntResult{Value: 0}
+		return IntReply{Value: 0}
 	}
 
 	if vals[idx]&(1<<(offset%64)) != 0 {
-		return IntResult{Value: 1}
+		return IntReply{Value: 1}
 	}
-	return IntResult{Value: 0}
+	return IntReply{Value: 0}
 }
 
 func (c *GetBit) parseOffset(args []string) (uint64, error) {

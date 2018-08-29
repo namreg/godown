@@ -14,7 +14,11 @@ type memoryClock interface {
 
 //Storage represents a storage that store its all data in memory. Implements Storage interaface
 type Storage struct {
-	clck         memoryClock
+	clck memoryClock
+
+	metaMu sync.RWMutex
+	meta   map[storage.MetaKey]storage.MetaValue
+
 	mu           sync.RWMutex
 	items        map[storage.Key]*storage.Value
 	itemsWithTTL map[storage.Key]*storage.Value // items thats have ttl and will be processed by GC
@@ -29,20 +33,10 @@ func WithClock(clck memoryClock) func(*Storage) {
 
 //New creates a new memory storage with the given items
 func New(items map[storage.Key]*storage.Value, opts ...func(*Storage)) *Storage {
-	if items == nil {
-		items = make(map[storage.Key]*storage.Value)
-	}
-
-	itemsWithTTL := make(map[storage.Key]*storage.Value)
-	for k, v := range items {
-		if v.TTL() > 0 {
-			itemsWithTTL[k] = v
-		}
-	}
 	strg := &Storage{
-		items:        items,
-		itemsWithTTL: itemsWithTTL,
+		meta: make(map[storage.MetaKey]storage.MetaValue),
 	}
+	strg.setItems(items)
 
 	for _, f := range opts {
 		f(strg)
@@ -53,6 +47,28 @@ func New(items map[storage.Key]*storage.Value, opts ...func(*Storage)) *Storage 
 	}
 
 	return strg
+}
+
+func (strg *Storage) setItems(items map[storage.Key]*storage.Value) {
+	strg.mu.Lock()
+	defer strg.mu.Unlock()
+
+	if items == nil {
+		strg.items, strg.itemsWithTTL = make(map[storage.Key]*storage.Value), make(map[storage.Key]*storage.Value)
+		return
+	}
+
+	itemsWithTTL := make(map[storage.Key]*storage.Value)
+
+	for k, v := range items {
+		if v.TTL() > 0 {
+			itemsWithTTL[k] = v
+		}
+	}
+
+	strg.items = items
+	strg.itemsWithTTL = itemsWithTTL
+
 }
 
 //Put puts a new value that will be returned by ValueSetter.
@@ -125,9 +141,47 @@ func (strg *Storage) All() (map[storage.Key]*storage.Value, error) {
 	return strg.items, nil
 }
 
+//Restore replaces current items with the given ones.
+func (strg *Storage) Restore(m map[storage.Key]*storage.Value) error {
+	strg.setItems(m)
+	return nil
+}
+
 //AllWithTTL returns all stored values thats have TTL
 func (strg *Storage) AllWithTTL() (map[storage.Key]*storage.Value, error) {
 	strg.mu.RLock()
 	defer strg.mu.RUnlock()
 	return strg.itemsWithTTL, nil
+}
+
+//AllMeta returns all stored metadata.
+func (strg *Storage) AllMeta() (map[storage.MetaKey]storage.MetaValue, error) {
+	strg.metaMu.RLock()
+	all := strg.meta
+	strg.metaMu.RUnlock()
+	return all, nil
+}
+
+//PutMeta puts a meta value at the given key.
+func (strg *Storage) PutMeta(key storage.MetaKey, value storage.MetaValue) error {
+	strg.metaMu.Lock()
+	strg.meta[key] = value
+	strg.metaMu.Unlock()
+	return nil
+}
+
+//GetMeta gets a meta value at the given key.
+func (strg *Storage) GetMeta(key storage.MetaKey) (storage.MetaValue, error) {
+	strg.metaMu.RLock()
+	value := strg.meta[key]
+	strg.metaMu.RUnlock()
+	return value, nil
+}
+
+//RestoreMeta replace current meta with the given one.
+func (strg *Storage) RestoreMeta(m map[storage.MetaKey]storage.MetaValue) error {
+	strg.metaMu.Lock()
+	strg.meta = m
+	strg.metaMu.Unlock()
+	return nil
 }

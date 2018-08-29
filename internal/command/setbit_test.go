@@ -30,17 +30,17 @@ func TestSetBit_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"ok/1", []string{"key", "1", "1"}, OkResult{}},
-		{"ok/2", []string{"key", "0", "0"}, OkResult{}},
-		{"big_offset", []string{"key", "100", "1"}, OkResult{}},
-		{"negative_offset", []string{"key", "-1", "1"}, ErrResult{Value: errors.New("invalid offset")}},
-		{"invalid_value/1", []string{"key", "1", "-1"}, ErrResult{Value: errors.New("value should be 0 or 1")}},
-		{"invalid_value/2", []string{"key", "1", "2"}, ErrResult{Value: errors.New("value should be 0 or 1")}},
-		{"wrong_type_op", []string{"string", "1", "1"}, ErrResult{Value: ErrWrongTypeOp}},
-		{"wrong_args_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_args_number/2", []string{"key", "field"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"ok/1", []string{"key", "1", "1"}, OkReply{}},
+		{"ok/2", []string{"key", "0", "0"}, OkReply{}},
+		{"big_offset", []string{"key", "100", "1"}, OkReply{}},
+		{"negative_offset", []string{"key", "-1", "1"}, ErrReply{Value: errors.New("invalid offset")}},
+		{"invalid_value/1", []string{"key", "1", "-1"}, ErrReply{Value: errors.New("value should be 0 or 1")}},
+		{"invalid_value/2", []string{"key", "1", "2"}, ErrReply{Value: errors.New("value should be 0 or 1")}},
+		{"wrong_type_op", []string{"string", "1", "1"}, ErrReply{Value: ErrWrongTypeOp}},
+		{"wrong_args_number/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_args_number/2", []string{"key", "field"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -108,7 +108,7 @@ func TestSetBit_Execute_WhiteBox(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := SetBit{strg: strg}
 			res := cmd.Execute(tt.args...)
-			assert.Equal(t, OkResult{}, res)
+			assert.Equal(t, OkReply{}, res)
 
 			tt.verify(t)
 		})
@@ -145,11 +145,11 @@ func TestSetBit_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.PutMock.Return(err)
 
 	cmd := SetBit{strg: strg}
 	res := cmd.Execute("key", "1", "1")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

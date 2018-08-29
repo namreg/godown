@@ -17,7 +17,7 @@ import (
 type CommandMock struct {
 	t minimock.Tester
 
-	ExecuteFunc       func(p ...string) (r Result)
+	ExecuteFunc       func(p ...string) (r Reply)
 	ExecuteCounter    uint64
 	ExecutePreCounter uint64
 	ExecuteMock       mCommandMockExecute
@@ -65,22 +65,22 @@ func (m *mCommandMockExecute) Expect(p ...string) *mCommandMockExecute {
 }
 
 //Return sets up a mock for Command.Execute to return Return's arguments
-func (m *mCommandMockExecute) Return(r Result) *CommandMock {
-	m.mock.ExecuteFunc = func(p ...string) Result {
+func (m *mCommandMockExecute) Return(r Reply) *CommandMock {
+	m.mock.ExecuteFunc = func(p ...string) Reply {
 		return r
 	}
 	return m.mock
 }
 
 //Set uses given function f as a mock of Command.Execute method
-func (m *mCommandMockExecute) Set(f func(p ...string) (r Result)) *CommandMock {
+func (m *mCommandMockExecute) Set(f func(p ...string) (r Reply)) *CommandMock {
 	m.mock.ExecuteFunc = f
 	m.mockExpectations = nil
 	return m.mock
 }
 
 //Execute implements github.com/namreg/godown-v2/internal/command.Command interface
-func (m *CommandMock) Execute(p ...string) (r Result) {
+func (m *CommandMock) Execute(p ...string) (r Reply) {
 	atomic.AddUint64(&m.ExecutePreCounter, 1)
 	defer atomic.AddUint64(&m.ExecuteCounter, 1)
 

@@ -1,30 +1,64 @@
 syntax = "proto3";
 
-//Request is a request to a server.
-message Request {
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+//FSMCommandType describes all available commands that FSM can apply.
+enum FSMCommandType {
+    option (gogoproto.goproto_enum_prefix) = false;
+    APPLY_COMMAND = 0 [(gogoproto.enumvalue_customname) = "FSMApplyCommand"];
+    APPLY_METADATA = 1 [(gogoproto.enumvalue_customname) = "FSMApplyMetadata"];
+}
+
+//FSMCommand is a FSM command.
+message FSMCommand {
+    FSMCommandType type = 1;
+    bytes command = 2 [(gogoproto.customtype) = "github.com/centrifugal/centrifugo/libcentrifugo/raw.Raw", (gogoproto.nullable) = false];
+}
+
+//UpdateMetadataRequest is used to update meta info in the raft FSM.
+message UpdateMetadataRequest {
+    string key = 1;
+    string value = 2;
+}
+
+//UpdateMetadataResponse is a response on the UpdateMetadataRequest.
+message UpdateMetadataResponse {}
+
+//ExecuteCommandRequest is a request to execute a command.
+message ExecuteCommandRequest {
     string command = 1;
 }
 
-//Response is a response that contains command's execution result.
-message Response {
-    enum Type {
-        NIL = 0;
-        OK = 1;
-        RAW_STRING = 2;
-        STRING = 3;
-        INT = 4;
-        SLICE = 5;
-        ERR = 6;
-    }
-    message Result {
-        Type type = 1;
-        string item = 2;
-        repeated string items = 3; //uses only when type = SLICE
-    }
-    Result result = 1;
+//CommandExecutionReply describes all available replies.
+enum CommandExecutionReply {
+    option (gogoproto.goproto_enum_prefix) = false;
+    NIL = 0 [(gogoproto.enumvalue_customname) = "NilCommandReply"];
+    OK = 1 [(gogoproto.enumvalue_customname) = "OkCommandReply"];
+    RAW_STRING = 2 [(gogoproto.enumvalue_customname) = "RawStringCommandReply"];
+    STRING = 3 [(gogoproto.enumvalue_customname) = "StringCommandReply"];
+    INT = 4 [(gogoproto.enumvalue_customname) = "IntCommandReply"];
+    SLICE = 5 [(gogoproto.enumvalue_customname) = "SliceCommandReply"];
+    ERR = 6 [(gogoproto.enumvalue_customname) = "ErrCommandReply"];
 }
+
+//ExecuteCommandResponse is a response on the ExecuteCommandRequest.
+message ExecuteCommandResponse {
+    CommandExecutionReply reply = 1;
+    string item = 2;
+    repeated string items = 3; //uses only when type = SLICE
+}
+
+//AddToClusterRequest is a request to add a new raft node to the cluster.
+message AddToClusterRequest {
+    string id = 1;    //node ID
+    string addr = 2; //node raft address
+}
+
+//AddToClusterResponse is a reponse on the AddToClusterRequest.
+message AddToClusterResponse {}
 
 //Godown is a service that executes commands.
 service Godown {
-    rpc ExecuteCommand (Request) returns (Response);
+    rpc ExecuteCommand (ExecuteCommandRequest) returns (ExecuteCommandResponse);
+    rpc AddToCluster(AddToClusterRequest) returns (AddToClusterResponse); //internally using
 }

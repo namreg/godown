@@ -38,14 +38,14 @@ func TestGet_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"ok", []string{"key_string"}, StringResult{Value: "string_value"}},
-		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
-		{"expired_key", []string{"expired"}, NilResult{}},
-		{"wrong_type_op", []string{"key_list"}, ErrResult{Value: ErrWrongTypeOp}},
-		{"wrong_number_of_args/1", []string{"key1", "key2"}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"ok", []string{"key_string"}, StringReply{Value: "string_value"}},
+		{"not_existing_key", []string{"not_existing_key"}, NilReply{}},
+		{"expired_key", []string{"expired"}, NilReply{}},
+		{"wrong_type_op", []string{"key_list"}, ErrReply{Value: ErrWrongTypeOp}},
+		{"wrong_number_of_args/1", []string{"key1", "key2"}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -62,11 +62,11 @@ func TestGet_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.GetMock.Return(nil, err)
 
 	cmd := Get{strg: strg}
 	res := cmd.Execute("key")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

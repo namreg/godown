@@ -9,7 +9,7 @@ import (
 
 //Lindex is the LINDEX command
 type Lindex struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -26,34 +26,34 @@ Negative indices can be used to designate elements starting at the tail of the l
 }
 
 //Execute implements Execute of Command interface
-func (c *Lindex) Execute(args ...string) Result {
+func (c *Lindex) Execute(args ...string) Reply {
 	if len(args) != 2 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return NilResult{}
+			return NilReply{}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	if value.Type() != storage.ListDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+		return ErrReply{Value: ErrWrongTypeOp}
 	}
 
 	list := value.Data().([]string)
 
 	index, err := c.parseIndex(list, args[1])
 	if err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	if index < 0 || index > len(list)-1 {
-		return NilResult{}
+		return NilReply{}
 	}
-	return StringResult{Value: list[index]}
+	return StringReply{Value: list[index]}
 }
 
 func (c *Lindex) parseIndex(list []string, index string) (int, error) {

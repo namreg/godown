@@ -11,7 +11,7 @@ var errListOutOfRange = errors.New("lrange: out of range")
 
 //Lrange is the LRANGE command
 type Lrange struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -28,21 +28,21 @@ with 0 being the first element of the list (the head of the list), 1 being the n
 }
 
 //Execute implements Execute of Command interface
-func (c *Lrange) Execute(args ...string) Result {
+func (c *Lrange) Execute(args ...string) Reply {
 	if len(args) != 3 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return NilResult{}
+			return NilReply{}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	if value.Type() != storage.ListDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+		return ErrReply{Value: ErrWrongTypeOp}
 	}
 
 	list := value.Data().([]string)
@@ -50,17 +50,17 @@ func (c *Lrange) Execute(args ...string) Result {
 	start, stop, err := c.extractStartStopIndexes(len(list), args)
 	if err != nil {
 		if err == errListOutOfRange {
-			return NilResult{}
+			return NilReply{}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	rng := list[start:stop]
 	if len(rng) == 0 {
-		return NilResult{}
+		return NilReply{}
 	}
 
-	return SliceResult{Value: rng}
+	return SliceReply{Value: rng}
 }
 
 func (c *Lrange) extractStartStopIndexes(len int, args []string) (int, int, error) {

@@ -22,10 +22,10 @@ func TestPing_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"no_args", []string{}, RawStringResult{Value: "PONG"}},
-		{"with_args", []string{"hello", "world"}, RawStringResult{Value: "hello world"}},
+		{"no_args", []string{}, RawStringReply{Value: "PONG"}},
+		{"with_args", []string{"hello", "world"}, RawStringReply{Value: "hello world"}},
 	}
 
 	for _, tt := range tests {

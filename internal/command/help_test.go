@@ -36,12 +36,12 @@ func TestHelp_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"existing_command", []string{"mock"}, RawStringResult{Value: "help message"}},
-		{"not_existing_command", []string{"not_existing_command"}, ErrResult{Value: errors.New(`command "not_existing_command" not found`)}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"mock", "mock"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"existing_command", []string{"mock"}, RawStringReply{Value: "help message"}},
+		{"not_existing_command", []string{"not_existing_command"}, ErrReply{Value: errors.New(`command "not_existing_command" not found`)}},
+		{"wrong_number_of_args/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"mock", "mock"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 
 	for _, tt := range tests {

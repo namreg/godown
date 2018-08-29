@@ -12,12 +12,12 @@ var ErrCommandNotFound = errors.New("command: not found")
 
 //Parser is a parser that parses user input and creates the appropriate command.
 type Parser struct {
-	strg commandStorage
+	strg dataStore
 	clck commandClock
 }
 
 //NewParser creates a new parser
-func NewParser(strg commandStorage, clck commandClock) *Parser {
+func NewParser(strg dataStore, clck commandClock) *Parser {
 	return &Parser{strg: strg, clck: clck}
 }
 

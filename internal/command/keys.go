@@ -8,7 +8,7 @@ import (
 
 //Keys is the Keys command
 type Keys struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -23,19 +23,19 @@ Find all keys matching the given pattern.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Keys) Execute(args ...string) Result {
+func (c *Keys) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	keys, err := c.strg.Keys()
 	if err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	re, err := c.compilePattern(args[0])
 	if err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	keyNames := make([]string, 0, len(keys))
@@ -45,7 +45,7 @@ func (c *Keys) Execute(args ...string) Result {
 			keyNames = append(keyNames, sk)
 		}
 	}
-	return SliceResult{Value: keyNames}
+	return SliceReply{Value: keyNames}
 }
 
 func (c *Keys) compilePattern(input string) (*regexp.Regexp, error) {

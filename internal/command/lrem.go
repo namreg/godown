@@ -6,7 +6,7 @@ import (
 
 //Lrem is the LREM command
 type Lrem struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -21,9 +21,9 @@ Removes all occurrences of elements equal to value from the list stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Lrem) Execute(args ...string) Result {
+func (c *Lrem) Execute(args ...string) Reply {
 	if len(args) != 2 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	setter := func(old *storage.Value) (*storage.Value, error) {
@@ -49,7 +49,7 @@ func (c *Lrem) Execute(args ...string) Result {
 		return storage.NewList(newList), nil
 	}
 	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
-	return OkResult{}
+	return OkReply{}
 }

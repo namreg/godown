@@ -6,7 +6,7 @@ import (
 
 //Lpop is the LPOP command
 type Lpop struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -21,9 +21,9 @@ Removes and returns the first element of the list stored at key.`
 }
 
 //Execute implements Execute of Command interface
-func (c *Lpop) Execute(args ...string) Result {
+func (c *Lpop) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	var popped string
@@ -48,11 +48,11 @@ func (c *Lpop) Execute(args ...string) Result {
 	}
 
 	if err := c.strg.Put(storage.Key(args[0]), setter); err != nil {
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 
 	if popped == "" {
-		return NilResult{}
+		return NilReply{}
 	}
-	return StringResult{Value: popped}
+	return StringReply{Value: popped}
 }

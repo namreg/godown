@@ -6,7 +6,7 @@ import (
 
 //Hvals is the HVALS command
 type Hvals struct {
-	strg commandStorage
+	strg dataStore
 }
 
 //Name implements Name of Command interface
@@ -21,25 +21,25 @@ Returns all values in the hash stored at key`
 }
 
 //Execute implements Execute of Command interface
-func (c *Hvals) Execute(args ...string) Result {
+func (c *Hvals) Execute(args ...string) Reply {
 	if len(args) != 1 {
-		return ErrResult{Value: ErrWrongArgsNumber}
+		return ErrReply{Value: ErrWrongArgsNumber}
 	}
 
 	value, err := c.strg.Get(storage.Key(args[0]))
 	if err != nil {
 		if err == storage.ErrKeyNotExists {
-			return NilResult{}
+			return NilReply{}
 		}
-		return ErrResult{Value: err}
+		return ErrReply{Value: err}
 	}
 	if value.Type() != storage.MapDataType {
-		return ErrResult{Value: ErrWrongTypeOp}
+		return ErrReply{Value: ErrWrongTypeOp}
 	}
 	m := value.Data().(map[string]string)
 	vals := make([]string, 0, len(m))
 	for _, v := range m {
 		vals = append(vals, v)
 	}
-	return SliceResult{Value: vals}
+	return SliceReply{Value: vals}
 }

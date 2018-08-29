@@ -22,11 +22,11 @@ type Command interface {
 	//Help returns information about the command. Description, usage and etc.
 	Help() string
 	//Execute executes the command with the given arguments.
-	Execute(args ...string) Result
+	Execute(args ...string) Reply
 }
 
-//go:generate minimock -i github.com/namreg/godown-v2/internal/command.commandStorage -o ./
-type commandStorage interface {
+//go:generate minimock -i github.com/namreg/godown-v2/internal/command.dataStore -o ./
+type dataStore interface {
 	//Put puts a new value at the given Key.
 	Put(key storage.Key, sttr storage.ValueSetter) error
 	//Get gets a value by the given key.

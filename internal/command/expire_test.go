@@ -33,14 +33,14 @@ func TestExpire_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"wrong_arg_number/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_arg_number/2", []string{"key", "10", "20"}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"existing_key", []string{"key", "10"}, OkResult{}},
-		{"not_existing_key", []string{"not_existing_key", "10"}, OkResult{}},
-		{"secs_as_string", []string{"not_existing_key", "seconds"}, ErrResult{Value: errors.New("seconds should be integer")}},
-		{"secs_negative", []string{"not_existing_key", "-10"}, ErrResult{Value: errors.New("seconds should be positive")}},
+		{"wrong_arg_number/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_arg_number/2", []string{"key", "10", "20"}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"existing_key", []string{"key", "10"}, OkReply{}},
+		{"not_existing_key", []string{"not_existing_key", "10"}, OkReply{}},
+		{"secs_as_string", []string{"not_existing_key", "seconds"}, ErrReply{Value: errors.New("seconds should be integer")}},
+		{"secs_negative", []string{"not_existing_key", "-10"}, ErrReply{Value: errors.New("seconds should be positive")}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,12 +57,12 @@ func TestExpire_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.PutMock.Return(err)
 
 	cmd := Expire{strg: strg}
 
-	expectedRes := ErrResult{Value: err}
+	expectedRes := ErrReply{Value: err}
 	actualRes := cmd.Execute("key", "10")
 
 	assert.Equal(t, expectedRes, actualRes)
@@ -84,7 +84,7 @@ func TestExpire_Execute_WhiteBox(t *testing.T) {
 	cmd := Expire{strg: strg, clck: clck}
 
 	res := cmd.Execute([]string{"key", "10"}...)
-	assert.Equal(t, OkResult{}, res)
+	assert.Equal(t, OkReply{}, res)
 
 	items, err := strg.All()
 	assert.NoError(t, err)

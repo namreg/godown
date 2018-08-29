@@ -52,14 +52,14 @@ func TestTTL_Execute(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
-		want Result
+		want Reply
 	}{
-		{"no_timeout", []string{"no_timeout"}, IntResult{Value: -1}},
-		{"expired", []string{"expired"}, NilResult{}},
-		{"will_expire", []string{"will_expire"}, IntResult{Value: now.Add(10*time.Second).Unix() - now.Unix()}},
-		{"not_existing_key", []string{"not_existing_key"}, NilResult{}},
-		{"wrong_number_of_args/1", []string{}, ErrResult{Value: ErrWrongArgsNumber}},
-		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrResult{Value: ErrWrongArgsNumber}},
+		{"no_timeout", []string{"no_timeout"}, IntReply{Value: -1}},
+		{"expired", []string{"expired"}, NilReply{}},
+		{"will_expire", []string{"will_expire"}, IntReply{Value: now.Add(10*time.Second).Unix() - now.Unix()}},
+		{"not_existing_key", []string{"not_existing_key"}, NilReply{}},
+		{"wrong_number_of_args/1", []string{}, ErrReply{Value: ErrWrongArgsNumber}},
+		{"wrong_number_of_args/2", []string{"key", "arg1"}, ErrReply{Value: ErrWrongArgsNumber}},
 	}
 
 	for _, tt := range tests {
@@ -77,11 +77,11 @@ func TestTTL_Execute_StorageErr(t *testing.T) {
 
 	err := errors.New("error")
 
-	strg := NewcommandStorageMock(mc)
+	strg := NewdataStoreMock(mc)
 	strg.GetMock.Return(nil, err)
 
 	cmd := TTL{strg: strg}
 	res := cmd.Execute("key")
 
-	assert.Equal(t, ErrResult{Value: err}, res)
+	assert.Equal(t, ErrReply{Value: err}, res)
 }

@@ -21,9 +21,9 @@ Returns PONG if no argument is provided, otherwise return a copy of the argument
 }
 
 //Execute executes a PING command
-func (c *Ping) Execute(args ...string) Result {
+func (c *Ping) Execute(args ...string) Reply {
 	if len(args) == 0 {
-		return RawStringResult{Value: pong}
+		return RawStringReply{Value: pong}
 	}
-	return RawStringResult{Value: strings.Join(args, " ")}
+	return RawStringReply{Value: strings.Join(args, " ")}
 }
