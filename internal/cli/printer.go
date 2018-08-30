@@ -16,13 +16,13 @@ const (
 )
 
 const logo = `
-                | |                    
-  __ _  ___   __| | _____      ___ __  
+                | |
+  __ _  ___   __| | _____      ___ __
  / _  |/ _ \ / _  |/ _ \ \ /\ / / '_ \  Dead simple, distributed,
-| (_| | (_) | (_| | (_) \ V  V /| | | | fault-taulerance key-value storage.
- \__, |\___/ \__,_|\___/ \_/\_/ |_| |_| 
+| (_| | (_) | (_| | (_) \ V  V /| | | | fault-tolerant key-value storage.
+ \__, |\___/ \__,_|\___/ \_/\_/ |_| |_|
   __/ |
- |___/                                
+ |___/
 `
 
 type printer struct {

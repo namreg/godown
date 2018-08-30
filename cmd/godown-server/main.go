@@ -11,6 +11,12 @@ import (
 	"github.com/namreg/godown-v2/internal/storage/memory"
 )
 
+//Values populated by the Go linker.
+var (
+	commit    = "unknown"
+	buildtime = "unknown"
+)
+
 func main() {
 	id := flag.String("id", "", "Server unique id.")
 	dir := flag.String("dir", "", "Directory where data is stored.")
@@ -18,8 +24,14 @@ func main() {
 	raftAddr := flag.String("raft", "", "Raft protocol listen address.")
 	joinAddr := flag.String("join", "", "Server address to join.")
 	gcInterval := flag.Duration("gc", 0, "Garbage collector interval.")
+	showVersion := flag.Bool("version", false, "Show version.")
 
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("commit: %s\nbuildtime: %s", commit, buildtime)
+		os.Exit(0)
+	}
 
 	clck := clock.New()
 	strg := memory.New(nil)

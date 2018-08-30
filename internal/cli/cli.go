@@ -68,7 +68,6 @@ func (c *CLI) Close() error {
 
 func (c *CLI) run() {
 	c.printer.printLogo()
-	c.printer.println("Welcome to the godown CLI!")
 	for {
 		input, err := c.term.GetPrompt(prefix)
 		if err != nil {
