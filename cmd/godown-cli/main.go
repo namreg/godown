@@ -11,8 +11,9 @@ import (
 
 //Values populated by the Go linker.
 var (
-	commit    = "unknown"
-	buildtime = "unknown"
+	version = "unknown"
+	commit  = "unknown"
+	date    = "unknown"
 )
 
 var host = flag.String("host", "127.0.0.1", "Host to connect to a server")
@@ -23,7 +24,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("commit: %s\nbuildtime: %s", commit, buildtime)
+		fmt.Printf("version: %s\ncommit: %s\nbuildtime: %s", version, commit, date)
 		os.Exit(0)
 	}
 

@@ -13,8 +13,9 @@ import (
 
 //Values populated by the Go linker.
 var (
-	commit    = "unknown"
-	buildtime = "unknown"
+	version = "unknown"
+	commit  = "unknown"
+	date    = "unknown"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("commit: %s\nbuildtime: %s", commit, buildtime)
+		fmt.Printf("version: %s\ncommit: %s\nbuildtime: %s", version, commit, date)
 		os.Exit(0)
 	}
 
