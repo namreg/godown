@@ -1,6 +1,9 @@
 project_name: godown
+git:
+  short_hash: true
 release:
-  name_template: "{{ .ProjectName }}-v{{ .Version }}"
+  name_template: "v{{ .Version }}"
+  prerelease: true 
 builds:
   -
     main: ./cmd/godown-cli/main.go
@@ -32,10 +35,8 @@ archive:
     amd64: x86_64
 checksum:
   name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
+dist: build/dist
 changelog:
-  sort: asc
   filters:
     exclude:
     - '^docs:'
