@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/namreg/godown-v2/internal/api"
 )
 
@@ -26,11 +27,19 @@ const logo = `
 `
 
 type printer struct {
-	out io.Writer
+	okColor  *color.Color
+	errColor *color.Color
+	nilColor *color.Color
+	out      io.Writer
 }
 
 func newPrinter(out io.Writer) *printer {
-	return &printer{out: out}
+	return &printer{
+		okColor:  color.New(color.FgHiGreen),
+		errColor: color.New(color.FgHiRed),
+		nilColor: color.New(color.FgHiCyan),
+		out:      out,
+	}
 }
 
 //Close closes the printer
@@ -42,7 +51,9 @@ func (p *printer) Close() error {
 }
 
 func (p *printer) printLogo() {
+	color.Set(color.FgMagenta)
 	p.println(strings.Replace(logo, "\n", "\r\n", -1))
+	color.Unset()
 }
 
 func (p *printer) println(str string) {
@@ -50,15 +61,15 @@ func (p *printer) println(str string) {
 }
 
 func (p *printer) printError(err error) {
-	fmt.Fprintf(p.out, "Error: %s\n", err.Error())
+	p.errColor.Fprintf(p.out, "Error: %s\n", err.Error())
 }
 
 func (p *printer) printResponse(resp *api.ExecuteCommandResponse) {
 	switch resp.Reply {
 	case api.OkCommandReply:
-		p.println(okString)
+		p.println(p.okColor.Sprint(okString))
 	case api.NilCommandReply:
-		p.println(nilString)
+		p.println(p.nilColor.Sprint(nilString))
 	case api.RawStringCommandReply:
 		p.println(strings.Replace(resp.Item, "\n", "\r\n", -1))
 	case api.StringCommandReply:
@@ -70,7 +81,7 @@ func (p *printer) printResponse(resp *api.ExecuteCommandResponse) {
 			p.println(fmt.Sprintf("(integer) %d", n))
 		}
 	case api.ErrCommandReply:
-		p.println(fmt.Sprintf("(error) %s", resp.Item))
+		p.println(p.errColor.Sprintf("(error) %s", resp.Item))
 	case api.SliceCommandReply:
 		items := resp.Items
 		buf := new(bytes.Buffer)

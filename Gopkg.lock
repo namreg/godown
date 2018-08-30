@@ -32,6 +32,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/fatih/color"
+  packages = ["."]
+  revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
+  version = "v1.7.0"
+
+[[projects]]
   name = "github.com/gogo/protobuf"
   packages = [
     "gogoproto",
@@ -88,6 +94,18 @@
   name = "github.com/hashicorp/raft-boltdb"
   packages = ["."]
   revision = "6e5ba93211eaf8d9a2ad7e41ffad8c6f160f9fe3"
+
+[[projects]]
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
+  version = "v0.0.3"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -190,6 +208,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "32fb2b989eccfa111062baf2e0c42d0fde35a155b3c47776ce6f9fd9b970bcc8"
+  inputs-digest = "2dda022bb44761a802180aad49f8008d5f55e5ee7facff1aa744d52f8fd20390"
   solver-name = "gps-cdcl"
   solver-version = 1

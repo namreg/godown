@@ -6,15 +6,17 @@ import (
 	"os"
 	"time"
 
+	"github.com/Bowery/prompt"
 	"github.com/namreg/godown-v2/internal/api"
 
-	"github.com/Bowery/prompt"
 	"google.golang.org/grpc"
 )
 
 const connectTimeout = 200 * time.Millisecond
 
 const prefix = "godown >"
+
+var prmpt = ""
 
 //CLI allows users to interact with a server.
 type CLI struct {
@@ -38,6 +40,8 @@ func Run(hostPort string) (err error) {
 	if err != nil {
 		return fmt.Errorf("could not create a terminal: %v", err)
 	}
+
+	prmpt = fmt.Sprintf("(%s) %s", hostPort, prefix)
 
 	c := &CLI{
 		printer: newPrinter(os.Stdout),
@@ -69,7 +73,7 @@ func (c *CLI) Close() error {
 func (c *CLI) run() {
 	c.printer.printLogo()
 	for {
-		input, err := c.term.GetPrompt(prefix)
+		input, err := c.term.GetPrompt(prmpt)
 		if err != nil {
 			if err == prompt.ErrCTRLC || err == prompt.ErrEOF {
 				break
