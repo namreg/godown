@@ -40,4 +40,11 @@ build: clear
 .PHONY: release
 release: test lint
 	@echo "======> starting a new release"
-	@docker run -v $(PWD):/go/src/$(PACKAGE) -w /go/src/$(PACKAGE) -e GITHUB_TOKEN goreleaser/goreleaser release --rm-dist
+	docker run --rm --privileged \
+	-v $(PWD):/go/src/$(PACKAGE) \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-w /go/src/$(PACKAGE) \
+	-e GITHUB_TOKEN \
+	-e DOCKER_USERNAME \
+	-e DOCKER_PASSWORD \
+	goreleaser/goreleaser release --rm-dist

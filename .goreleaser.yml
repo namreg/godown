@@ -6,7 +6,7 @@ release:
   prerelease: true 
 builds:
   -
-    main: ./cmd/godown-cli/main.go
+    main: cmd/godown-cli/main.go
     binary: godown-cli
     env:
       - CGO_ENABLED=0
@@ -17,7 +17,7 @@ builds:
       - amd64
       - 386
   -
-    main: ./cmd/godown-server/main.go
+    main: cmd/godown-server/main.go
     binary: godown-server
     env:
       - CGO_ENABLED=0
@@ -41,3 +41,24 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+    - Merge pull request
+    - Merge branch
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    binary: godown-server
+    image: namreg/godown-server
+    dockerfile: cmd/godown-server/Dockerfile
+    tag_templates:
+      - "{{ .Tag }}"
+      - latest
+  -
+    goos: linux
+    goarch: amd64
+    binary: godown-cli
+    image: namreg/godown-cli
+    dockerfile: cmd/godown-cli/Dockerfile
+    tag_templates:
+      - "{{ .Tag }}"
+      - latest    
