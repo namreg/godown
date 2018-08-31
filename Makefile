@@ -34,8 +34,8 @@ clear:
 
 .PHONY: build
 build: clear
-	go build -ldflags="-X main.buildtime=$(CURTIME) -X main.commit=$(COMMIT)" -o $(ARTIFACTS)/godown-server ./cmd/godown-server
-	go build -ldflags="-X main.buildtime=$(CURTIME) -X main.commit=$(COMMIT)" -o $(ARTIFACTS)/godown-cli ./cmd/godown-cli
+	go build -o $(ARTIFACTS)/godown-server ./cmd/godown-server
+	go build -o $(ARTIFACTS)/godown-cli ./cmd/godown-cli
 
 .PHONY: release
 release: test lint

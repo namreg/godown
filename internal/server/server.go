@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -26,7 +27,7 @@ import (
 const (
 	defaultListenAddr = "127.0.0.1:4000"
 	defaultRaftAddr   = "127.0.0.1:4001"
-	defaultDir        = "../../data/node"
+	defaultDir        = "../../data"
 	defaultGCInterval = 500 * time.Millisecond
 )
 
@@ -109,7 +110,7 @@ type Server struct {
 
 	gc            *gc
 	srv           *grpc.Server
-	leaderConn    *grpc.ClientConn
+	leader        *grpc.ClientConn
 	raft          *raft.Raft //consensus protocol
 	raftTransport raft.Transport
 }
@@ -177,7 +178,7 @@ func (s *Server) setupRaft() error {
 	if s.opts.ID == "" {
 		return errors.New("empty server ID")
 	}
-	absDir, err := filepath.Abs(s.opts.Dir)
+	absDir, err := filepath.Abs(filepath.Join(s.opts.Dir, fmt.Sprintf("node%s", s.opts.ID)))
 	if err != nil {
 		return err
 	}
@@ -237,8 +238,8 @@ func (s *Server) start(hostPort string) error {
 //Stop stops a grpc server.
 func (s *Server) Stop() error {
 	s.srv.Stop()
-	if s.leaderConn != nil {
-		return s.leaderConn.Close()
+	if s.leader != nil {
+		return s.leader.Close()
 	}
 	return nil
 }
@@ -246,11 +247,17 @@ func (s *Server) Stop() error {
 //whenLeaderChanged executes given functions when a leader in the cluster changed.
 func (s *Server) whenLeaderChanged(funcs ...func(isLeader bool) error) {
 	for isLeader := range s.raft.LeaderCh() {
+		wg := new(sync.WaitGroup)
+		wg.Add(len(funcs))
 		for _, f := range funcs {
-			if err := f(isLeader); err != nil {
-				s.opts.Logger.Printf("[WARN] server: error while executing function when leader changed: %v", err)
-			}
+			go func(f func(isLeader bool) error) {
+				defer wg.Done()
+				if err := f(isLeader); err != nil {
+					s.opts.Logger.Printf("[WARN] server: error while executing function when leader changed: %v", err)
+				}
+			}(f)
 		}
+		wg.Wait()
 	}
 }
 
@@ -258,7 +265,7 @@ func (s *Server) updateLeaderIP(isLeader bool) error {
 	if !isLeader {
 		return nil
 	}
-	cmd, err := newSetMetaFSMCommand(leaderIPMetaKey, s.opts.ListenAddr)
+	cmd, err := newApplyMetadataFSMCommand(leaderIPMetaKey, s.opts.ListenAddr)
 	if err != nil {
 		return fmt.Errorf("could not create set meta fsm command: %v", err)
 	}
@@ -293,24 +300,35 @@ func (s *Server) controlGC(isLeader bool) error {
 }
 
 func (s *Server) controlLeaderConn(isLeader bool) error {
+	var err error
 	if isLeader {
-		var err error
-		if s.leaderConn != nil {
-			err = s.leaderConn.Close()
-			s.leaderConn = nil
+		if s.leader != nil {
+			err = s.leader.Close()
+			s.leader = nil
 		}
 		return err
 	}
+	s.leader, err = s.leaderConn()
+	if err != nil {
+		return fmt.Errorf("could not connect to leader: %v", err)
+	}
+	return nil
+
+}
+
+func (s *Server) leaderConn() (*grpc.ClientConn, error) {
+	if s.leader != nil {
+		return s.leader, nil
+	}
 	leaderIP, err := s.meta.GetMeta(storage.MetaKey(leaderIPMetaKey))
 	if err != nil {
-		return fmt.Errorf("could not get leader ip from meta store: %v", err)
+		return nil, fmt.Errorf("could not get leader ip from meta store: %v", err)
 	}
 	conn, err := grpc.Dial(string(leaderIP), grpc.WithInsecure())
 	if err != nil {
-		return fmt.Errorf("could not dial the leader at %s: %v", leaderIP, err)
+		return nil, fmt.Errorf("could not dial %s: %v", leaderIP, err)
 	}
-	s.leaderConn = conn
-	return nil
+	return conn, err
 }
 
 //ExecuteCommand executes a command that placed into the request.
@@ -328,7 +346,11 @@ func (s *Server) ExecuteCommand(ctx context.Context, req *api.ExecuteCommandRequ
 
 	if s.isCommandModifiesState(cmd) {
 		if !s.isLeader() {
-			return api.NewGodownClient(s.leaderConn).ExecuteCommand(ctx, req)
+			conn, err := s.leaderConn()
+			if err != nil {
+				return nil, err
+			}
+			return api.NewGodownClient(conn).ExecuteCommand(ctx, req)
 		}
 
 		fsmCmd, err := newExecuteFSMCommand(req.Command)
@@ -370,7 +392,11 @@ func (s *Server) ExecuteCommand(ctx context.Context, req *api.ExecuteCommandRequ
 //AddToCluster add a new node to the existing cluster.
 func (s *Server) AddToCluster(ctx context.Context, req *api.AddToClusterRequest) (*api.AddToClusterResponse, error) {
 	if !s.isLeader() {
-		return api.NewGodownClient(s.leaderConn).AddToCluster(ctx, req)
+		conn, err := s.leaderConn()
+		if err != nil {
+			return nil, err
+		}
+		return api.NewGodownClient(conn).AddToCluster(ctx, req)
 	}
 	configFuture := s.raft.GetConfiguration()
 	if err := configFuture.Error(); err != nil {

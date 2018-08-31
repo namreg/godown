@@ -136,7 +136,7 @@ func (f *fsm) Restore(rc io.ReadCloser) error {
 	return nil
 }
 
-func newSetMetaFSMCommand(key, value string) (*api.FSMCommand, error) {
+func newApplyMetadataFSMCommand(key, value string) (*api.FSMCommand, error) {
 	return newFSMCommand(api.FSMApplyMetadata, &api.UpdateMetadataRequest{Key: key, Value: value})
 }
 
