@@ -3,7 +3,7 @@ package command
 /*
 DO NOT EDIT!
 This code was generated automatically using github.com/gojuno/minimock v1.9
-The original interface "Command" can be found in github.com/namreg/godown-v2/internal/command
+The original interface "Command" can be found in github.com/namreg/godown/internal/command
 */
 import (
 	"sync/atomic"
@@ -13,7 +13,7 @@ import (
 	testify_assert "github.com/stretchr/testify/assert"
 )
 
-//CommandMock implements github.com/namreg/godown-v2/internal/command.Command
+//CommandMock implements github.com/namreg/godown/internal/command.Command
 type CommandMock struct {
 	t minimock.Tester
 
@@ -33,7 +33,7 @@ type CommandMock struct {
 	NameMock       mCommandMockName
 }
 
-//NewCommandMock returns a mock for github.com/namreg/godown-v2/internal/command.Command
+//NewCommandMock returns a mock for github.com/namreg/godown/internal/command.Command
 func NewCommandMock(t minimock.Tester) *CommandMock {
 	m := &CommandMock{t: t}
 
@@ -79,7 +79,7 @@ func (m *mCommandMockExecute) Set(f func(p ...string) (r Reply)) *CommandMock {
 	return m.mock
 }
 
-//Execute implements github.com/namreg/godown-v2/internal/command.Command interface
+//Execute implements github.com/namreg/godown/internal/command.Command interface
 func (m *CommandMock) Execute(p ...string) (r Reply) {
 	atomic.AddUint64(&m.ExecutePreCounter, 1)
 	defer atomic.AddUint64(&m.ExecuteCounter, 1)
@@ -133,7 +133,7 @@ func (m *mCommandMockHelp) Set(f func() (r string)) *CommandMock {
 	return m.mock
 }
 
-//Help implements github.com/namreg/godown-v2/internal/command.Command interface
+//Help implements github.com/namreg/godown/internal/command.Command interface
 func (m *CommandMock) Help() (r string) {
 	atomic.AddUint64(&m.HelpPreCounter, 1)
 	defer atomic.AddUint64(&m.HelpCounter, 1)
@@ -175,7 +175,7 @@ func (m *mCommandMockName) Set(f func() (r string)) *CommandMock {
 	return m.mock
 }
 
-//Name implements github.com/namreg/godown-v2/internal/command.Command interface
+//Name implements github.com/namreg/godown/internal/command.Command interface
 func (m *CommandMock) Name() (r string) {
 	atomic.AddUint64(&m.NamePreCounter, 1)
 	defer atomic.AddUint64(&m.NameCounter, 1)

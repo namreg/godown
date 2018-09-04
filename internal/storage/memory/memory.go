@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/namreg/godown-v2/internal/clock"
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/clock"
+	"github.com/namreg/godown/internal/storage"
 )
 
 type memoryClock interface {

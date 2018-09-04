@@ -10,8 +10,8 @@ import (
 	"github.com/gogo/protobuf/proto"
 
 	"github.com/hashicorp/raft"
-	"github.com/namreg/godown-v2/internal/api"
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/api"
+	"github.com/namreg/godown/internal/storage"
 )
 
 //fsm stands for a finite state machine.

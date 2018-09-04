@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/namreg/godown-v2/internal/clock"
-	"github.com/namreg/godown-v2/internal/command"
-	"github.com/namreg/godown-v2/internal/server"
-	"github.com/namreg/godown-v2/internal/storage/memory"
+	"github.com/namreg/godown/internal/clock"
+	"github.com/namreg/godown/internal/command"
+	"github.com/namreg/godown/internal/server"
+	"github.com/namreg/godown/internal/storage/memory"
 )
 
 //Values populated by the Go linker.

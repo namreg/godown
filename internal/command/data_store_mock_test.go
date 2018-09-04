@@ -3,19 +3,19 @@ package command
 /*
 DO NOT EDIT!
 This code was generated automatically using github.com/gojuno/minimock v1.9
-The original interface "dataStore" can be found in github.com/namreg/godown-v2/internal/command
+The original interface "dataStore" can be found in github.com/namreg/godown/internal/command
 */
 import (
 	"sync/atomic"
 	"time"
 
 	"github.com/gojuno/minimock"
-	storage "github.com/namreg/godown-v2/internal/storage"
+	storage "github.com/namreg/godown/internal/storage"
 
 	testify_assert "github.com/stretchr/testify/assert"
 )
 
-//dataStoreMock implements github.com/namreg/godown-v2/internal/command.dataStore
+//dataStoreMock implements github.com/namreg/godown/internal/command.dataStore
 type dataStoreMock struct {
 	t minimock.Tester
 
@@ -40,7 +40,7 @@ type dataStoreMock struct {
 	PutMock       mdataStoreMockPut
 }
 
-//NewdataStoreMock returns a mock for github.com/namreg/godown-v2/internal/command.dataStore
+//NewdataStoreMock returns a mock for github.com/namreg/godown/internal/command.dataStore
 func NewdataStoreMock(t minimock.Tester) *dataStoreMock {
 	m := &dataStoreMock{t: t}
 
@@ -87,7 +87,7 @@ func (m *mdataStoreMockDel) Set(f func(p storage.Key) (r error)) *dataStoreMock 
 	return m.mock
 }
 
-//Del implements github.com/namreg/godown-v2/internal/command.dataStore interface
+//Del implements github.com/namreg/godown/internal/command.dataStore interface
 func (m *dataStoreMock) Del(p storage.Key) (r error) {
 	atomic.AddUint64(&m.DelPreCounter, 1)
 	defer atomic.AddUint64(&m.DelCounter, 1)
@@ -153,7 +153,7 @@ func (m *mdataStoreMockGet) Set(f func(p storage.Key) (r *storage.Value, r1 erro
 	return m.mock
 }
 
-//Get implements github.com/namreg/godown-v2/internal/command.dataStore interface
+//Get implements github.com/namreg/godown/internal/command.dataStore interface
 func (m *dataStoreMock) Get(p storage.Key) (r *storage.Value, r1 error) {
 	atomic.AddUint64(&m.GetPreCounter, 1)
 	defer atomic.AddUint64(&m.GetCounter, 1)
@@ -207,7 +207,7 @@ func (m *mdataStoreMockKeys) Set(f func() (r []storage.Key, r1 error)) *dataStor
 	return m.mock
 }
 
-//Keys implements github.com/namreg/godown-v2/internal/command.dataStore interface
+//Keys implements github.com/namreg/godown/internal/command.dataStore interface
 func (m *dataStoreMock) Keys() (r []storage.Key, r1 error) {
 	atomic.AddUint64(&m.KeysPreCounter, 1)
 	defer atomic.AddUint64(&m.KeysCounter, 1)
@@ -262,7 +262,7 @@ func (m *mdataStoreMockPut) Set(f func(p storage.Key, p1 storage.ValueSetter) (r
 	return m.mock
 }
 
-//Put implements github.com/namreg/godown-v2/internal/command.dataStore interface
+//Put implements github.com/namreg/godown/internal/command.dataStore interface
 func (m *dataStoreMock) Put(p storage.Key, p1 storage.ValueSetter) (r error) {
 	atomic.AddUint64(&m.PutPreCounter, 1)
 	defer atomic.AddUint64(&m.PutCounter, 1)

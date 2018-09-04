@@ -3,7 +3,7 @@ package command
 /*
 DO NOT EDIT!
 This code was generated automatically using github.com/gojuno/minimock v1.9
-The original interface "commandClock" can be found in github.com/namreg/godown-v2/internal/command
+The original interface "commandClock" can be found in github.com/namreg/godown/internal/command
 */
 import (
 	"sync/atomic"
@@ -12,7 +12,7 @@ import (
 	"github.com/gojuno/minimock"
 )
 
-//commandClockMock implements github.com/namreg/godown-v2/internal/command.commandClock
+//commandClockMock implements github.com/namreg/godown/internal/command.commandClock
 type commandClockMock struct {
 	t minimock.Tester
 
@@ -22,7 +22,7 @@ type commandClockMock struct {
 	NowMock       mcommandClockMockNow
 }
 
-//NewcommandClockMock returns a mock for github.com/namreg/godown-v2/internal/command.commandClock
+//NewcommandClockMock returns a mock for github.com/namreg/godown/internal/command.commandClock
 func NewcommandClockMock(t minimock.Tester) *commandClockMock {
 	m := &commandClockMock{t: t}
 
@@ -54,7 +54,7 @@ func (m *mcommandClockMockNow) Set(f func() (r time.Time)) *commandClockMock {
 	return m.mock
 }
 
-//Now implements github.com/namreg/godown-v2/internal/command.commandClock interface
+//Now implements github.com/namreg/godown/internal/command.commandClock interface
 func (m *commandClockMock) Now() (r time.Time) {
 	atomic.AddUint64(&m.NowPreCounter, 1)
 	defer atomic.AddUint64(&m.NowCounter, 1)

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/storage"
 )
 
 //Expire is the Expire command

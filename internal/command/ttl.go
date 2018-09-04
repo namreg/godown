@@ -3,7 +3,7 @@ package command
 import (
 	"time"
 
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/storage"
 )
 
 //TTL is the TTL command

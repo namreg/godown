@@ -3,7 +3,7 @@ package command
 /*
 DO NOT EDIT!
 This code was generated automatically using github.com/gojuno/minimock v1.9
-The original interface "commandParser" can be found in github.com/namreg/godown-v2/internal/command
+The original interface "commandParser" can be found in github.com/namreg/godown/internal/command
 */
 import (
 	"sync/atomic"
@@ -13,7 +13,7 @@ import (
 	testify_assert "github.com/stretchr/testify/assert"
 )
 
-//commandParserMock implements github.com/namreg/godown-v2/internal/command.commandParser
+//commandParserMock implements github.com/namreg/godown/internal/command.commandParser
 type commandParserMock struct {
 	t minimock.Tester
 
@@ -23,7 +23,7 @@ type commandParserMock struct {
 	ParseMock       mcommandParserMockParse
 }
 
-//NewcommandParserMock returns a mock for github.com/namreg/godown-v2/internal/command.commandParser
+//NewcommandParserMock returns a mock for github.com/namreg/godown/internal/command.commandParser
 func NewcommandParserMock(t minimock.Tester) *commandParserMock {
 	m := &commandParserMock{t: t}
 
@@ -67,7 +67,7 @@ func (m *mcommandParserMockParse) Set(f func(p string) (r Command, r1 []string, 
 	return m.mock
 }
 
-//Parse implements github.com/namreg/godown-v2/internal/command.commandParser interface
+//Parse implements github.com/namreg/godown/internal/command.commandParser interface
 func (m *commandParserMock) Parse(p string) (r Command, r1 []string, r2 error) {
 	atomic.AddUint64(&m.ParsePreCounter, 1)
 	defer atomic.AddUint64(&m.ParseCounter, 1)

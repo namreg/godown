@@ -3,7 +3,7 @@ package command
 import (
 	"unicode/utf8"
 
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/storage"
 )
 
 //Strlen is the Strlen command

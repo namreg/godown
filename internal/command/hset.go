@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/storage"
 )
 
 //Hset is the HSET command

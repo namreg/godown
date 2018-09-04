@@ -6,7 +6,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/namreg/godown-v2/internal/cli"
+	"github.com/namreg/godown/internal/cli"
 )
 
 //Values populated by the Go linker.

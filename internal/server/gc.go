@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/namreg/godown-v2/internal/api"
+	"github.com/namreg/godown/internal/api"
 	context "golang.org/x/net/context"
 )
 

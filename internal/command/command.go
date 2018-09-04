@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/storage"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 )
 
 //Command represents a command thats server can execute.
-//go:generate minimock -i github.com/namreg/godown-v2/internal/command.Command -o ./
+//go:generate minimock -i github.com/namreg/godown/internal/command.Command -o ./
 type Command interface {
 	//Name returns the command name.
 	Name() string
@@ -25,7 +25,7 @@ type Command interface {
 	Execute(args ...string) Reply
 }
 
-//go:generate minimock -i github.com/namreg/godown-v2/internal/command.dataStore -o ./
+//go:generate minimock -i github.com/namreg/godown/internal/command.dataStore -o ./
 type dataStore interface {
 	//Put puts a new value at the given Key.
 	Put(key storage.Key, sttr storage.ValueSetter) error
@@ -37,12 +37,12 @@ type dataStore interface {
 	Keys() ([]storage.Key, error)
 }
 
-//go:generate minimock -i github.com/namreg/godown-v2/internal/command.commandParser -o ./
+//go:generate minimock -i github.com/namreg/godown/internal/command.commandParser -o ./
 type commandParser interface {
 	Parse(str string) (cmd Command, args []string, err error)
 }
 
-//go:generate minimock -i github.com/namreg/godown-v2/internal/command.commandClock -o ./
+//go:generate minimock -i github.com/namreg/godown/internal/command.commandClock -o ./
 type commandClock interface {
 	//Now returns current time.
 	Now() time.Time

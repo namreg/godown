@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/namreg/godown-v2/internal/clock"
+	"github.com/namreg/godown/internal/clock"
 
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/storage"
 	"github.com/stretchr/testify/assert"
 )
 

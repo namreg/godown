@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/storage"
 )
 
 //GetBit is the GetBit command

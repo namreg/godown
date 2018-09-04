@@ -3,7 +3,7 @@ package server
 /*
 DO NOT EDIT!
 This code was generated automatically using github.com/gojuno/minimock v1.9
-The original interface "serverClock" can be found in github.com/namreg/godown-v2/internal/server
+The original interface "serverClock" can be found in github.com/namreg/godown/internal/server
 */
 import (
 	"sync/atomic"
@@ -12,7 +12,7 @@ import (
 	"github.com/gojuno/minimock"
 )
 
-//serverClockMock implements github.com/namreg/godown-v2/internal/server.serverClock
+//serverClockMock implements github.com/namreg/godown/internal/server.serverClock
 type serverClockMock struct {
 	t minimock.Tester
 
@@ -22,7 +22,7 @@ type serverClockMock struct {
 	NowMock       mserverClockMockNow
 }
 
-//NewserverClockMock returns a mock for github.com/namreg/godown-v2/internal/server.serverClock
+//NewserverClockMock returns a mock for github.com/namreg/godown/internal/server.serverClock
 func NewserverClockMock(t minimock.Tester) *serverClockMock {
 	m := &serverClockMock{t: t}
 
@@ -54,7 +54,7 @@ func (m *mserverClockMockNow) Set(f func() (r time.Time)) *serverClockMock {
 	return m.mock
 }
 
-//Now implements github.com/namreg/godown-v2/internal/server.serverClock interface
+//Now implements github.com/namreg/godown/internal/server.serverClock interface
 func (m *serverClockMock) Now() (r time.Time) {
 	atomic.AddUint64(&m.NowPreCounter, 1)
 	defer atomic.AddUint64(&m.NowCounter, 1)

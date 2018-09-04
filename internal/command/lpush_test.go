@@ -7,8 +7,8 @@ import (
 	"github.com/gojuno/minimock"
 	"github.com/pkg/errors"
 
-	"github.com/namreg/godown-v2/internal/storage"
-	"github.com/namreg/godown-v2/internal/storage/memory"
+	"github.com/namreg/godown/internal/storage"
+	"github.com/namreg/godown/internal/storage/memory"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/namreg/godown-v2/internal/api"
+	"github.com/namreg/godown/internal/api"
 )
 
 const (

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/Bowery/prompt"
-	"github.com/namreg/godown-v2/internal/api"
+	"github.com/namreg/godown/internal/api"
 
 	"google.golang.org/grpc"
 )

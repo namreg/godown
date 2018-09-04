@@ -1,7 +1,5 @@
-PACKAGE=github.com/namreg/godown-v2
-SRC_PKGS=$(shell go list ./... | grep -v vendor | grep -v cmd)
-CURTIME=$(shell date +%Y-%m-%dT%T%z)
-COMMIT=$(shell git rev-parse HEAD)
+PACKAGE=github.com/namreg/godown
+PKGS=$(shell go list ./... | grep -v vendor | grep -v cmd)
 ARTIFACTS=./build
 
 .PHONY: default
@@ -15,7 +13,7 @@ vendor:
 .PHONY: generate
 generate:
 	@echo "======> generating code"
-	@go generate $(SRC_PKGS)
+	@go generate $(PKGS)
 
 .PHONY: lint
 lint:
@@ -25,11 +23,11 @@ lint:
 .PHONY: test
 test: vendor generate
 	@echo "======> running tests"
-	@go test -race $(SRC_PKGS) -cover
+	@go test -race $(PKGS) -cover
 
 .PHONY: clear
 clear:
-	@echo "======> clear artifacts"
+	@echo "======> clearing artifacts"
 	@rm -fR $(ARTIFACTS)
 
 .PHONY: build

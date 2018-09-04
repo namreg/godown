@@ -3,7 +3,7 @@ package command
 import (
 	"strings"
 
-	"github.com/namreg/godown-v2/internal/storage"
+	"github.com/namreg/godown/internal/storage"
 )
 
 //Set is the SET command
