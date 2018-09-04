@@ -52,3 +52,7 @@
 [[constraint]]
   name = "github.com/fatih/color"
   version = "1.7.0"
+
+[[constraint]]
+  name = "github.com/hashicorp/go-multierror"
+  version = "1.0.0"
