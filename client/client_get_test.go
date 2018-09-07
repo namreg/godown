@@ -188,7 +188,3 @@ func TestClient_GetWithContext(t *testing.T) {
 		assert.Equal(t, tt.wantResult, res)
 	}
 }
-
-func stringToPtr(str string) *string {
-	return &str
-}

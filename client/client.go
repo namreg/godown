@@ -89,3 +89,22 @@ func (c *Client) get(ctx context.Context, key string) ScalarResult {
 	}
 	return newScalarResult(resp)
 }
+
+//Set sets a new value at the given key.
+func (c *Client) Set(key, value string) StatusResult {
+	return c.set(context.Background(), key, value)
+}
+
+//SetWithContext similar to Set but with the context.
+func (c *Client) SetWithContext(ctx context.Context, key, value string) StatusResult {
+	return c.set(ctx, key, value)
+}
+
+func (c *Client) set(ctx context.Context, key, value string) StatusResult {
+	req := c.newExecuteRequest("SET", key, value)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newStatusResult(resp)
+}

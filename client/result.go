@@ -55,7 +55,29 @@ func newScalarResult(resp *api.ExecuteCommandResponse) ScalarResult {
 	case api.StringCommandReply:
 		res.val = &resp.Item
 	default:
-		res.err = fmt.Errorf("unexpected reply: %v", resp.Reply)
+		res.err = fmt.Errorf("unexpected reply: %v", resp.GetReply())
+	}
+	return res
+}
+
+//StatusResult is used when a command can respond only with success or with error.
+type StatusResult struct {
+	err error
+}
+
+//Err returns an error
+func (sr StatusResult) Err() error {
+	return sr.err
+}
+
+func newStatusResult(resp *api.ExecuteCommandResponse) StatusResult {
+	res := StatusResult{}
+	switch resp.GetReply() {
+	case api.OkCommandReply:
+	case api.ErrCommandReply:
+		res.err = errors.New(resp.Item)
+	default:
+		res.err = fmt.Errorf("unexpected reply: %v", resp.GetReply())
 	}
 	return res
 }
