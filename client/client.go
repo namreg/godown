@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -121,6 +122,25 @@ func (c *Client) DelWithContext(ctx context.Context, key string) StatusResult {
 
 func (c *Client) del(ctx context.Context, key string) StatusResult {
 	req := c.newExecuteRequest("DEL", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newStatusResult(resp)
+}
+
+//Expire sets expiration of the given key as `now + secs`.
+func (c *Client) Expire(key string, secs int) StatusResult {
+	return c.expire(context.Background(), key, secs)
+}
+
+//ExpireWithContext similar to Expire but with context.
+func (c *Client) ExpireWithContext(ctx context.Context, key string, secs int) StatusResult {
+	return c.expire(ctx, key, secs)
+}
+
+func (c *Client) expire(ctx context.Context, key string, secs int) StatusResult {
+	req := c.newExecuteRequest("EXPIRE", key, strconv.Itoa(secs))
 	resp, err := c.executor.ExecuteCommand(ctx, req)
 	if err != nil {
 		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
