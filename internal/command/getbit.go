@@ -68,13 +68,11 @@ func (c *GetBit) parseOffset(args []string) (uint64, error) {
 }
 
 func (c *GetBit) resolveIndex(offset uint64) uint64 {
-	var idx uint64
-	if offset > 63 {
-		if offset == 64 {
-			idx = 1
-		} else {
-			idx = offset % 64
-		}
+	if offset < 64 {
+		return 0
 	}
-	return idx
+	if offset == 64 {
+		return 1
+	}
+	return offset % 64
 }
