@@ -21,7 +21,7 @@ func (sr ScalarResult) Err() error {
 
 //IsNil returns true if the underlying value is nil.
 func (sr ScalarResult) IsNil() bool {
-	return sr.val == nil
+	return sr.val == nil && sr.err == nil
 }
 
 //Val returns a string representation.
