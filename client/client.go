@@ -108,3 +108,22 @@ func (c *Client) set(ctx context.Context, key, value string) StatusResult {
 	}
 	return newStatusResult(resp)
 }
+
+//Del deletes the given key.
+func (c *Client) Del(key string) StatusResult {
+	return c.del(context.Background(), key)
+}
+
+//DelWithContext similar to Del but with context.
+func (c *Client) DelWithContext(ctx context.Context, key string) StatusResult {
+	return c.del(ctx, key)
+}
+
+func (c *Client) del(ctx context.Context, key string) StatusResult {
+	req := c.newExecuteRequest("DEL", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newStatusResult(resp)
+}
