@@ -165,8 +165,8 @@ func TestClient_GetWithContext(t *testing.T) {
 		},
 		{
 			name:          "custom_context",
-			args:          args{key: "test_key", ctx: context.WithValue(context.Background(), ctxKey("key"), "val")},
-			expectCtx:     context.WithValue(context.Background(), ctxKey("key"), "val"),
+			args:          args{ctx: contextWithValue("ctx_key", "ctx_value"), key: "test_key"},
+			expectCtx:     contextWithValue("ctx_key", "ctx_value"),
 			expectCommand: "GET test_key",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.SliceCommandReply,

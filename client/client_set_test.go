@@ -139,8 +139,8 @@ func TestClient_SetWithContext(t *testing.T) {
 		},
 		{
 			name:          "with_custom_context",
-			args:          args{ctx: context.WithValue(context.Background(), ctxKey("ctx_key"), "ctx_value"), key: "key", value: "val"},
-			expectCtx:     context.WithValue(context.Background(), ctxKey("ctx_key"), "ctx_value"),
+			args:          args{ctx: contextWithValue("ctx_key", "ctx_value"), key: "key", value: "val"},
+			expectCtx:     contextWithValue("ctx_key", "ctx_value"),
 			expectCommand: "SET key val",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.OkCommandReply,

@@ -147,3 +147,22 @@ func (c *Client) expire(ctx context.Context, key string, secs int) StatusResult 
 	}
 	return newStatusResult(resp)
 }
+
+//GetBit returns the bit value at the offset in the string stored at key.
+func (c *Client) GetBit(key string, offset uint64) ScalarResult {
+	return c.getBit(context.Background(), key, offset)
+}
+
+//GetBitWithContext similar to GetBit but with context.
+func (c *Client) GetBitWithContext(ctx context.Context, key string, offset uint64) ScalarResult {
+	return c.getBit(ctx, key, offset)
+}
+
+func (c *Client) getBit(ctx context.Context, key string, offset uint64) ScalarResult {
+	req := c.newExecuteRequest("GETBIT", key, strconv.FormatUint(offset, 10))
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}

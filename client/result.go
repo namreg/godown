@@ -52,7 +52,7 @@ func newScalarResult(resp *api.ExecuteCommandResponse) ScalarResult {
 	case api.NilCommandReply:
 	case api.ErrCommandReply:
 		res.err = errors.New(resp.Item)
-	case api.StringCommandReply:
+	case api.StringCommandReply, api.IntCommandReply:
 		res.val = &resp.Item
 	default:
 		res.err = fmt.Errorf("unexpected reply: %v", resp.GetReply())

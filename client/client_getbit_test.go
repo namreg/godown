@@ -10,53 +10,59 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestClient_Del(t *testing.T) {
+func TestClient_GetBit(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
+	type args struct {
+		key    string
+		offset uint64
+	}
+
 	tests := []struct {
 		name          string
-		arg           string
+		args          args
 		expectCommand string
 		mockResponse  *api.ExecuteCommandResponse
 		mockErr       error
-		wantResult    StatusResult
+		wantResult    ScalarResult
 	}{
 		{
 			name:          "could_not_execute_command",
-			arg:           "key",
-			expectCommand: "DEL key",
+			args:          args{key: "key", offset: 1},
+			expectCommand: "GETBIT key 1",
 			mockErr:       errors.New("something went wrong"),
-			wantResult:    StatusResult{err: errors.New("could not execute command: something went wrong")},
+			wantResult:    ScalarResult{err: errors.New("could not execute command: something went wrong")},
 		},
 		{
 			name:          "server_respond_with_error",
-			arg:           "key",
-			expectCommand: "DEL key",
+			args:          args{key: "key", offset: 1},
+			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.ErrCommandReply,
 				Item:  "internal server error",
 			},
-			wantResult: StatusResult{err: errors.New("internal server error")},
+			wantResult: ScalarResult{err: errors.New("internal server error")},
 		},
 		{
-			name:          "server_respond_with_ok",
-			arg:           "key",
-			expectCommand: "DEL key",
+			name:          "server_respond_with_int",
+			args:          args{key: "key", offset: 1},
+			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.OkCommandReply,
+				Reply: api.IntCommandReply,
+				Item:  "1",
 			},
-			wantResult: StatusResult{},
+			wantResult: ScalarResult{val: stringToPtr("1")},
 		},
 		{
 			name:          "server_respond_with_unexpected_reply",
-			arg:           "key",
-			expectCommand: "DEL key",
+			args:          args{key: "key", offset: 1},
+			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.RawStringCommandReply,
-				Item:  "raw string",
+				Reply: api.SliceCommandReply,
+				Items: []string{"val"},
 			},
-			wantResult: StatusResult{err: errors.New("unexpected reply: RAW_STRING")},
+			wantResult: ScalarResult{err: errors.New("unexpected reply: SLICE")},
 		},
 	}
 
@@ -68,19 +74,21 @@ func TestClient_Del(t *testing.T) {
 
 		cl := Client{executor: mock}
 
-		res := cl.Del(tt.arg)
+		res := cl.GetBit(tt.args.key, tt.args.offset)
 		assert.Equal(t, tt.wantResult, res)
 	}
 }
 
-func TestClient_DelWithContext(t *testing.T) {
+func TestClient_GetBitWithContext(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
 	type args struct {
-		ctx context.Context
-		key string
+		ctx    context.Context
+		key    string
+		offset uint64
 	}
+
 	type ctxKey string
 
 	tests := []struct {
@@ -90,57 +98,59 @@ func TestClient_DelWithContext(t *testing.T) {
 		expectCommand string
 		mockResponse  *api.ExecuteCommandResponse
 		mockErr       error
-		wantResult    StatusResult
+		wantResult    ScalarResult
 	}{
 		{
 			name:          "could_not_execute_command",
-			args:          args{ctx: context.Background(), key: "key"},
+			args:          args{ctx: context.Background(), key: "key", offset: 1},
 			expectCtx:     context.Background(),
-			expectCommand: "DEL key",
+			expectCommand: "GETBIT key 1",
 			mockErr:       errors.New("something went wrong"),
-			wantResult:    StatusResult{err: errors.New("could not execute command: something went wrong")},
+			wantResult:    ScalarResult{err: errors.New("could not execute command: something went wrong")},
 		},
 		{
 			name:          "server_respond_with_error",
-			args:          args{ctx: context.Background(), key: "key"},
+			args:          args{ctx: context.Background(), key: "key", offset: 1},
 			expectCtx:     context.Background(),
-			expectCommand: "DEL key",
+			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.ErrCommandReply,
 				Item:  "internal server error",
 			},
-			wantResult: StatusResult{err: errors.New("internal server error")},
+			wantResult: ScalarResult{err: errors.New("internal server error")},
 		},
 		{
-			name:          "server_respond_with_ok",
-			args:          args{ctx: context.Background(), key: "key"},
+			name:          "server_respond_with_int",
+			args:          args{ctx: context.Background(), key: "key", offset: 1},
 			expectCtx:     context.Background(),
-			expectCommand: "DEL key",
+			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.OkCommandReply,
+				Reply: api.IntCommandReply,
+				Item:  "1",
 			},
-			wantResult: StatusResult{},
+			wantResult: ScalarResult{val: stringToPtr("1")},
 		},
 		{
 			name:          "server_respond_with_unexpected_reply",
-			args:          args{ctx: context.Background(), key: "key"},
+			args:          args{ctx: context.Background(), key: "key", offset: 1},
 			expectCtx:     context.Background(),
-			expectCommand: "DEL key",
+			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.RawStringCommandReply,
-				Item:  "raw string",
+				Reply: api.SliceCommandReply,
+				Items: []string{"val"},
 			},
-			wantResult: StatusResult{err: errors.New("unexpected reply: RAW_STRING")},
+			wantResult: ScalarResult{err: errors.New("unexpected reply: SLICE")},
 		},
 		{
 			name:          "with_custom_context",
-			args:          args{ctx: contextWithValue("ctx_key", "ctx_value"), key: "key"},
+			args:          args{ctx: contextWithValue("ctx_key", "ctx_value"), key: "key", offset: 1},
 			expectCtx:     contextWithValue("ctx_key", "ctx_value"),
-			expectCommand: "DEL key",
+			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.OkCommandReply,
+				Reply: api.IntCommandReply,
+				Item:  "1",
 			},
-			wantResult: StatusResult{},
+			wantResult: ScalarResult{val: stringToPtr("1")},
 		},
 	}
 
@@ -152,7 +162,7 @@ func TestClient_DelWithContext(t *testing.T) {
 
 		cl := Client{executor: mock}
 
-		res := cl.DelWithContext(tt.args.ctx, tt.args.key)
+		res := cl.GetBitWithContext(tt.args.ctx, tt.args.key, tt.args.offset)
 		assert.Equal(t, tt.wantResult, res)
 	}
 }

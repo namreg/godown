@@ -141,8 +141,8 @@ func TestClient_ExpireWithContext(t *testing.T) {
 		},
 		{
 			name:          "with_custom_context",
-			args:          args{ctx: context.WithValue(context.Background(), ctxKey("ctx_key"), "ctx_value"), key: "key", secs: 10},
-			expectCtx:     context.WithValue(context.Background(), ctxKey("ctx_key"), "ctx_value"),
+			args:          args{ctx: contextWithValue("ctx_key", "ctx_value"), key: "key", secs: 10},
+			expectCtx:     contextWithValue("ctx_key", "ctx_value"),
 			expectCommand: "EXPIRE key 10",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.OkCommandReply,
