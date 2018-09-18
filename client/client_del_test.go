@@ -81,7 +81,6 @@ func TestClient_DelWithContext(t *testing.T) {
 		ctx context.Context
 		key string
 	}
-	type ctxKey string
 
 	tests := []struct {
 		name          string

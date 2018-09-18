@@ -89,8 +89,6 @@ func TestClient_GetBitWithContext(t *testing.T) {
 		offset uint64
 	}
 
-	type ctxKey string
-
 	tests := []struct {
 		name          string
 		args          args

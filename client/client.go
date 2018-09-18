@@ -166,3 +166,22 @@ func (c *Client) getBit(ctx context.Context, key string, offset uint64) ScalarRe
 	}
 	return newScalarResult(resp)
 }
+
+//HGet returns the value associated with field in the hash stored at key.
+func (c *Client) HGet(key, field string) ScalarResult {
+	return c.hget(context.Background(), key, field)
+}
+
+//HGetWithContext similar to HGet but with context.
+func (c *Client) HGetWithContext(ctx context.Context, key, field string) ScalarResult {
+	return c.hget(ctx, key, field)
+}
+
+func (c *Client) hget(ctx context.Context, key, field string) ScalarResult {
+	req := c.newExecuteRequest("HGET", key, field)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}

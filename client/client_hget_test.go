@@ -1,23 +1,26 @@
 package client
 
 import (
-	"context"
+	context "context"
 	"errors"
 	"testing"
 
-	"github.com/namreg/godown/internal/api"
-
 	"github.com/gojuno/minimock"
+	"github.com/namreg/godown/internal/api"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestClient_Get(t *testing.T) {
+func TestClient_HGet(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
+	type args struct {
+		key, field string
+	}
+
 	test := []struct {
 		name          string
-		arg           string
+		args          args
 		expectCommand string
 		mockResponse  *api.ExecuteCommandResponse
 		mockErr       error
@@ -25,29 +28,29 @@ func TestClient_Get(t *testing.T) {
 	}{
 		{
 			name:          "could_not_execute_command",
-			arg:           "test_key",
-			expectCommand: "GET test_key",
-			mockErr:       errors.New("server error"),
+			args:          args{key: "key", field: "field"},
+			expectCommand: "HGET key field",
+			mockErr:       errors.New("something went wrong"),
 			wantResult: ScalarResult{
-				err: errors.New("could not execute command: server error"),
+				err: errors.New("could not execute command: something went wrong"),
 			},
 		},
 		{
 			name:          "server_respond_with_error",
-			arg:           "test_key",
-			expectCommand: "GET test_key",
+			args:          args{key: "key", field: "field"},
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.ErrCommandReply,
-				Item:  "something went wrong",
+				Item:  "internal server error",
 			},
 			wantResult: ScalarResult{
-				err: errors.New("something went wrong"),
+				err: errors.New("internal server error"),
 			},
 		},
 		{
 			name:          "server_respond_with_nil",
-			arg:           "test_key",
-			expectCommand: "GET test_key",
+			args:          args{key: "key", field: "field"},
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.NilCommandReply,
 			},
@@ -55,18 +58,18 @@ func TestClient_Get(t *testing.T) {
 		},
 		{
 			name:          "server_respond_with_string",
-			arg:           "test_key",
-			expectCommand: "GET test_key",
+			args:          args{key: "key", field: "field"},
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.StringCommandReply,
-				Item:  "value",
+				Item:  "string",
 			},
-			wantResult: ScalarResult{val: stringToPtr("value")},
+			wantResult: ScalarResult{val: stringToPtr("string")},
 		},
 		{
 			name:          "server_respond_with_unexpected_reply",
-			arg:           "test_key",
-			expectCommand: "GET test_key",
+			args:          args{key: "key", field: "field"},
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.SliceCommandReply,
 				Items: []string{"val"},
@@ -83,18 +86,18 @@ func TestClient_Get(t *testing.T) {
 
 		cl := Client{executor: mock}
 
-		res := cl.Get(tt.arg)
+		res := cl.HGet(tt.args.key, tt.args.field)
 		assert.Equal(t, tt.wantResult, res)
 	}
 }
 
-func TestClient_GetWithContext(t *testing.T) {
+func TestClient_HGetWithContext(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
 	type args struct {
-		ctx context.Context
-		key string
+		ctx        context.Context
+		key, field string
 	}
 
 	test := []struct {
@@ -108,32 +111,32 @@ func TestClient_GetWithContext(t *testing.T) {
 	}{
 		{
 			name:          "could_not_execute_command",
-			args:          args{key: "test_key", ctx: context.Background()},
+			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
-			expectCommand: "GET test_key",
-			mockErr:       errors.New("server error"),
+			expectCommand: "HGET key field",
+			mockErr:       errors.New("something went wrong"),
 			wantResult: ScalarResult{
-				err: errors.New("could not execute command: server error"),
+				err: errors.New("could not execute command: something went wrong"),
 			},
 		},
 		{
 			name:          "server_respond_with_error",
-			args:          args{key: "test_key", ctx: context.Background()},
+			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
-			expectCommand: "GET test_key",
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.ErrCommandReply,
-				Item:  "something went wrong",
+				Item:  "internal server error",
 			},
 			wantResult: ScalarResult{
-				err: errors.New("something went wrong"),
+				err: errors.New("internal server error"),
 			},
 		},
 		{
 			name:          "server_respond_with_nil",
-			args:          args{key: "test_key", ctx: context.Background()},
+			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
-			expectCommand: "GET test_key",
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.NilCommandReply,
 			},
@@ -141,20 +144,20 @@ func TestClient_GetWithContext(t *testing.T) {
 		},
 		{
 			name:          "server_respond_with_string",
-			args:          args{key: "test_key", ctx: context.Background()},
+			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
-			expectCommand: "GET test_key",
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.StringCommandReply,
-				Item:  "value",
+				Item:  "string",
 			},
-			wantResult: ScalarResult{val: stringToPtr("value")},
+			wantResult: ScalarResult{val: stringToPtr("string")},
 		},
 		{
 			name:          "server_respond_with_unexpected_reply",
-			args:          args{key: "test_key", ctx: context.Background()},
+			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
-			expectCommand: "GET test_key",
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.SliceCommandReply,
 				Items: []string{"val"},
@@ -162,10 +165,10 @@ func TestClient_GetWithContext(t *testing.T) {
 			wantResult: ScalarResult{err: errors.New("unexpected reply: SLICE")},
 		},
 		{
-			name:          "custom_context",
-			args:          args{ctx: contextWithValue("ctx_key", "ctx_value"), key: "test_key"},
-			expectCtx:     contextWithValue("ctx_key", "ctx_value"),
-			expectCommand: "GET test_key",
+			name:          "custon_context",
+			args:          args{ctx: contextWithValue("custom_key", "custom_value"), key: "key", field: "field"},
+			expectCtx:     contextWithValue("custom_key", "custom_value"),
+			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.SliceCommandReply,
 				Items: []string{"val"},
@@ -177,12 +180,12 @@ func TestClient_GetWithContext(t *testing.T) {
 	for _, tt := range test {
 		mock := NewexecutorMock(mc)
 		mock.ExecuteCommandMock.
-			Expect(tt.args.ctx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+			Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
 			Return(tt.mockResponse, tt.mockErr)
 
 		cl := Client{executor: mock}
 
-		res := cl.GetWithContext(tt.args.ctx, tt.args.key)
+		res := cl.HGetWithContext(tt.args.ctx, tt.args.key, tt.args.field)
 		assert.Equal(t, tt.wantResult, res)
 	}
 }

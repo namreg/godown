@@ -88,8 +88,6 @@ func TestClient_ExpireWithContext(t *testing.T) {
 		secs int
 	}
 
-	type ctxKey string
-
 	tests := []struct {
 		name          string
 		args          args

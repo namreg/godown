@@ -86,8 +86,6 @@ func TestClient_SetWithContext(t *testing.T) {
 		key, value string
 	}
 
-	type ctxKey string
-
 	tests := []struct {
 		name          string
 		args          args
