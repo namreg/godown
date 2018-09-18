@@ -185,3 +185,22 @@ func (c *Client) hget(ctx context.Context, key, field string) ScalarResult {
 	}
 	return newScalarResult(resp)
 }
+
+//HKeys returns all keys of the map stored at the given key.
+func (c *Client) HKeys(key string) ListResult {
+	return c.hkeys(context.Background(), key)
+}
+
+//HKeysWithContext similar to Hkeys by with context.
+func (c *Client) HKeysWithContext(ctx context.Context, key string) ListResult {
+	return c.hkeys(ctx, key)
+}
+
+func (c *Client) hkeys(ctx context.Context, key string) ListResult {
+	req := c.newExecuteRequest("HKEYS", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ListResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newListResult(resp)
+}

@@ -35,7 +35,7 @@ func TestClient_GetBit(t *testing.T) {
 			wantResult:    ScalarResult{err: errors.New("could not execute command: something went wrong")},
 		},
 		{
-			name:          "server_respond_with_error",
+			name:          "server_responds_with_error",
 			args:          args{key: "key", offset: 1},
 			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -45,7 +45,7 @@ func TestClient_GetBit(t *testing.T) {
 			wantResult: ScalarResult{err: errors.New("internal server error")},
 		},
 		{
-			name:          "server_respond_with_int",
+			name:          "server_responds_with_int",
 			args:          args{key: "key", offset: 1},
 			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -55,7 +55,7 @@ func TestClient_GetBit(t *testing.T) {
 			wantResult: ScalarResult{val: stringToPtr("1")},
 		},
 		{
-			name:          "server_respond_with_unexpected_reply",
+			name:          "server_responds_with_unexpected_reply",
 			args:          args{key: "key", offset: 1},
 			expectCommand: "GETBIT key 1",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -107,7 +107,7 @@ func TestClient_GetBitWithContext(t *testing.T) {
 			wantResult:    ScalarResult{err: errors.New("could not execute command: something went wrong")},
 		},
 		{
-			name:          "server_respond_with_error",
+			name:          "server_responds_with_error",
 			args:          args{ctx: context.Background(), key: "key", offset: 1},
 			expectCtx:     context.Background(),
 			expectCommand: "GETBIT key 1",
@@ -118,7 +118,7 @@ func TestClient_GetBitWithContext(t *testing.T) {
 			wantResult: ScalarResult{err: errors.New("internal server error")},
 		},
 		{
-			name:          "server_respond_with_int",
+			name:          "server_responds_with_int",
 			args:          args{ctx: context.Background(), key: "key", offset: 1},
 			expectCtx:     context.Background(),
 			expectCommand: "GETBIT key 1",
@@ -129,7 +129,7 @@ func TestClient_GetBitWithContext(t *testing.T) {
 			wantResult: ScalarResult{val: stringToPtr("1")},
 		},
 		{
-			name:          "server_respond_with_unexpected_reply",
+			name:          "server_responds_with_unexpected_reply",
 			args:          args{ctx: context.Background(), key: "key", offset: 1},
 			expectCtx:     context.Background(),
 			expectCommand: "GETBIT key 1",

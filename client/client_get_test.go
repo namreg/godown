@@ -33,7 +33,7 @@ func TestClient_Get(t *testing.T) {
 			},
 		},
 		{
-			name:          "server_respond_with_error",
+			name:          "server_responds_with_error",
 			arg:           "test_key",
 			expectCommand: "GET test_key",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -45,7 +45,7 @@ func TestClient_Get(t *testing.T) {
 			},
 		},
 		{
-			name:          "server_respond_with_nil",
+			name:          "server_responds_with_nil",
 			arg:           "test_key",
 			expectCommand: "GET test_key",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -54,7 +54,7 @@ func TestClient_Get(t *testing.T) {
 			wantResult: ScalarResult{},
 		},
 		{
-			name:          "server_respond_with_string",
+			name:          "server_responds_with_string",
 			arg:           "test_key",
 			expectCommand: "GET test_key",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -64,7 +64,7 @@ func TestClient_Get(t *testing.T) {
 			wantResult: ScalarResult{val: stringToPtr("value")},
 		},
 		{
-			name:          "server_respond_with_unexpected_reply",
+			name:          "server_responds_with_unexpected_reply",
 			arg:           "test_key",
 			expectCommand: "GET test_key",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -117,7 +117,7 @@ func TestClient_GetWithContext(t *testing.T) {
 			},
 		},
 		{
-			name:          "server_respond_with_error",
+			name:          "server_responds_with_error",
 			args:          args{key: "test_key", ctx: context.Background()},
 			expectCtx:     context.Background(),
 			expectCommand: "GET test_key",
@@ -130,7 +130,7 @@ func TestClient_GetWithContext(t *testing.T) {
 			},
 		},
 		{
-			name:          "server_respond_with_nil",
+			name:          "server_responds_with_nil",
 			args:          args{key: "test_key", ctx: context.Background()},
 			expectCtx:     context.Background(),
 			expectCommand: "GET test_key",
@@ -140,7 +140,7 @@ func TestClient_GetWithContext(t *testing.T) {
 			wantResult: ScalarResult{},
 		},
 		{
-			name:          "server_respond_with_string",
+			name:          "server_responds_with_string",
 			args:          args{key: "test_key", ctx: context.Background()},
 			expectCtx:     context.Background(),
 			expectCommand: "GET test_key",
@@ -151,7 +151,7 @@ func TestClient_GetWithContext(t *testing.T) {
 			wantResult: ScalarResult{val: stringToPtr("value")},
 		},
 		{
-			name:          "server_respond_with_unexpected_reply",
+			name:          "server_responds_with_unexpected_reply",
 			args:          args{key: "test_key", ctx: context.Background()},
 			expectCtx:     context.Background(),
 			expectCommand: "GET test_key",

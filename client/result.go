@@ -19,7 +19,7 @@ func (sr ScalarResult) Err() error {
 	return sr.err
 }
 
-//IsNil returns true if the underlying value is nil.
+//IsNil returns true if the underlying value and error is empty.
 func (sr ScalarResult) IsNil() bool {
 	return sr.val == nil && sr.err == nil
 }
@@ -65,7 +65,7 @@ type StatusResult struct {
 	err error
 }
 
-//Err returns an error
+//Err returns an error.
 func (sr StatusResult) Err() error {
 	return sr.err
 }
@@ -76,6 +76,44 @@ func newStatusResult(resp *api.ExecuteCommandResponse) StatusResult {
 	case api.OkCommandReply:
 	case api.ErrCommandReply:
 		res.err = errors.New(resp.Item)
+	default:
+		res.err = fmt.Errorf("unexpected reply: %v", resp.GetReply())
+	}
+	return res
+}
+
+//ListResult is used when command respond with slice.
+type ListResult struct {
+	val []string
+	err error
+}
+
+//Err returns an error.
+func (lr ListResult) Err() error {
+	return lr.err
+}
+
+//IsNil returns true if the underlaying value and error is empty.
+func (lr ListResult) IsNil() bool {
+	return lr.err == nil && lr.val == nil
+}
+
+//Val returns the underlying slice if no error. Otherwise, the error will be returned.
+func (lr ListResult) Val() ([]string, error) {
+	if err := lr.Err(); err != nil {
+		return nil, err
+	}
+	return lr.val, nil
+}
+
+func newListResult(resp *api.ExecuteCommandResponse) ListResult {
+	res := ListResult{}
+	switch resp.GetReply() {
+	case api.NilCommandReply:
+	case api.SliceCommandReply:
+		res.val = resp.GetItems()
+	case api.ErrCommandReply:
+		res.err = errors.New(resp.GetItem())
 	default:
 		res.err = fmt.Errorf("unexpected reply: %v", resp.GetReply())
 	}

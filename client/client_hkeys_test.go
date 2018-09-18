@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestClient_Del(t *testing.T) {
+func TestClient_HKeys(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
@@ -20,43 +20,57 @@ func TestClient_Del(t *testing.T) {
 		expectCommand string
 		mockResponse  *api.ExecuteCommandResponse
 		mockErr       error
-		wantResult    StatusResult
+		wantResult    ListResult
 	}{
 		{
 			name:          "could_not_execute_command",
 			arg:           "key",
-			expectCommand: "DEL key",
+			expectCommand: "HKEYS key",
 			mockErr:       errors.New("something went wrong"),
-			wantResult:    StatusResult{err: errors.New("could not execute command: something went wrong")},
+			wantResult: ListResult{
+				err: errors.New("could not execute command: something went wrong"),
+			},
 		},
 		{
 			name:          "server_responds_with_error",
 			arg:           "key",
-			expectCommand: "DEL key",
+			expectCommand: "HKEYS key",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.ErrCommandReply,
 				Item:  "internal server error",
 			},
-			wantResult: StatusResult{err: errors.New("internal server error")},
+			wantResult: ListResult{
+				err: errors.New("internal server error"),
+			},
 		},
 		{
-			name:          "server_responds_with_ok",
+			name:          "server_responds_with_nil",
 			arg:           "key",
-			expectCommand: "DEL key",
+			expectCommand: "HKEYS key",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.OkCommandReply,
+				Reply: api.NilCommandReply,
 			},
-			wantResult: StatusResult{},
+			wantResult: ListResult{},
+		},
+		{
+			name:          "server_responds_with_slice",
+			arg:           "key",
+			expectCommand: "HKEYS key",
+			mockResponse: &api.ExecuteCommandResponse{
+				Reply: api.SliceCommandReply,
+				Items: []string{"string1", "string2"},
+			},
+			wantResult: ListResult{val: []string{"string1", "string2"}},
 		},
 		{
 			name:          "server_responds_with_unexpected_reply",
 			arg:           "key",
-			expectCommand: "DEL key",
+			expectCommand: "HKEYS key",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.RawStringCommandReply,
-				Item:  "raw string",
+				Reply: api.StringCommandReply,
+				Item:  "string",
 			},
-			wantResult: StatusResult{err: errors.New("unexpected reply: RAW_STRING")},
+			wantResult: ListResult{err: errors.New("unexpected reply: STRING")},
 		},
 	}
 
@@ -68,12 +82,12 @@ func TestClient_Del(t *testing.T) {
 
 		cl := Client{executor: mock}
 
-		res := cl.Del(tt.arg)
+		res := cl.HKeys(tt.arg)
 		assert.Equal(t, tt.wantResult, res)
 	}
 }
 
-func TestClient_DelWithContext(t *testing.T) {
+func TestClient_HKeysWithContext(t *testing.T) {
 	mc := minimock.NewController(t)
 	defer mc.Finish()
 
@@ -89,57 +103,73 @@ func TestClient_DelWithContext(t *testing.T) {
 		expectCommand string
 		mockResponse  *api.ExecuteCommandResponse
 		mockErr       error
-		wantResult    StatusResult
+		wantResult    ListResult
 	}{
 		{
 			name:          "could_not_execute_command",
 			args:          args{ctx: context.Background(), key: "key"},
 			expectCtx:     context.Background(),
-			expectCommand: "DEL key",
+			expectCommand: "HKEYS key",
 			mockErr:       errors.New("something went wrong"),
-			wantResult:    StatusResult{err: errors.New("could not execute command: something went wrong")},
+			wantResult: ListResult{
+				err: errors.New("could not execute command: something went wrong"),
+			},
 		},
 		{
 			name:          "server_responds_with_error",
 			args:          args{ctx: context.Background(), key: "key"},
 			expectCtx:     context.Background(),
-			expectCommand: "DEL key",
+			expectCommand: "HKEYS key",
 			mockResponse: &api.ExecuteCommandResponse{
 				Reply: api.ErrCommandReply,
 				Item:  "internal server error",
 			},
-			wantResult: StatusResult{err: errors.New("internal server error")},
+			wantResult: ListResult{
+				err: errors.New("internal server error"),
+			},
 		},
 		{
-			name:          "server_responds_with_ok",
+			name:          "server_responds_with_nil",
 			args:          args{ctx: context.Background(), key: "key"},
 			expectCtx:     context.Background(),
-			expectCommand: "DEL key",
+			expectCommand: "HKEYS key",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.OkCommandReply,
+				Reply: api.NilCommandReply,
 			},
-			wantResult: StatusResult{},
+			wantResult: ListResult{},
+		},
+		{
+			name:          "server_responds_with_slice",
+			args:          args{ctx: context.Background(), key: "key"},
+			expectCtx:     context.Background(),
+			expectCommand: "HKEYS key",
+			mockResponse: &api.ExecuteCommandResponse{
+				Reply: api.SliceCommandReply,
+				Items: []string{"string1", "string2"},
+			},
+			wantResult: ListResult{val: []string{"string1", "string2"}},
+		},
+		{
+			name:          "custom_context",
+			args:          args{ctx: contextWithValue("key", "value"), key: "key"},
+			expectCtx:     contextWithValue("key", "value"),
+			expectCommand: "HKEYS key",
+			mockResponse: &api.ExecuteCommandResponse{
+				Reply: api.SliceCommandReply,
+				Items: []string{"string1", "string2"},
+			},
+			wantResult: ListResult{val: []string{"string1", "string2"}},
 		},
 		{
 			name:          "server_responds_with_unexpected_reply",
 			args:          args{ctx: context.Background(), key: "key"},
 			expectCtx:     context.Background(),
-			expectCommand: "DEL key",
+			expectCommand: "HKEYS key",
 			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.RawStringCommandReply,
-				Item:  "raw string",
+				Reply: api.StringCommandReply,
+				Item:  "string",
 			},
-			wantResult: StatusResult{err: errors.New("unexpected reply: RAW_STRING")},
-		},
-		{
-			name:          "with_custom_context",
-			args:          args{ctx: contextWithValue("ctx_key", "ctx_value"), key: "key"},
-			expectCtx:     contextWithValue("ctx_key", "ctx_value"),
-			expectCommand: "DEL key",
-			mockResponse: &api.ExecuteCommandResponse{
-				Reply: api.OkCommandReply,
-			},
-			wantResult: StatusResult{},
+			wantResult: ListResult{err: errors.New("unexpected reply: STRING")},
 		},
 	}
 
@@ -151,7 +181,7 @@ func TestClient_DelWithContext(t *testing.T) {
 
 		cl := Client{executor: mock}
 
-		res := cl.DelWithContext(tt.args.ctx, tt.args.key)
+		res := cl.HKeysWithContext(tt.args.ctx, tt.args.key)
 		assert.Equal(t, tt.wantResult, res)
 	}
 }

@@ -35,7 +35,7 @@ func TestClient_Set(t *testing.T) {
 			wantResult:    StatusResult{err: errors.New("could not execute command: something went wrong")},
 		},
 		{
-			name:          "server_respond_with_error",
+			name:          "server_responds_with_error",
 			args:          args{key: "key", value: "val"},
 			expectCommand: "SET key val",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -45,7 +45,7 @@ func TestClient_Set(t *testing.T) {
 			wantResult: StatusResult{err: errors.New("internal server error")},
 		},
 		{
-			name:          "server_respond_with_ok",
+			name:          "server_responds_with_ok",
 			args:          args{key: "key", value: "val"},
 			expectCommand: "SET key val",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -54,7 +54,7 @@ func TestClient_Set(t *testing.T) {
 			wantResult: StatusResult{},
 		},
 		{
-			name:          "server_respond_with_unexpected_reply",
+			name:          "server_responds_with_unexpected_reply",
 			args:          args{key: "key", value: "val"},
 			expectCommand: "SET key val",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -104,7 +104,7 @@ func TestClient_SetWithContext(t *testing.T) {
 			wantResult:    StatusResult{err: errors.New("could not execute command: something went wrong")},
 		},
 		{
-			name:          "server_respond_with_error",
+			name:          "server_responds_with_error",
 			args:          args{ctx: context.Background(), key: "key", value: "val"},
 			expectCtx:     context.Background(),
 			expectCommand: "SET key val",
@@ -115,7 +115,7 @@ func TestClient_SetWithContext(t *testing.T) {
 			wantResult: StatusResult{err: errors.New("internal server error")},
 		},
 		{
-			name:          "server_respond_with_ok",
+			name:          "server_responds_with_ok",
 			args:          args{ctx: context.Background(), key: "key", value: "val"},
 			expectCtx:     context.Background(),
 			expectCommand: "SET key val",
@@ -125,7 +125,7 @@ func TestClient_SetWithContext(t *testing.T) {
 			wantResult: StatusResult{},
 		},
 		{
-			name:          "server_respond_with_unexpected_reply",
+			name:          "server_responds_with_unexpected_reply",
 			args:          args{ctx: context.Background(), key: "key", value: "val"},
 			expectCtx:     context.Background(),
 			expectCommand: "SET key val",

@@ -36,7 +36,7 @@ func TestClient_HGet(t *testing.T) {
 			},
 		},
 		{
-			name:          "server_respond_with_error",
+			name:          "server_responds_with_error",
 			args:          args{key: "key", field: "field"},
 			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -48,7 +48,7 @@ func TestClient_HGet(t *testing.T) {
 			},
 		},
 		{
-			name:          "server_respond_with_nil",
+			name:          "server_responds_with_nil",
 			args:          args{key: "key", field: "field"},
 			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -57,7 +57,7 @@ func TestClient_HGet(t *testing.T) {
 			wantResult: ScalarResult{},
 		},
 		{
-			name:          "server_respond_with_string",
+			name:          "server_responds_with_string",
 			args:          args{key: "key", field: "field"},
 			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -67,7 +67,7 @@ func TestClient_HGet(t *testing.T) {
 			wantResult: ScalarResult{val: stringToPtr("string")},
 		},
 		{
-			name:          "server_respond_with_unexpected_reply",
+			name:          "server_responds_with_unexpected_reply",
 			args:          args{key: "key", field: "field"},
 			expectCommand: "HGET key field",
 			mockResponse: &api.ExecuteCommandResponse{
@@ -120,7 +120,7 @@ func TestClient_HGetWithContext(t *testing.T) {
 			},
 		},
 		{
-			name:          "server_respond_with_error",
+			name:          "server_responds_with_error",
 			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
 			expectCommand: "HGET key field",
@@ -133,7 +133,7 @@ func TestClient_HGetWithContext(t *testing.T) {
 			},
 		},
 		{
-			name:          "server_respond_with_nil",
+			name:          "server_responds_with_nil",
 			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
 			expectCommand: "HGET key field",
@@ -143,7 +143,7 @@ func TestClient_HGetWithContext(t *testing.T) {
 			wantResult: ScalarResult{},
 		},
 		{
-			name:          "server_respond_with_string",
+			name:          "server_responds_with_string",
 			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
 			expectCommand: "HGET key field",
@@ -154,7 +154,7 @@ func TestClient_HGetWithContext(t *testing.T) {
 			wantResult: ScalarResult{val: stringToPtr("string")},
 		},
 		{
-			name:          "server_respond_with_unexpected_reply",
+			name:          "server_responds_with_unexpected_reply",
 			args:          args{ctx: context.Background(), key: "key", field: "field"},
 			expectCtx:     context.Background(),
 			expectCommand: "HGET key field",
