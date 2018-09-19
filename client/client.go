@@ -223,3 +223,22 @@ func (c *Client) hset(ctx context.Context, key, field, value string) StatusResul
 	}
 	return newStatusResult(resp)
 }
+
+//HVals returns values of a hash stored at the given key.
+func (c *Client) HVals(key string) ListResult {
+	return c.hvals(context.Background(), key)
+}
+
+//HValsWithContext similar to HVals but with context.
+func (c *Client) HValsWithContext(ctx context.Context, key string) ListResult {
+	return c.hvals(ctx, key)
+}
+
+func (c *Client) hvals(ctx context.Context, key string) ListResult {
+	req := c.newExecuteRequest("HVALS", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ListResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newListResult(resp)
+}
