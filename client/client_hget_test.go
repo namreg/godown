@@ -79,15 +79,17 @@ func TestClient_HGet(t *testing.T) {
 	}
 
 	for _, tt := range test {
-		mock := NewexecutorMock(mc)
-		mock.ExecuteCommandMock.
-			Expect(context.Background(), &api.ExecuteCommandRequest{Command: tt.expectCommand}).
-			Return(tt.mockResponse, tt.mockErr)
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewexecutorMock(mc)
+			mock.ExecuteCommandMock.
+				Expect(context.Background(), &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+				Return(tt.mockResponse, tt.mockErr)
 
-		cl := Client{executor: mock}
+			cl := Client{executor: mock}
 
-		res := cl.HGet(tt.args.key, tt.args.field)
-		assert.Equal(t, tt.wantResult, res)
+			res := cl.HGet(tt.args.key, tt.args.field)
+			assert.Equal(t, tt.wantResult, res)
+		})
 	}
 }
 
@@ -178,14 +180,16 @@ func TestClient_HGetWithContext(t *testing.T) {
 	}
 
 	for _, tt := range test {
-		mock := NewexecutorMock(mc)
-		mock.ExecuteCommandMock.
-			Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
-			Return(tt.mockResponse, tt.mockErr)
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewexecutorMock(mc)
+			mock.ExecuteCommandMock.
+				Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+				Return(tt.mockResponse, tt.mockErr)
 
-		cl := Client{executor: mock}
+			cl := Client{executor: mock}
 
-		res := cl.HGetWithContext(tt.args.ctx, tt.args.key, tt.args.field)
-		assert.Equal(t, tt.wantResult, res)
+			res := cl.HGetWithContext(tt.args.ctx, tt.args.key, tt.args.field)
+			assert.Equal(t, tt.wantResult, res)
+		})
 	}
 }

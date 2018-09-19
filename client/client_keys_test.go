@@ -64,15 +64,17 @@ func TestClient_Keys(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mock := NewexecutorMock(mc)
-		mock.ExecuteCommandMock.
-			Expect(context.Background(), &api.ExecuteCommandRequest{Command: tt.expectCommand}).
-			Return(tt.mockResponse, tt.mockErr)
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewexecutorMock(mc)
+			mock.ExecuteCommandMock.
+				Expect(context.Background(), &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+				Return(tt.mockResponse, tt.mockErr)
 
-		cl := Client{executor: mock}
+			cl := Client{executor: mock}
 
-		res := cl.Keys(tt.arg)
-		assert.Equal(t, tt.wantResult, res)
+			res := cl.Keys(tt.arg)
+			assert.Equal(t, tt.wantResult, res)
+		})
 	}
 }
 
@@ -151,14 +153,16 @@ func TestClient_KeysWithContext(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mock := NewexecutorMock(mc)
-		mock.ExecuteCommandMock.
-			Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
-			Return(tt.mockResponse, tt.mockErr)
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewexecutorMock(mc)
+			mock.ExecuteCommandMock.
+				Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+				Return(tt.mockResponse, tt.mockErr)
 
-		cl := Client{executor: mock}
+			cl := Client{executor: mock}
 
-		res := cl.KeysWithContext(tt.args.ctx, tt.args.pattern)
-		assert.Equal(t, tt.wantResult, res)
+			res := cl.KeysWithContext(tt.args.ctx, tt.args.pattern)
+			assert.Equal(t, tt.wantResult, res)
+		})
 	}
 }

@@ -61,15 +61,17 @@ func TestClient_Del(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mock := NewexecutorMock(mc)
-		mock.ExecuteCommandMock.
-			Expect(context.Background(), &api.ExecuteCommandRequest{Command: tt.expectCommand}).
-			Return(tt.mockResponse, tt.mockErr)
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewexecutorMock(mc)
+			mock.ExecuteCommandMock.
+				Expect(context.Background(), &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+				Return(tt.mockResponse, tt.mockErr)
 
-		cl := Client{executor: mock}
+			cl := Client{executor: mock}
 
-		res := cl.Del(tt.arg)
-		assert.Equal(t, tt.wantResult, res)
+			res := cl.Del(tt.arg)
+			assert.Equal(t, tt.wantResult, res)
+		})
 	}
 }
 
@@ -144,14 +146,16 @@ func TestClient_DelWithContext(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mock := NewexecutorMock(mc)
-		mock.ExecuteCommandMock.
-			Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
-			Return(tt.mockResponse, tt.mockErr)
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewexecutorMock(mc)
+			mock.ExecuteCommandMock.
+				Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+				Return(tt.mockResponse, tt.mockErr)
 
-		cl := Client{executor: mock}
+			cl := Client{executor: mock}
 
-		res := cl.DelWithContext(tt.args.ctx, tt.args.key)
-		assert.Equal(t, tt.wantResult, res)
+			res := cl.DelWithContext(tt.args.ctx, tt.args.key)
+			assert.Equal(t, tt.wantResult, res)
+		})
 	}
 }

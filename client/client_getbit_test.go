@@ -67,15 +67,17 @@ func TestClient_GetBit(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mock := NewexecutorMock(mc)
-		mock.ExecuteCommandMock.
-			Expect(context.Background(), &api.ExecuteCommandRequest{Command: tt.expectCommand}).
-			Return(tt.mockResponse, tt.mockErr)
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewexecutorMock(mc)
+			mock.ExecuteCommandMock.
+				Expect(context.Background(), &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+				Return(tt.mockResponse, tt.mockErr)
 
-		cl := Client{executor: mock}
+			cl := Client{executor: mock}
 
-		res := cl.GetBit(tt.args.key, tt.args.offset)
-		assert.Equal(t, tt.wantResult, res)
+			res := cl.GetBit(tt.args.key, tt.args.offset)
+			assert.Equal(t, tt.wantResult, res)
+		})
 	}
 }
 
@@ -153,14 +155,16 @@ func TestClient_GetBitWithContext(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mock := NewexecutorMock(mc)
-		mock.ExecuteCommandMock.
-			Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
-			Return(tt.mockResponse, tt.mockErr)
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewexecutorMock(mc)
+			mock.ExecuteCommandMock.
+				Expect(tt.expectCtx, &api.ExecuteCommandRequest{Command: tt.expectCommand}).
+				Return(tt.mockResponse, tt.mockErr)
 
-		cl := Client{executor: mock}
+			cl := Client{executor: mock}
 
-		res := cl.GetBitWithContext(tt.args.ctx, tt.args.key, tt.args.offset)
-		assert.Equal(t, tt.wantResult, res)
+			res := cl.GetBitWithContext(tt.args.ctx, tt.args.key, tt.args.offset)
+			assert.Equal(t, tt.wantResult, res)
+		})
 	}
 }

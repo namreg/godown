@@ -299,3 +299,22 @@ func (c *Client) llen(ctx context.Context, key string) ScalarResult {
 	}
 	return newScalarResult(resp)
 }
+
+//LPop removes and returns the first element of the list stored at the given key.
+func (c *Client) LPop(key string) ScalarResult {
+	return c.lpop(context.Background(), key)
+}
+
+//LPopWithContext similar to LPop but with context.
+func (c *Client) LPopWithContext(ctx context.Context, key string) ScalarResult {
+	return c.lpop(ctx, key)
+}
+
+func (c *Client) lpop(ctx context.Context, key string) ScalarResult {
+	req := c.newExecuteRequest("LPOP", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}
