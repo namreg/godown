@@ -261,3 +261,22 @@ func (c *Client) keys(ctx context.Context, pattern string) ListResult {
 	}
 	return newListResult(resp)
 }
+
+//LIndex returns a value at the index in the list stored at the given key.
+func (c *Client) LIndex(key string, index int) ScalarResult {
+	return c.lindex(context.Background(), key, index)
+}
+
+//LIndexWithContext similar to LIndex but with context.
+func (c *Client) LIndexWithContext(ctx context.Context, key string, index int) ScalarResult {
+	return c.lindex(ctx, key, index)
+}
+
+func (c *Client) lindex(ctx context.Context, key string, index int) ScalarResult {
+	req := c.newExecuteRequest("LINDEX", key, strconv.Itoa(index))
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}
