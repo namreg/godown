@@ -280,3 +280,22 @@ func (c *Client) lindex(ctx context.Context, key string, index int) ScalarResult
 	}
 	return newScalarResult(resp)
 }
+
+//LLen returns a number of the elements in the list stored at the given key.
+func (c *Client) LLen(key string) ScalarResult {
+	return c.llen(context.Background(), key)
+}
+
+//LLenWithContext similar to LLen but with context.
+func (c *Client) LLenWithContext(ctx context.Context, key string) ScalarResult {
+	return c.llen(ctx, key)
+}
+
+func (c *Client) llen(ctx context.Context, key string) ScalarResult {
+	req := c.newExecuteRequest("LLEN", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}
