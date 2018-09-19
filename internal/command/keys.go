@@ -38,7 +38,7 @@ func (c *Keys) Execute(args ...string) Reply {
 		return ErrReply{Value: err}
 	}
 
-	keyNames := make([]string, 0, len(keys))
+	keyNames := make([]string, 0)
 	for _, k := range keys {
 		sk := string(k)
 		if re.MatchString(sk) {

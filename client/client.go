@@ -242,3 +242,22 @@ func (c *Client) hvals(ctx context.Context, key string) ListResult {
 	}
 	return newListResult(resp)
 }
+
+//Keys returns all keys that matched to the given pattern.
+func (c *Client) Keys(pattern string) ListResult {
+	return c.keys(context.Background(), pattern)
+}
+
+//KeysWithContext similar to Keys but with context.
+func (c *Client) KeysWithContext(ctx context.Context, pattern string) ListResult {
+	return c.keys(ctx, pattern)
+}
+
+func (c *Client) keys(ctx context.Context, pattern string) ListResult {
+	req := c.newExecuteRequest("KEYS", pattern)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ListResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newListResult(resp)
+}
