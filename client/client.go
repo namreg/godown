@@ -204,3 +204,22 @@ func (c *Client) hkeys(ctx context.Context, key string) ListResult {
 	}
 	return newListResult(resp)
 }
+
+//HSet sets a field in hash at the given key.
+func (c *Client) HSet(key, field, value string) StatusResult {
+	return c.hset(context.Background(), key, field, value)
+}
+
+//HSetWithContext similar to HSet but with context.
+func (c *Client) HSetWithContext(ctx context.Context, key, field, value string) StatusResult {
+	return c.hset(ctx, key, field, value)
+}
+
+func (c *Client) hset(ctx context.Context, key, field, value string) StatusResult {
+	req := c.newExecuteRequest("HSET", key, field, value)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newStatusResult(resp)
+}
