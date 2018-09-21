@@ -318,3 +318,22 @@ func (c *Client) lpop(ctx context.Context, key string) ScalarResult {
 	}
 	return newScalarResult(resp)
 }
+
+//LPush prepends a new value to the list stored at the given key.
+func (c *Client) LPush(key, value string) StatusResult {
+	return c.lpush(context.Background(), key, value)
+}
+
+//LPushWithContext similar to LPush but with context.
+func (c *Client) LPushWithContext(ctx context.Context, key, value string) StatusResult {
+	return c.lpush(ctx, key, value)
+}
+
+func (c *Client) lpush(ctx context.Context, key, value string) StatusResult {
+	req := c.newExecuteRequest("LPUSH", key, value)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newStatusResult(resp)
+}
