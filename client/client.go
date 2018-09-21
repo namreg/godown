@@ -337,3 +337,23 @@ func (c *Client) lpush(ctx context.Context, key, value string) StatusResult {
 	}
 	return newStatusResult(resp)
 }
+
+//LRange returns elements from the list stored at the given key.
+//Start and stop are zero-based indexes.
+func (c *Client) LRange(key string, start, stop int) ListResult {
+	return c.lrange(context.Background(), key, start, stop)
+}
+
+//LRangeWithContext similar to LRange but with context.
+func (c *Client) LRangeWithContext(ctx context.Context, key string, start, stop int) ListResult {
+	return c.lrange(ctx, key, start, stop)
+}
+
+func (c *Client) lrange(ctx context.Context, key string, start, stop int) ListResult {
+	req := c.newExecuteRequest("LRANGE", key, strconv.Itoa(start), strconv.Itoa(stop))
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ListResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newListResult(resp)
+}
