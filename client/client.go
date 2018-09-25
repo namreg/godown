@@ -357,3 +357,22 @@ func (c *Client) lrange(ctx context.Context, key string, start, stop int) ListRe
 	}
 	return newListResult(resp)
 }
+
+//LRem removes a given value from the list stored at the given key.
+func (c *Client) LRem(key, value string) StatusResult {
+	return c.lrem(context.Background(), key, value)
+}
+
+//LRemWithContext similar to LRem but with context.
+func (c *Client) LRemWithContext(ctx context.Context, key, value string) StatusResult {
+	return c.lrem(ctx, key, value)
+}
+
+func (c *Client) lrem(ctx context.Context, key, value string) StatusResult {
+	req := c.newExecuteRequest("LREM", key, value)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newStatusResult(resp)
+}
