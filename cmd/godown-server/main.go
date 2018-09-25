@@ -34,10 +34,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	clck := clock.New()
-	strg := memory.New(nil)
-	parser := command.NewParser(strg, clck)
-
 	opts := server.DefaultOptions()
 	opts.ID = *id
 
@@ -55,6 +51,10 @@ func main() {
 	if *gcInterval != 0 {
 		opts.GCInterval = *gcInterval
 	}
+
+	clck := clock.New()
+	strg := memory.New(nil)
+	parser := command.NewParser(strg, clck)
 
 	srv := server.New(strg, strg, parser, opts)
 

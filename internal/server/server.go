@@ -186,6 +186,7 @@ func (s *Server) setupRaft() error {
 
 	config := raft.DefaultConfig()
 	config.LocalID = raft.ServerID(s.opts.ID)
+	config.Logger = s.opts.Logger
 
 	addr, err := net.ResolveTCPAddr("tcp", s.opts.RaftAddr)
 	if err != nil {
