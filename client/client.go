@@ -433,3 +433,22 @@ func (c *Client) strlen(ctx context.Context, key string) ScalarResult {
 	}
 	return newScalarResult(resp)
 }
+
+//TTL returns the remaining time to live of a key. -1 returns if key does not have timeout.
+func (c *Client) TTL(key string) ScalarResult {
+	return c.ttl(context.Background(), key)
+}
+
+//TTLWithContext similar to TTL but with context.
+func (c *Client) TTLWithContext(ctx context.Context, key string) ScalarResult {
+	return c.ttl(ctx, key)
+}
+
+func (c *Client) ttl(ctx context.Context, key string) ScalarResult {
+	req := c.newExecuteRequest("TTL", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}
