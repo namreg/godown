@@ -376,3 +376,22 @@ func (c *Client) lrem(ctx context.Context, key, value string) StatusResult {
 	}
 	return newStatusResult(resp)
 }
+
+//Ping returns PONG if no argument is provided, otherwise returns a copy of the argument as a bulk.
+func (c *Client) Ping(args ...string) ScalarResult {
+	return c.ping(context.Background(), args...)
+}
+
+//PingWithContext similar to Ping but with context.
+func (c *Client) PingWithContext(ctx context.Context, args ...string) ScalarResult {
+	return c.ping(ctx, args...)
+}
+
+func (c *Client) ping(ctx context.Context, args ...string) ScalarResult {
+	req := c.newExecuteRequest("PING", args...)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}

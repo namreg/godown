@@ -77,3 +77,44 @@ func TestStatusResult_Err(t *testing.T) {
 	res := StatusResult{err: errors.New("error")}
 	assert.Equal(t, errors.New("error"), res.Err())
 }
+
+func TestListResult_Err(t *testing.T) {
+	res := ListResult{err: errors.New("error")}
+	assert.Equal(t, errors.New("error"), res.Err())
+}
+
+func TestListResult_IsNil(t *testing.T) {
+	tests := []struct {
+		name   string
+		result ListResult
+		want   bool
+	}{
+		{"value_nil_and_err_nil", ListResult{}, true},
+		{"value_nil_and_err_not_nil", ListResult{err: errors.New("error")}, false},
+		{"value_not_nil_and_err_not_nil", ListResult{val: []string{"val"}, err: errors.New("error")}, false},
+		{"value_not_nil_and_err_nil", ListResult{val: []string{"val"}}, false},
+	}
+
+	for _, tt := range tests {
+		assert.Equal(t, tt.want, tt.result.IsNil())
+	}
+}
+
+func TestListResult_Val(t *testing.T) {
+	tests := []struct {
+		name    string
+		result  ListResult
+		wantVal []string
+		wantErr error
+	}{
+		{"val_nil_and_err_not_nil", ListResult{err: errors.New("error")}, nil, errors.New("error")},
+		{"val_nil_and_err_nil", ListResult{}, nil, nil},
+		{"val_not_nil_and_err_nil", ListResult{val: []string{"val"}}, []string{"val"}, nil},
+	}
+
+	for _, tt := range tests {
+		val, err := tt.result.Val()
+		assert.Equal(t, tt.wantVal, val)
+		assert.Equal(t, tt.wantErr, err)
+	}
+}
