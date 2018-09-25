@@ -452,3 +452,22 @@ func (c *Client) ttl(ctx context.Context, key string) ScalarResult {
 	}
 	return newScalarResult(resp)
 }
+
+//Type returns a data type of a value stored at key.
+func (c *Client) Type(key string) ScalarResult {
+	return c.getType(context.Background(), key)
+}
+
+//TypeWithContext similar to Type but with context.
+func (c *Client) TypeWithContext(ctx context.Context, key string) ScalarResult {
+	return c.getType(ctx, key)
+}
+
+func (c *Client) getType(ctx context.Context, key string) ScalarResult {
+	req := c.newExecuteRequest("TYPE", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}
