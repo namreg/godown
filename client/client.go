@@ -395,3 +395,22 @@ func (c *Client) ping(ctx context.Context, args ...string) ScalarResult {
 	}
 	return newScalarResult(resp)
 }
+
+//SetBit sets or clears the bit at offset in the bitmap stored at key.
+func (c *Client) SetBit(key string, offset, value uint64) StatusResult {
+	return c.setbit(context.Background(), key, offset, value)
+}
+
+//SetBitWithContext similar to SetBit but with context.
+func (c *Client) SetBitWithContext(ctx context.Context, key string, offset, value uint64) StatusResult {
+	return c.setbit(ctx, key, offset, value)
+}
+
+func (c *Client) setbit(ctx context.Context, key string, offset, value uint64) StatusResult {
+	req := c.newExecuteRequest("SETBIT", key, strconv.FormatUint(offset, 10), strconv.FormatUint(value, 10))
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newStatusResult(resp)
+}
