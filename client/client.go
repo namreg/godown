@@ -414,3 +414,22 @@ func (c *Client) setbit(ctx context.Context, key string, offset, value uint64) S
 	}
 	return newStatusResult(resp)
 }
+
+//Strlen returns a length of the string stored at key.
+func (c *Client) Strlen(key string) ScalarResult {
+	return c.strlen(context.Background(), key)
+}
+
+//StrlenWithContext similar to Strlen but with context.
+func (c *Client) StrlenWithContext(ctx context.Context, key string) ScalarResult {
+	return c.strlen(ctx, key)
+}
+
+func (c *Client) strlen(ctx context.Context, key string) ScalarResult {
+	req := c.newExecuteRequest("STRLEN", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}
