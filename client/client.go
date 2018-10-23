@@ -243,6 +243,26 @@ func (c *Client) hvals(ctx context.Context, key string) ListResult {
 	return newListResult(resp)
 }
 
+//HDel deletes given fields from map stored at the given key.
+func (c *Client) HDel(key string, field string, fields ...string) ScalarResult {
+	return c.hdel(context.Background(), key, field, fields...)
+}
+
+//HDelWithContext similar to HDel but with context.
+func (c *Client) HDelWithContext(ctx context.Context, key, field string, fields ...string) ScalarResult {
+	return c.hdel(ctx, key, field, fields...)
+}
+
+func (c *Client) hdel(ctx context.Context, key, field string, fields ...string) ScalarResult {
+	args := append([]string{key, field}, fields...)
+	req := c.newExecuteRequest("HDEL", args...)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}
+
 //Keys returns all keys that matched to the given pattern.
 func (c *Client) Keys(pattern string) ListResult {
 	return c.keys(context.Background(), pattern)

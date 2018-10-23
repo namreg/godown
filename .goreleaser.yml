@@ -53,12 +53,3 @@ dockers:
     tag_templates:
       - "{{ .Tag }}"
       - latest
-  -
-    goos: linux
-    goarch: amd64
-    binary: godown-cli
-    image: namreg/godown-cli
-    dockerfile: cmd/godown-cli/Dockerfile
-    tag_templates:
-      - "{{ .Tag }}"
-      - latest    
