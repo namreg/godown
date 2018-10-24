@@ -13,7 +13,7 @@ It supports the following data structures: `String`, `Bitmap`, `Map`, `List`.
 ### How to install
 
 #### Install via binaries
-You can find binaries on the [Github releases page](https://github.com/namreg/godown/client/releases).
+You can find binaries on the [Github releases page](https://github.com/namreg/godown/releases).
 
 #### Install via docker
 ```bash
