@@ -1,0 +1,14 @@
+language: go
+
+go:
+  - 1.x
+
+script:
+  - make test
+
+before_install:
+  - go get github.com/gojuno/minimock/cmd/minimock
+  - go get github.com/golang/dep/cmd/dep
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

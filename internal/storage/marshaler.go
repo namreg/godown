@@ -46,7 +46,7 @@ func (v *Value) UnmarshalJSON(j []byte) error {
 			case StringDataType:
 				s, ok := mv.(string)
 				if !ok {
-					return fmt.Errorf("could not unmarshal string value: not a string representaion")
+					return fmt.Errorf("could not unmarshal string value: not a string representation")
 				}
 				val.data = s
 			case ListDataType:
@@ -58,7 +58,7 @@ func (v *Value) UnmarshalJSON(j []byte) error {
 			case MapDataType:
 				tm, ok := mv.(map[string]interface{})
 				if !ok {
-					return fmt.Errorf("could not unmarshal map value: not a map representaion")
+					return fmt.Errorf("could not unmarshal map value: not a map representation")
 				}
 				vmap := make(map[string]string, len(tm))
 				for mkey, mvalue := range tm {
@@ -72,7 +72,7 @@ func (v *Value) UnmarshalJSON(j []byte) error {
 			case BitMapDataType:
 				l, ok := mv.([]uint64)
 				if !ok {
-					return fmt.Errorf("could not unmarshal bitmap value: not a bitmap representaion")
+					return fmt.Errorf("could not unmarshal bitmap value: not a bitmap representation")
 				}
 				val.data = l
 			}

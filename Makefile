@@ -23,7 +23,7 @@ lint:
 .PHONY: test
 test: vendor generate
 	@echo "======> running tests"
-	@go test -race $(PKGS) -cover
+	@go test -cover -race -coverprofile=coverage.txt -covermode=atomic $(PKGS)
 
 .PHONY: clear
 clear:

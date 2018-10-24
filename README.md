@@ -1,6 +1,9 @@
 ## Godown
 
+[![Build Status](https://www.travis-ci.org/namreg/godown.svg?branch=master)](https://www.travis-ci.org/namreg/godown)
+[![Go Report Card](https://goreportcard.com/badge/github.com/namreg/godown)](https://goreportcard.com/report/github.com/namreg/godown)
 [![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/namreg/godown/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/namreg/godown/branch/master/graph/badge.svg)](https://codecov.io/gh/namreg/godown)
 
 A simple, distributed, fault-tolerant key-value storage inspired by Redis. It uses [Raft](https://raft.github.io) protocotol as consensus algorithm.
 It supports the following data structures: `String`, `Bitmap`, `Map`, `List`.
@@ -10,7 +13,7 @@ It supports the following data structures: `String`, `Bitmap`, `Map`, `List`.
 ### How to install
 
 #### Install via binaries
-You can find binaries on the [Github releases page](https://github.com/namreg/godown/releases).
+You can find binaries on the [Github releases page](https://github.com/namreg/godown/client/releases).
 
 #### Install via docker
 ```bash
@@ -131,4 +134,8 @@ func main() {
 	}
 }
 ```
-Client documentation available at [godoc](https://godoc.org/github.com/namreg/godown)
+Client documentation available at [godoc](https://godoc.org/github.com/namreg/godown/client)
+
+### TODO
+- [ ] Write more docs
+- [ ] Write more tests
