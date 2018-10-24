@@ -28,12 +28,12 @@ docker run -it --rm -v godown:/var/lib/godown --name=godown_1 --net=godown -p 50
     namreg/godown-server -id 1 -listen godown_1:5000 -raft godown_1:6000
 
 # join the second node to the cluster
-docker run -it --rm -v godown:/var/lib/godown --name=godown_2 --net=godown -p 5001:5001 \ 
+docker run -it --rm -v godown:/var/lib/godown --name=godown_2 --net=godown -p 5001:5001 \
     namreg/godown-server -id 2 -listen godown_2:5001 -join godown_1:5000 -raft godown_2:6001
 
 # join the third node to the cluster
-docker run -it --rm -v godown:/var/lib/godown --name=godown_2 --net=godown -p 5001:5001  \
-    namreg/godown-server -id 2 -listen godown_2:5001 -join godown_1:5000 -raft godown_2:6001
+docker run -it --rm -v godown:/var/lib/godown --name=godown_3 --net=godown -p 5002:5002  \
+    namreg/godown-server -id 3 -listen godown_3:5001 -join godown_1:5000 -raft godown_3:6002
 ```
 
 Available options to run a server:
