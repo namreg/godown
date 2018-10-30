@@ -54,7 +54,7 @@ func TestMarshaler_MarshalJSON(t *testing.T) {
 			[]byte("{\"ttl\":0,\"type\":\"bitmap\",\"value\":[]}"),
 			nil,
 		},
-		{ // THIS TEST SEEMS TO BE KO: expected "value":[1,2,3,4] but given "value":[1,12,123,1234]. Is it normal ?
+		{
 			"data set to uint64 array of 4 elements according to dataType of type bitmap",
 			&Value{dataType: BitMapDataType, data: []uint64{1, 2, 3, 4}},
 			[]byte("{\"ttl\":0,\"type\":\"bitmap\",\"value\":[1,2,3,4]}"),
@@ -66,7 +66,7 @@ func TestMarshaler_MarshalJSON(t *testing.T) {
 			[]byte("{\"ttl\":0,\"type\":\"map\",\"value\":{}}"),
 			nil,
 		},
-		{ // THIS TEST SEEMS TO BE KO: expected "value":[1,2,3,4] but given "value":[1,12,123,1234]. Is it normal ?
+		{
 			"data set to a map of string:string of 1 element according to dataType of type map",
 			&Value{dataType: MapDataType, data: map[string]string{"key1": "val1"}},
 			[]byte("{\"ttl\":0,\"type\":\"map\",\"value\":{\"key1\":\"val1\"}}"),
