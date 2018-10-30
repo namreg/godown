@@ -130,10 +130,8 @@ func (v *Value) MarshalJSON() ([]byte, error) {
 		buf.WriteByte('[')
 		list := v.data.([]uint64)
 		size := len(list)
-		b := make([]byte, 0)
 		for i, lv := range list {
-			b = strconv.AppendUint(b, lv, 10)
-			buf.Write(b)
+			buf.Write(strconv.AppendUint([]byte{}, lv, 10))
 			if i != size-1 {
 				buf.WriteByte(',')
 			}
