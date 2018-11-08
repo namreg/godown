@@ -378,6 +378,25 @@ func (c *Client) rpush(ctx context.Context, key, value string, values ...string)
 	return newStatusResult(resp)
 }
 
+// RPop removes and returns the last element of the list stored at the given key.
+func (c *Client) RPop(key string) ScalarResult {
+	return c.rpop(context.Background(), key)
+}
+
+// RPopWithContext similar to RPop but with context.
+func (c *Client) RPopWithContext(ctx context.Context, key string) ScalarResult {
+	return c.rpop(ctx, key)
+}
+
+func (c *Client) rpop(ctx context.Context, key string) ScalarResult {
+	req := c.newExecuteRequest("RPOP", key)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return ScalarResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newScalarResult(resp)
+}
+
 //LRange returns elements from the list stored at the given key.
 //Start and stop are zero-based indexes.
 func (c *Client) LRange(key string, start, stop int) ListResult {

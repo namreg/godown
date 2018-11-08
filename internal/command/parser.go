@@ -61,6 +61,10 @@ func (p *Parser) Parse(str string) (Command, []string, error) {
 		cmd = &Lpop{strg: p.strg}
 	case "LPUSH":
 		cmd = &Lpush{strg: p.strg}
+	case "RPUSH":
+		cmd = &Rpush{strg: p.strg}
+	case "RPOP":
+		cmd = &Rpop{strg: p.strg}
 	case "LRANGE":
 		cmd = &Lrange{strg: p.strg}
 	case "LREM":
