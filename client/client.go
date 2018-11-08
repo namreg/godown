@@ -358,6 +358,26 @@ func (c *Client) lpush(ctx context.Context, key, value string) StatusResult {
 	return newStatusResult(resp)
 }
 
+// RPush appends a new value(s) to the list stored at the given key.
+func (c *Client) RPush(key, value string, values ...string) StatusResult {
+	return c.rpush(context.Background(), key, value, values...)
+}
+
+// RPushWithContext similar to RPush but with context.
+func (c *Client) RPushWithContext(ctx context.Context, key, value string, values ...string) StatusResult {
+	return c.rpush(ctx, key, value, values...)
+}
+
+func (c *Client) rpush(ctx context.Context, key, value string, values ...string) StatusResult {
+	args := append([]string{key, value}, values...)
+	req := c.newExecuteRequest("RPUSH", args...)
+	resp, err := c.executor.ExecuteCommand(ctx, req)
+	if err != nil {
+		return StatusResult{err: fmt.Errorf("could not execute command: %v", err)}
+	}
+	return newStatusResult(resp)
+}
+
 //LRange returns elements from the list stored at the given key.
 //Start and stop are zero-based indexes.
 func (c *Client) LRange(key string, start, stop int) ListResult {

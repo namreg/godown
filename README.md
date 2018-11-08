@@ -94,6 +94,8 @@ Supported commands:
 |---|---|---|
 | LPUSH&nbsp;key&nbsp;value&nbsp;[value&nbsp;...] | Prepend one or multiple values to a list. |
 | LPOP&nbsp;key | Removes and returns the first element of the list stored at key. |
+| RPUSH&nbsp;key&nbsp;value&nbsp;[value&nbsp;...] | Append one or multiple values to a list. |
+| RPOP&nbsp;key | Removes and returns the last element of the list stored at key. |
 | LLEN&nbsp;key | Returns the length of the list stored at key. If key does not exist, it is interpreted as an empty list and 0 is returned. |
 | LINDEX&nbsp;key&nbsp;index | Returns the element at index index in the list stored at key. <br>The index is zero-based, so 0 means the first element, 1 the second element and so on. Negative indices can be used to designate elements starting at the tail of the list. |
 | LRANGE&nbsp;key&nbsp;start&nbsp;stop | Returns the specified elements of the list stored at key.<br> The offsets start and stop are zero-based indexes, with 0 being the first element of the list (the head of the list), 1 being the next element and so on. |
