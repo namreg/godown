@@ -457,7 +457,8 @@ func (s *Server) createResponse(res command.Reply) (*api.ExecuteCommandResponse,
 func (s *Server) isCommandModifiesState(cmd command.Command) bool {
 	switch cmd.(type) {
 	case *command.Set, *command.Del, *command.Expire, *command.Hset,
-		*command.Lpop, *command.Lpush, *command.Lrem, *command.SetBit:
+		*command.Lpop, *command.Lpush, *command.Lrem, *command.SetBit,
+		*command.Rpop, *command.Rpush:
 		return true
 	}
 	return false
