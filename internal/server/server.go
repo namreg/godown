@@ -321,7 +321,19 @@ func (s *Server) leaderConn() (*grpc.ClientConn, error) {
 	if s.leader != nil {
 		return s.leader, nil
 	}
-	leaderIP, err := s.meta.GetMeta(storage.MetaKey(leaderIPMetaKey))
+	const maxAttempts = 5
+	var (
+		attempts int
+		leaderIP storage.MetaValue
+		err      error
+	)
+	leaderIP, err = s.meta.GetMeta(storage.MetaKey(leaderIPMetaKey))
+	// due to the raft latency, we need do retries
+	for err == storage.ErrKeyNotExists && attempts < maxAttempts {
+		attempts++
+		leaderIP, err = s.meta.GetMeta(storage.MetaKey(leaderIPMetaKey))
+		time.Sleep(time.Duration(attempts*100) * time.Millisecond)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("could not get leader ip from meta store: %v", err)
 	}
