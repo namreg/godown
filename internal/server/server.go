@@ -21,6 +21,7 @@ import (
 	"github.com/namreg/godown/internal/api"
 	"github.com/namreg/godown/internal/clock"
 	"github.com/namreg/godown/internal/command"
+	"github.com/namreg/godown/internal/server/resp"
 	"github.com/namreg/godown/internal/storage"
 )
 
@@ -82,6 +83,7 @@ type Options struct {
 	ID         string
 	ListenAddr string
 	RaftAddr   string
+	RESPAddr   string
 	Dir        string
 	Logger     *log.Logger
 	Clock      serverClock
@@ -233,7 +235,20 @@ func (s *Server) start(hostPort string) error {
 	s.srv = grpc.NewServer()
 	api.RegisterGodownServer(s.srv, s)
 
-	return s.srv.Serve(l)
+	errCh := make(chan error, 2)
+
+	go func() {
+		errCh <- s.srv.Serve(l)
+	}()
+
+	if s.opts.RESPAddr != "" {
+		r := resp.New(s)
+		go func() {
+			errCh <- r.Start(s.opts.RESPAddr)
+		}()
+	}
+
+	return <-errCh
 }
 
 //Stop stops a grpc server.

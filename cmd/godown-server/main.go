@@ -23,6 +23,7 @@ func main() {
 	dir := flag.String("dir", "", "Directory where data is stored.")
 	listenAddr := flag.String("listen", "", "Server address to listen.")
 	raftAddr := flag.String("raft", "", "Raft protocol listen address.")
+	respAddr := flag.String("resp", "", "Redis Serialization Protocol listen address.")
 	joinAddr := flag.String("join", "", "Server address to join.")
 	gcInterval := flag.Duration("gc", 0, "Garbage collector interval.")
 	showVersion := flag.Bool("version", false, "Show version.")
@@ -36,6 +37,7 @@ func main() {
 
 	opts := server.DefaultOptions()
 	opts.ID = *id
+	opts.RESPAddr = *respAddr
 
 	if *listenAddr != "" {
 		opts.ListenAddr = *listenAddr

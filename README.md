@@ -50,6 +50,8 @@ Available options to run a server:
         Server address to listen.
   -raft string
         Raft protocol listen address.
+  -resp string
+        Redis Serialization Protocol listen address.      
   -version
         Show version.
 ```
