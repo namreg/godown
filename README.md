@@ -33,7 +33,7 @@ docker run -it --rm -v godown:/var/lib/godown --name=godown_2 --net=godown -p 50
 
 # join the third node to the cluster
 docker run -it --rm -v godown:/var/lib/godown --name=godown_3 --net=godown -p 5002:5002  \
-    namreg/godown-server -id 3 -listen godown_3:5002 -join godown_1:5000 -raft godown_3:6002
+    namreg/godown-server -id 3 -listen godown_3:5001 -join godown_1:5000 -raft godown_3:6002
 ```
 
 Available options to run a server:
@@ -59,6 +59,40 @@ Available options to run a server:
 ### How to connect
 
 You can connect to any godown node. All modifications will be replicated to all nodes.
+
+#### Connect via any redis client
+If you have specified `resp` address while starting a node, you can connect to the one by any redis client.
+```go
+package main
+
+import (
+	"fmt"
+	"net"
+	"time"
+
+	"github.com/garyburd/redigo/redis"
+)
+
+const connectionTimeout = 100 * time.Millisecond
+
+func main() {
+	conn, err := net.Dial("tcp", "6380")
+	if err != nil {
+		panic(err)
+	}
+	rconn := redis.NewConn(conn, connectionTimeout, connectionTimeout)
+
+	reply, err := rconn.Do("LRANGE", "list", 0, 100)
+	vals, err := redis.Strings(reply, err)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(vals)
+}
+
+```
 
 #### Connect via CLI
 ```bash
