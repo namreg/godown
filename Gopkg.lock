@@ -180,6 +180,14 @@
   version = "v1.2.1"
 
 [[projects]]
+  digest = "1:b71eb6ea46bd52fc536b9b88ea26aa88d23d0af779b40515433643ecd9c5940b"
+  name = "github.com/tidwall/redcon"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "56b016127ae730019c5e3073a413ad9526440c38"
+  version = "v0.9.0"
+
+[[projects]]
   branch = "master"
   digest = "1:b5c3834d33445efdc5a8dcb154bed9e4c211edadbf02f6f5cc20c5e9be26a499"
   name = "golang.org/x/net"
@@ -285,6 +293,7 @@
     "github.com/hashicorp/raft-boltdb",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
+    "github.com/tidwall/redcon",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
   ]

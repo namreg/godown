@@ -50,6 +50,8 @@ Available options to run a server:
         Server address to listen.
   -raft string
         Raft protocol listen address.
+  -resp string
+        Redis Serialization Protocol listen address.      
   -version
         Show version.
 ```
@@ -57,6 +59,40 @@ Available options to run a server:
 ### How to connect
 
 You can connect to any godown node. All modifications will be replicated to all nodes.
+
+#### Connect via any redis client
+If you have specified `resp` address while starting a node, you can connect to the one by any redis client.
+```go
+package main
+
+import (
+	"fmt"
+	"net"
+	"time"
+
+	"github.com/garyburd/redigo/redis"
+)
+
+const connectionTimeout = 100 * time.Millisecond
+
+func main() {
+	conn, err := net.Dial("tcp", "6380")
+	if err != nil {
+		panic(err)
+	}
+	rconn := redis.NewConn(conn, connectionTimeout, connectionTimeout)
+
+	reply, err := rconn.Do("LRANGE", "list", 0, 100)
+	vals, err := redis.Strings(reply, err)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(vals)
+}
+
+```
 
 #### Connect via CLI
 ```bash

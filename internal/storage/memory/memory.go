@@ -173,8 +173,11 @@ func (strg *Storage) PutMeta(key storage.MetaKey, value storage.MetaValue) error
 //GetMeta gets a meta value at the given key.
 func (strg *Storage) GetMeta(key storage.MetaKey) (storage.MetaValue, error) {
 	strg.metaMu.RLock()
-	value := strg.meta[key]
+	value, ok := strg.meta[key]
 	strg.metaMu.RUnlock()
+	if !ok {
+		return "", storage.ErrKeyNotExists
+	}
 	return value, nil
 }
 

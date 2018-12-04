@@ -21,6 +21,7 @@ import (
 	"github.com/namreg/godown/internal/api"
 	"github.com/namreg/godown/internal/clock"
 	"github.com/namreg/godown/internal/command"
+	"github.com/namreg/godown/internal/server/resp"
 	"github.com/namreg/godown/internal/storage"
 )
 
@@ -82,6 +83,7 @@ type Options struct {
 	ID         string
 	ListenAddr string
 	RaftAddr   string
+	RESPAddr   string
 	Dir        string
 	Logger     *log.Logger
 	Clock      serverClock
@@ -233,7 +235,20 @@ func (s *Server) start(hostPort string) error {
 	s.srv = grpc.NewServer()
 	api.RegisterGodownServer(s.srv, s)
 
-	return s.srv.Serve(l)
+	errCh := make(chan error, 2)
+
+	go func() {
+		errCh <- s.srv.Serve(l)
+	}()
+
+	if s.opts.RESPAddr != "" {
+		r := resp.New(s)
+		go func() {
+			errCh <- r.Start(s.opts.RESPAddr)
+		}()
+	}
+
+	return <-errCh
 }
 
 //Stop stops a grpc server.
@@ -321,7 +336,19 @@ func (s *Server) leaderConn() (*grpc.ClientConn, error) {
 	if s.leader != nil {
 		return s.leader, nil
 	}
-	leaderIP, err := s.meta.GetMeta(storage.MetaKey(leaderIPMetaKey))
+	const maxAttempts = 5
+	var (
+		attempts int
+		leaderIP storage.MetaValue
+		err      error
+	)
+	leaderIP, err = s.meta.GetMeta(storage.MetaKey(leaderIPMetaKey))
+	// due to the raft latency, we need do retries
+	for err == storage.ErrKeyNotExists && attempts < maxAttempts {
+		attempts++
+		leaderIP, err = s.meta.GetMeta(storage.MetaKey(leaderIPMetaKey))
+		time.Sleep(time.Duration(attempts*100) * time.Millisecond)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("could not get leader ip from meta store: %v", err)
 	}
@@ -457,7 +484,8 @@ func (s *Server) createResponse(res command.Reply) (*api.ExecuteCommandResponse,
 func (s *Server) isCommandModifiesState(cmd command.Command) bool {
 	switch cmd.(type) {
 	case *command.Set, *command.Del, *command.Expire, *command.Hset,
-		*command.Lpop, *command.Lpush, *command.Lrem, *command.SetBit:
+		*command.Lpop, *command.Lpush, *command.Lrem, *command.SetBit,
+		*command.Rpop, *command.Rpush:
 		return true
 	}
 	return false
