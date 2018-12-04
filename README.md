@@ -14,6 +14,13 @@ It supports the following data structures: `String`, `Bitmap`, `Map`, `List`.
 
 #### Install via binaries
 You can find binaries on the [Github releases page](https://github.com/namreg/godown/releases).
+```bash
+/application/godown/godown-server -dir=/application/godown/data01 -id=01 -listen=127.0.0.1:14001 -raft=127.0.0.1:24001
+/application/godown/godown-server -dir=/application/godown/data02 -id=02 -listen=127.0.0.1:14002 -raft=127.0.0.1:24002 -join=127.0.0.1:14001
+/application/godown/godown-server -dir=/application/godown/data03 -id=03 -listen=127.0.0.1:14003 -raft=127.0.0.1:24003 -join=127.0.0.1:14001
+```
+
+
 
 #### Install via docker
 ```bash
@@ -33,7 +40,7 @@ docker run -it --rm -v godown:/var/lib/godown --name=godown_2 --net=godown -p 50
 
 # join the third node to the cluster
 docker run -it --rm -v godown:/var/lib/godown --name=godown_3 --net=godown -p 5002:5002  \
-    namreg/godown-server -id 3 -listen godown_3:5002 -join godown_1:5000 -raft godown_3:6002
+    namreg/godown-server -id 3 -listen godown_3:5001 -join godown_1:5000 -raft godown_3:6002
 ```
 
 Available options to run a server:
